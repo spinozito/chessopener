@@ -35,7 +35,9 @@ header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:c
 .kbd-hint{display:none;font-size:.6rem;color:var(--tx3);font-family:'JetBrains Mono',monospace;background:var(--bg4);border:1px solid var(--line2);border-radius:4px;padding:2px 6px}
 
 /* ── OPENING PICKER ── */
-.op-bar{flex-shrink:0;display:flex;gap:6px;padding:.6rem 1rem;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);background:var(--bg2)}
+.op-bar{flex-shrink:0;display:flex;gap:6px;padding:.5rem 1rem .4rem;overflow-x:auto;scrollbar-width:none;background:var(--bg2)}
+.op-bar::-webkit-scrollbar{display:none}
+.op-bar--var{padding:.3rem 1rem .4rem;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .op-bar::-webkit-scrollbar{display:none}
 .op-btn{flex-shrink:0;display:flex;align-items:center;padding:5px 14px;background:var(--bg3);border:1px solid var(--line2);border-radius:20px;color:var(--tx3);font-size:11.5px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .op-btn:active{transform:scale(.96)}
@@ -180,9 +182,10 @@ header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:c
 
 /* ── TABS ── */
 .tabs{display:flex;gap:4px;margin-left:auto}
-.tab-btn{padding:6px 16px;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--tx3);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.tab-btn{padding:6px 16px;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--tx3);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;border-bottom-width:2px}
 .tab-btn:active{transform:scale(.97)}
-.tab-btn.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.3);color:var(--ac)}
+#tab-learn.active{background:rgba(201,168,76,.1);border-color:transparent;border-bottom-color:rgba(201,168,76,.8);color:var(--ac)}
+#tab-quiz.active{background:rgba(74,222,128,.08);border-color:transparent;border-bottom-color:rgba(74,222,128,.7);color:#4ade80}
 
 /* ── QUIZ VIEW ── */
 .quiz-view{display:none;flex:1;flex-direction:column;padding:.8rem 1rem 2rem;gap:1rem}
@@ -288,7 +291,8 @@ body.light .ablock.g .ablabel{color:#8a6820}
 body.light .quiz-next{background:linear-gradient(135deg,#8a6820,#5a4010);color:#f5f0e8}
 body.light .qf-btn.active{background:rgba(138,104,32,.12);border-color:rgba(138,104,32,.4);color:#8a6820}
 body.light .onboard-btn{background:linear-gradient(135deg,#8a6820,#5a4010);color:#f5f0e8}
-body.light .tab-btn.active{background:rgba(138,104,32,.12);border-color:rgba(138,104,32,.3);color:#8a6820}
+body.light #tab-learn.active{background:rgba(138,104,32,.08);border-color:transparent;border-bottom-color:rgba(138,104,32,.7);color:#8a6820}
+body.light #tab-quiz.active{background:rgba(34,160,80,.08);border-color:transparent;border-bottom-color:rgba(34,160,80,.6);color:#228c40}
 body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rgba(138,104,32,.4);color:#8a6820}
 
 /* ── SIDE INDICATOR ── */
@@ -356,7 +360,7 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 .prac-selectors{display:flex;flex-direction:column;gap:0;padding:.2rem .8rem .05rem}
 .prac-filter-group{display:flex;flex-direction:column;gap:1px}
 .prac-filter-group--var{margin-top:3px;padding-top:3px;border-top:1px solid var(--line)}
-.prac-filter-label{font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);line-height:1}
+.prac-filter-label{font-size:10px;font-weight:400;letter-spacing:.01em;text-transform:none;color:var(--tx3);line-height:1;padding:.4rem 1rem .1rem;font-family:'Inter',sans-serif;font-style:italic}
 .prac-filter-label--var{color:rgba(201,168,76,.5)}
 
 /* ── YOUR TURN INDICATOR ── */
@@ -400,6 +404,13 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 .prac-hint-first{text-align:center;font-size:10px;color:var(--tx3);padding:.1rem 1rem 0;opacity:.7;font-family:'Inter',sans-serif;font-style:italic}
 .prac-hint-btn{font-size:10px;font-weight:600;color:var(--tx3);background:transparent;border:none;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.04em;text-decoration:underline;opacity:.6;padding:0;-webkit-tap-highlight-color:transparent}
 .prac-hint-btn:active{opacity:1}
+
+/* ── PIECE HINT HIGHLIGHT ── */
+.sq.piece-hint{animation:piece-pulse 1.2s ease-in-out 2;animation-fill-mode:forwards}
+@keyframes piece-pulse{
+  0%,100%{box-shadow:inset 0 0 0 3px rgba(201,168,76,0)}
+  50%{box-shadow:inset 0 0 0 3px rgba(201,168,76,.9),inset 0 0 12px rgba(201,168,76,.3)}
+}
 </style>
 </head>
 <body>
@@ -448,7 +459,9 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
   <button class="settings-btn" id="settings-btn" onclick="toggleSettings()" aria-label="Settings">⚙</button>
 </header>
 
-<div class="learn-view" id="learn-view"><div class="op-bar" id="op-bar"></div>
+<div class="learn-view" id="learn-view">
+<div class="op-bar" id="op-bar"></div>
+<div class="op-bar op-bar--var" id="var-bar"><div class="vlist" id="vlist"></div></div>
 
 <div class="page">
   <div class="board-section">
@@ -476,7 +489,6 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
     </div>
   </div>
   <div class="right-col">
-    <div><div class="slabel">Variation</div><div class="vlist" id="vlist"></div></div>
     <div class="acard" id="acard">
       <div class="aside-bar" id="aside-bar"></div>
       <div class="abody">
@@ -498,7 +510,7 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
   <!-- Sélecteur ouverture + variante -->
   <div class="prac-selectors">
     <div class="prac-filter-group">
-      <div class="prac-filter-label">Opening</div>
+      <div class="prac-filter-label">Pick an opening and a variation to practice</div>
       <div class="prac-filter" id="prac-op-filter"></div>
     </div>
     <div class="prac-filter-group prac-filter-group--var">
@@ -523,7 +535,7 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
     <span class="prac-turn-text" id="prac-turn-text">Your turn to play</span>
     <span class="prac-correct-badge" id="prac-correct-badge" style="display:inline;visibility:hidden">✓ Correct</span>
     <span class="prac-wrong-badge" id="prac-wrong-badge" style="display:inline;visibility:hidden">✗ Wrong</span>
-    <button class="prac-hint-btn" id="prac-hint-btn" style="margin-left:auto">Show me →</button>
+    <button class="prac-hint-btn" id="prac-hint-btn" style="margin-left:auto">Hint ?</button>
   </div>
 
   <!-- Continue button + Feedback card — juste sous l'échiquier -->
@@ -2704,6 +2716,7 @@ let pracSelected = null;
 let pracFlip = false;
 let pracLocked = false;
 let pracPrevBoard = null;
+let pracHintUsed = false; // true after hint, shows "Show me" next
 
 function initPractice(){
   pracOp = OPENINGS[0];
@@ -2765,14 +2778,59 @@ function fadeOutWrong(){
 
 function showHint(){
   if(pracStep >= pracMaxSteps || !isPlayerTurn()) return;
-  setFeedback('', ''); // clear any wrong move message
+  setFeedback('', '');
   showPracBadge('none');
+
+  const hintBtn = document.getElementById('prac-hint-btn');
+
+  if(!pracHintUsed){
+    // STAGE 1: highlight the piece to move
+    pracHintUsed = true;
+    if(hintBtn) hintBtn.textContent = 'Show me →';
+
+    // Find which piece to highlight
+    const expected = expectedMove();
+    const isW = isWhiteTurn();
+    // Parse source square from board state
+    const prevBoard = cloneB(pracBoard);
+    const testBoard = cloneB(pracBoard);
+    const resultBoard = applyMove(testBoard, expected, isW);
+    if(!resultBoard) return;
+
+    // Find which square changed from having a piece to empty
+    let fromRow = -1, fromCol = -1;
+    for(let r=0;r<8;r++) for(let c2=0;c2<8;c2++){
+      if(prevBoard[r][c2] && !resultBoard[r][c2]){
+        fromRow = r; fromCol = c2;
+      }
+    }
+
+    // Highlight the piece square on the board
+    const boardEl = document.getElementById('quiz-board');
+    if(boardEl && fromRow >= 0){
+      const flip = pracFlip;
+      const dispRow = flip ? (7-fromRow) : fromRow;
+      const dispCol = flip ? (7-fromCol) : fromCol;
+      const sqIdx = dispRow * 8 + dispCol;
+      const squares = boardEl.querySelectorAll('.sq');
+      if(squares[sqIdx]){
+        squares[sqIdx].classList.add('piece-hint');
+        // Remove after animation
+        setTimeout(() => squares[sqIdx].classList.remove('piece-hint'), 2500);
+      }
+    }
+    return; // Don't reveal the move yet
+  }
+
+  // STAGE 2: reveal the full move
+  pracHintUsed = false;
+  if(hintBtn) hintBtn.textContent = 'Hint ?';
+
   const expected = expectedMove();
   const mi = Math.floor(pracStep / 2);
   const isB = pracStep % 2 === 1;
   const mv = pracVar.moves[mi];
 
-  // Apply the move and show it
   pracPrevBoard = cloneB(pracBoard);
   pracBoard = applyMove(pracBoard, expected, isWhiteTurn());
   pracStep++;
@@ -2780,14 +2838,10 @@ function showHint(){
   renderPracBoard();
   renderDots();
 
-  // Show a specific "hint used" card
   const idea = isB ? (mv.bidea||mv.idea) : (mv.widea||mv.idea);
   showPracCard('hint', '👁 Move revealed', idea || mv.desc || '');
-  showPracBadge('none');
 
-  // Hide hint button until next player turn
-  const hw = document.getElementById('prac-hint-btn');
-  if(hw) hw.style.display = 'none';
+  if(hintBtn) hintBtn.style.display = 'none';
 
   if(pracStep >= pracMaxSteps){
     showContinueBtn(() => { hideContinueBtn(); showPracDone(); });
@@ -2875,6 +2929,7 @@ function startPractice(){
   pracSelected = null;
   pracLocked = false;
   pracPrevBoard = null;
+  pracHintUsed = false;
   pracFlip = pracOp.flip || false;
   const _el_prac_done=document.getElementById('prac-done');if(_el_prac_done)_el_prac_done.style.display = 'none';
   const _el_prac_board_section=document.getElementById('prac-board-section');if(_el_prac_board_section)_el_prac_board_section.style.display = '';
@@ -3096,7 +3151,10 @@ function handlePracClick(r, c){
     renderPracBoard();
     renderDots();
 
-    pracLocked = true; // lock clicks until opponent plays
+    pracLocked = true;
+    pracHintUsed = false;
+    const hb = document.getElementById('prac-hint-btn');
+    if(hb){ hb.textContent='Hint ?'; }
     // Show pedagogical feedback for this move
     const mi2 = Math.floor(prevStep / 2);
     const wasB2 = prevStep % 2 === 1;
