@@ -3114,10 +3114,9 @@ function handlePracClick(r, c){
   const expected = expectedMove();
   const legal = getLegalMoves(pracBoard, isWhiteTurn());
 
-  // Find which legal move matches this from->to
+  // Find which legal move matches this from->to using the selected piece
   let matchedMove = null;
   for(const mv of legal){
-    // Check if this move ends on the target square
     let dest = '';
     if(mv === 'O-O'){ dest = isWhiteTurn() ? 'g1' : 'g8'; }
     else if(mv === 'O-O-O'){ dest = isWhiteTurn() ? 'c1' : 'c8'; }
@@ -3125,10 +3124,12 @@ function handlePracClick(r, c){
     const dc = dest.charCodeAt(0) - 97;
     const dr = 8 - parseInt(dest[1]);
     if(dr === r && dc === c){
-      // Also check the piece matches (disambiguation)
+      // Verify the selected piece actually moved (not another piece of same type)
       const tempBoard = cloneB(pracBoard);
       const result = applyMove(tempBoard, mv, isWhiteTurn());
-      if(result && result[r][c]){ matchedMove = mv; break; }
+      if(result && result[r][c] && !result[sr][sc]){
+        matchedMove = mv; break;
+      }
     }
   }
 
@@ -3306,10 +3307,8 @@ function togglePieceStyle(){
   localStorage.setItem('co_pieces', pieceStyle);
   applyPieceStyle();
   update();
-  // also re-render quiz board if quiz is active
-  if(quizQuestions.length && quizIdx < quizQuestions.length){
-    renderQuizBoard(quizQuestions[quizIdx]);
-  }
+  // Re-render practice board if practice is active
+  if(pracBoard) renderPracBoard();
 }
 applyPieceStyle();
 
