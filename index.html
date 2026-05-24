@@ -309,7 +309,7 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 .prac-chip.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.4);color:var(--ac)}
 .prac-board-section{display:flex;justify-content:center;padding:.05rem 0 0}
 .prac-feedback{min-height:0;display:flex;align-items:center;justify-content:center;padding:0 .8rem;text-align:center;margin-top:0}
-.prac-card{margin:1px .8rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--line2);background:var(--bg2)}
+.prac-card{margin:3px .8rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--line2);background:var(--bg2)}
 .prac-feedback-msg{font-size:14px;font-weight:600;padding:8px 18px;border-radius:10px;transition:all .25s}
 .prac-feedback-msg.correct{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.3)}
 .prac-feedback-msg.wrong{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);animation:shake .3s ease}
@@ -340,12 +340,16 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 .prac-status-text{font-size:11px;color:var(--tx3);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
 
 /* ── PRACTICE FEEDBACK CARD ── */
-.prac-card{margin:1px .8rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--line2);background:var(--bg2)}
+.prac-card{margin:3px .8rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--line2);background:var(--bg2)}
 .prac-card-header{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .prac-card-header.correct{background:rgba(74,222,128,.12);color:#34d399;border-bottom:1px solid rgba(74,222,128,.15)}
 .prac-card-header.wrong{background:rgba(239,68,68,.08);color:#f87171;border-bottom:1px solid rgba(239,68,68,.15)}
 .prac-card-header.opp{background:rgba(201,168,76,.08);color:var(--ac);border-bottom:1px solid rgba(201,168,76,.15)}
 .prac-card-idea{padding:10px 12px;font-size:14px;color:var(--tx);line-height:1.55;font-family:'Cormorant Garamond',serif;font-style:italic}
+.prac-continue{display:flex;align-items:center;justify-content:center;gap:10px;padding:.2rem 0 0}
+.prac-continue-label{font-size:10px;font-weight:700;color:#34d399;letter-spacing:.04em}
+.prac-continue-btn{padding:8px 28px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.35);border-radius:20px;color:var(--ac);font-size:12px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.06em;transition:all .15s}
+.prac-continue-btn:active{background:rgba(201,168,76,.2)}
 
 /* ── PRACTICE FILTER GROUPS ── */
 .prac-selectors{display:flex;flex-direction:column;gap:0;padding:.2rem .8rem .05rem}
@@ -355,7 +359,7 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 .prac-filter-label--var{color:rgba(201,168,76,.5)}
 
 /* ── YOUR TURN INDICATOR ── */
-.prac-turn{display:flex;align-items:center;justify-content:center;gap:7px;padding:.1rem .8rem .1rem}
+.prac-turn{display:flex;align-items:center;justify-content:center;gap:7px;padding:.1rem .8rem .1rem;flex-wrap:wrap}
 .prac-turn-dot{width:7px;height:7px;border-radius:50%;background:var(--ac);flex-shrink:0;animation:pulse-turn 1.4s ease-in-out infinite}
 .prac-turn-text{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ac)}
 @keyframes pulse-turn{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
@@ -372,6 +376,7 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
   animation:badge-pop .2s ease;
   display:none;
 }
+.prac-correct-badge,.prac-wrong-badge{display:inline;margin:0 auto}
 .prac-correct-badge{
   margin-left:auto;
   font-size:10px;font-weight:700;
@@ -509,12 +514,16 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
     <span class="prac-wrong-badge" id="prac-wrong-badge" style="display:none">✗ Wrong</span>
   </div>
 
-  <!-- Feedback card — juste sous l'échiquier -->
-  <div class="prac-feedback" id="prac-feedback"></div>
+  <!-- Continue button + Feedback card — juste sous l'échiquier -->
+  <div class="prac-continue" id="prac-continue" style="display:none">
+    <span class="prac-continue-label" id="prac-continue-label"></span>
+    <button class="prac-continue-btn" id="prac-continue-btn">Continue →</button>
+  </div>
   <div class="prac-card" id="prac-card" style="display:none">
     <div class="prac-card-header" id="prac-card-header"></div>
     <div class="prac-card-idea" id="prac-card-idea"></div>
   </div>
+  <div class="prac-feedback" id="prac-feedback"></div>
 
   <!-- Progress + Status -->
   <div class="prac-top-bar" id="prac-top-bar">
@@ -2857,6 +2866,20 @@ function showPracBadge(type){
   if(ko) ko.style.display = type==='wrong' ? 'inline' : 'none';
 }
 
+function showContinueBtn(cb, label){
+  const wrap = document.getElementById('prac-continue');
+  const btn = document.getElementById('prac-continue-btn');
+  const lbl = document.getElementById('prac-continue-label');
+  if(!wrap||!btn) return;
+  if(lbl) lbl.textContent = label || '';
+  wrap.style.display = 'flex';
+  btn.onclick = cb;
+}
+function hideContinueBtn(){
+  const wrap = document.getElementById('prac-continue');
+  if(wrap) wrap.style.display = 'none';
+}
+
 function showPracCard(type, header, idea){
   const card = document.getElementById('prac-card');
   const h = document.getElementById('prac-card-header');
@@ -2894,6 +2917,8 @@ function startPractice(){
   if(card) card.style.display = 'none';
   setFeedback('', '');
   showPracBadge('none');
+  hideContinueBtn();
+  const tEl=document.getElementById('prac-turn');if(tEl)tEl.style.display='';
   renderPracBoard();
   renderDots();
   updateStatus();
@@ -3086,26 +3111,36 @@ function handlePracClick(r, c){
     const idea2 = wasB2 ? (mv2.bidea||mv2.idea) : (mv2.widea||mv2.idea);
     showPracCard('correct', '✓ Correct move!', idea2 || mv2.desc || '');
     showPracBadge('correct');
+    const turnEl = document.getElementById('prac-turn');
+    if(turnEl) turnEl.style.display = 'none';
 
     if(pracStep >= pracMaxSteps){
-      setTimeout(() => showPracDone(), 2000);
+      showContinueBtn(() => { hideContinueBtn(); showPracDone(); });
     } else {
-      updateStatus();
       if(!isPlayerTurn() && pracStep < pracMaxSteps){
-        setTimeout(() => {
-          const prevStep2 = pracStep;
-          autoPlayOpponent();
-          // Show opponent's explanation
-          const mi3 = Math.floor(prevStep2 / 2);
-          const wasB3 = prevStep2 % 2 === 1;
-          const mv3 = pracVar.moves[mi3];
-          const idea3 = wasB3 ? (mv3.bidea||mv3.idea) : (mv3.widea||mv3.idea);
-          showPracCard('opp', '↩ Opponent responds', idea3 || mv3.desc || '');
+        showContinueBtn(() => {
+          hideContinueBtn();
           showPracBadge('none');
-          pracLocked = false;
-          if(pracStep >= pracMaxSteps) setTimeout(() => showPracDone(), 2000);
-          else updateStatus();
-        }, 2000);
+          updateStatus('Opponent thinking…');
+          const turnEl = document.getElementById('prac-turn');
+          if(turnEl) turnEl.style.display = '';
+          setTimeout(() => {
+            const prevStep2 = pracStep;
+            autoPlayOpponent();
+            const mi3 = Math.floor(prevStep2 / 2);
+            const wasB3 = prevStep2 % 2 === 1;
+            const mv3 = pracVar.moves[mi3];
+            const idea3 = wasB3 ? (mv3.bidea||mv3.idea) : (mv3.widea||mv3.idea);
+            showPracCard('opp', '↩ Opponent responds', idea3 || mv3.desc || '');
+            pracLocked = false;
+            updateStatus();
+            const turnEl2 = document.getElementById('prac-turn');
+            if(turnEl2) turnEl2.style.display = '';
+            if(pracStep >= pracMaxSteps) setTimeout(() => showPracDone(), 2500);
+          }, 900);
+        }, '✓ Correct');
+      } else {
+        showContinueBtn(() => { hideContinueBtn(); showPracBadge('none'); pracLocked = false; updateStatus(); const t=document.getElementById('prac-turn');if(t)t.style.display=''; });
       }
     }
   } else {
@@ -3141,21 +3176,18 @@ function renderDots(){
   }
 }
 
-function updateStatus(){
-  const mi = Math.floor(pracStep / 2);
-  const isB = pracStep % 2 === 1;
-  const side = isB ? 'Black' : 'White';
+function updateStatus(override){
   const el = document.getElementById('prac-status-text');
   if(el) el.textContent = `Move ${pracStep + 1} of ${pracMaxSteps}`;
-  // Update turn indicator
   const turnDot = document.getElementById('prac-turn-dot');
   const turnText = document.getElementById('prac-turn-text');
-  const playerTurn = isPlayerTurn();
+  const msg = override || (isPlayerTurn() ? '← Your turn to play' : '← Your turn to play');
   if(turnDot){
-    turnDot.style.background = playerTurn ? 'var(--ac)' : 'var(--tx3)';
-    turnDot.style.animationPlayState = playerTurn ? 'running' : 'paused';
+    const isOpp = override === 'Opponent thinking…';
+    turnDot.style.background = isOpp ? 'var(--tx3)' : 'var(--ac)';
+    turnDot.style.animationPlayState = isOpp ? 'paused' : 'running';
   }
-  if(turnText) turnText.textContent = playerTurn ? '← Your turn to play' : 'Opponent thinking…';
+  if(turnText) turnText.textContent = msg;
 }
 
 
