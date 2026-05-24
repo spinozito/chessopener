@@ -1,0 +1,3252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ChessOpener</title>
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="ChessOpener">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+:root{
+  --bg:#060400;--bg2:#0e0b02;--bg3:#161004;--bg4:#1e1608;
+  --line:rgba(255,255,255,.06);--line2:rgba(255,255,255,.10);
+  --tx:#ffffff;--tx2:rgba(255,255,255,.80);--tx3:rgba(255,255,255,.45);
+  --ac:#c9a84c;--ac2:#e8c84a;--glow:rgba(201,168,76,.2);
+  --green:#c9a84c;--gbg:rgba(201,168,76,.06);
+  --blue:#8ab4d0;--bbg:rgba(138,180,208,.06);
+  --sl:#e8d5a0;--sd:#2a1e08;--board-shadow:0 0 0 1px rgba(201,168,76,.4),0 0 0 4px rgba(201,168,76,.07),0 12px 40px rgba(0,0,0,.9);
+  --hl-from:rgba(74,222,128,.0);--hl-to:rgba(74,222,128,.0);
+}
+html{background:var(--bg)}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-height:100dvh;display:flex;flex-direction:column}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:rgba(6,4,0,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.15)}
+.logo{display:flex;align-items:center;gap:.5rem}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#c9a84c,#8a6820);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 10px var(--glow)}
+.logo-title{font-size:1.25rem;font-weight:600;letter-spacing:.06em;font-family:'Cormorant Garamond',serif;color:var(--ac)}
+.logo-sub{font-size:.72rem;color:var(--tx3);letter-spacing:.05em}
+.kbd-hint{display:none;font-size:.6rem;color:var(--tx3);font-family:'JetBrains Mono',monospace;background:var(--bg4);border:1px solid var(--line2);border-radius:4px;padding:2px 6px}
+
+/* ── OPENING PICKER ── */
+.op-bar{flex-shrink:0;display:flex;gap:6px;padding:.6rem 1rem;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);background:var(--bg2)}
+.op-bar::-webkit-scrollbar{display:none}
+.op-btn{flex-shrink:0;display:flex;align-items:center;padding:5px 14px;background:var(--bg3);border:1px solid var(--line2);border-radius:20px;color:var(--tx3);font-size:11.5px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.op-btn:active{transform:scale(.96)}
+.op-btn.active{background:rgba(201,168,76,.12);border-color:var(--ac);box-shadow:0 0 14px rgba(201,168,76,.15)}
+.op-btn .on{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap}
+.op-btn.active .on{color:var(--ac)}
+
+/* ── PAGE ── */
+.page{flex:1;display:flex;flex-direction:column;gap:.7rem;padding:.7rem 1rem 2rem}
+
+/* ── BOARD ── */
+/* ── BOARD LAYOUT — rock solid ── */
+.board-section{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
+.board-wrap{
+  --sq: min(calc((100vw - 5rem) / 8), 50px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.bwr{display:flex;flex-direction:row;align-items:flex-start}
+.rc{
+  display:flex;flex-direction:column;
+  width:16px;flex-shrink:0;margin-right:4px;padding-top:0
+}
+.rl{
+  height:var(--sq);
+  display:flex;align-items:center;justify-content:flex-end;
+  font-size:11px;font-weight:600;
+  color:var(--tx2);font-family:'JetBrains Mono',monospace;
+  line-height:1;flex-shrink:0
+}
+.board{
+  display:grid;
+  grid-template-columns:repeat(8,var(--sq));
+  grid-template-rows:repeat(8,var(--sq));
+  border-radius:8px;overflow:hidden;
+  box-shadow:var(--board-shadow);
+  flex-shrink:0
+}
+.sq{
+  width:var(--sq);height:var(--sq);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;flex-shrink:0
+}
+.sq.l{background:var(--sl)}.sq.d{background:var(--sd)}
+.sq.d::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,transparent 60%);pointer-events:none}
+.sq.hf{box-shadow:inset 0 0 0 2px rgba(74,222,128,.6)}
+.sq.ht{box-shadow:inset 0 0 0 2px rgba(74,222,128,.9);background-color:rgba(74,222,128,.1)}
+.sq svg{width:calc(var(--sq)*.86);height:calc(var(--sq)*.86);display:block}
+.fr{display:flex;flex-direction:row;margin-left:20px;padding-top:3px}
+#quiz-fr{padding-top:2px;margin-top:0}
+.fl{
+  width:var(--sq);flex-shrink:0;
+  text-align:center;
+  font-size:11px;font-weight:600;
+  color:var(--tx2);font-family:'JetBrains Mono',monospace;
+  line-height:1
+}
+
+/* ── NAV-BAR fusionnée ── */
+.side-label{display:none}
+.coup-wrap{display:none}
+.nav-bar{width:100%;display:flex;align-items:center;gap:8px;margin-top:6px}
+.nav-btn{width:36px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--line2);border-radius:9px;color:var(--tx2);font-size:16px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.nav-btn:active{transform:scale(.95)}
+.nav-btn:disabled{opacity:.2;cursor:default}
+.nav-center{flex:1;display:flex;align-items:center;gap:9px;background:var(--bg3);border:1px solid var(--line2);border-radius:9px;padding:7px 12px;min-width:0;cursor:pointer;transition:all .15s}
+.nav-center:active{transform:scale(.98)}
+.nav-move{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;white-space:nowrap}
+.nav-move.w{color:#e8c84a}
+.nav-move.b{color:#c9a84c}
+.nav-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.nav-dot.w{background:#f0ece0;box-shadow:0 0 0 1.2px #1a1200}
+.nav-dot.b{background:#1a1200;box-shadow:0 0 0 1.2px #c9a84c}
+.nav-ctx{font-size:11px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.nav-next{flex:2;padding:10px;background:linear-gradient(135deg,#c9a84c,#8a6820);border:none;border-radius:10px;color:#1a0e00;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;letter-spacing:.03em;cursor:pointer;transition:all .15s;box-shadow:0 2px 12px rgba(201,168,76,.2);-webkit-tap-highlight-color:transparent}
+.nav-back{flex:1;padding:10px;background:var(--bg3);border:1px solid var(--line2);border-radius:10px;color:var(--tx2);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.nav-back:active{transform:scale(.97)}
+.nav-back:disabled{opacity:.2;cursor:default}
+.nav-buttons{display:flex;gap:8px;width:100%;margin-top:8px}
+.nav-next:active{transform:scale(.98);filter:brightness(.92)}
+.nav-next:disabled{opacity:.3;cursor:default}
+
+/* ── VARIANTS ── */
+.slabel{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);margin-bottom:4px}
+.vlist{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.vlist::-webkit-scrollbar{display:none}
+.vbtn{flex-shrink:0;display:flex;align-items:center;padding:4px 12px;background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--tx3);font-size:11.5px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.vbtn:active{transform:scale(.97)}
+.vbtn.active{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.5);border-bottom:2px solid rgba(201,168,76,.6)}
+.vbtn .vn{font-size:11.5px;font-weight:600;color:var(--tx3);white-space:nowrap;font-style:italic}
+.vbtn.active .vn{color:var(--ac);}
+
+/* ── ANALYSIS CARD ── */
+.acard{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;overflow:hidden;position:relative}
+.acard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--ac),transparent)}
+.abody{display:flex;flex-direction:column;gap:7px;padding:10px 12px;overflow-y:auto}
+.acontent{display:flex;flex-direction:column;gap:7px;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.02)}
+.adesc{font-size:18px;color:var(--tx);line-height:1.6;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.07);font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;letter-spacing:.01em}
+.ablock.g{background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:11px 13px}
+.ablock.g .ablabel{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;color:var(--ac)}
+.ablock.g .abtext{font-size:15px;line-height:1.6;color:var(--tx)}
+.ablock.b{background:rgba(138,180,208,.05);border:1px solid rgba(138,180,208,.12);border-radius:10px;padding:11px 13px}
+.ablock.b .ablabel{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;color:var(--blue)}
+.ablock.b .abtext{font-size:14px;line-height:1.55;color:var(--tx2)}
+
+/* ── DESKTOP ── */
+@media(min-width:720px){
+  html,body{height:100%;overflow:hidden}
+  .kbd-hint{display:block}
+  .page{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:auto 1fr;gap:1rem;padding:.7rem 1.2rem}
+  .board-section{grid-column:1;grid-row:1;align-self:center}
+  .board-wrap{--sq:52px}
+  .quiz-board{--sq:48px}
+  .nav-bar{width:100%}
+  .right-col{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:.6rem;overflow:hidden;min-height:0}
+  .acard{flex:1;min-height:0;display:flex;flex-direction:column}
+  .abody{flex:1;min-height:0;overflow-y:auto}
+  .adesc{font-size:16px}.abtext{font-size:13.5px}
+}
+@media(min-width:900px){.board-wrap{--sq:56px}}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{width:100%;height:3px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:7px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#c9a84c,#e8c84a);border-radius:2px;transition:width .3s ease}
+
+/* ── ONBOARDING OVERLAY ── */
+.onboard{position:fixed;inset:0;z-index:998;background:rgba(6,4,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;backdrop-filter:blur(8px)}
+.onboard-icon{font-size:52px}
+.onboard-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:#e8c84a;text-align:center;letter-spacing:1px}
+.onboard-text{font-size:15px;color:rgba(255,255,255,.75);text-align:center;line-height:1.7;max-width:300px}
+.onboard-steps{display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px}
+.onboard-step{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.18);border-radius:10px}
+.onboard-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#c9a84c;flex-shrink:0;margin-top:1px}
+.onboard-desc{font-size:13px;color:rgba(255,255,255,.8);line-height:1.5}
+.onboard-btn{margin-top:8px;padding:14px 40px;background:linear-gradient(135deg,#c9a84c,#8a6820);border:none;border-radius:12px;color:#1a0e00;font-size:16px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.03em;box-shadow:0 4px 20px rgba(201,168,76,.3)}
+.onboard-btn:active{transform:scale(.97)}
+
+/* ── VARIANT DONE STATE ── */
+.vbtn.done .vn::after{content:' ✓';font-size:10px;opacity:.6}
+.vbtn.done{border-color:rgba(201,168,76,.25)}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tab-btn{padding:6px 16px;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--tx3);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.tab-btn:active{transform:scale(.97)}
+.tab-btn.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.3);color:var(--ac)}
+
+/* ── QUIZ VIEW ── */
+.quiz-view{display:none;flex:1;flex-direction:column;padding:.8rem 1rem 2rem;gap:1rem}
+.quiz-view.active{display:flex}
+.learn-view{display:flex;flex:1;flex-direction:column}
+.learn-view.hidden{display:none}
+
+/* ── QUIZ CARD ── */
+.quiz-header{text-align:center;padding:.5rem 0}
+.quiz-score{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--tx3);letter-spacing:.1em}
+.quiz-streak{font-size:13px;color:var(--ac);font-weight:600}
+.quiz-board-section{display:flex;flex-direction:column;align-items:center;gap:5px;margin-bottom:6px}
+.quiz-board{--sq:min(calc((100vw - 5rem)/8),48px);display:grid;grid-template-columns:repeat(8,var(--sq));grid-template-rows:repeat(8,var(--sq));border-radius:8px;overflow:hidden;box-shadow:var(--board-shadow);flex-shrink:0}
+/* Practice board-wrap uses quiz-board --sq */
+.prac-board-section .board-wrap{--sq:min(calc((100vw - 5rem)/8),48px)}
+
+.quiz-board .sq svg{width:calc(var(--sq)*.88);height:calc(var(--sq)*.88);display:block}
+.quiz-board .sq.l{background:var(--sl)}.quiz-board .sq.d{background:var(--sd)}
+.quiz-board .sq.ht{box-shadow:inset 0 0 0 2px rgba(74,222,128,.9);background-color:rgba(74,222,128,.1)}
+.quiz-board .sq.hf{box-shadow:inset 0 0 0 2px rgba(74,222,128,.5)}
+.quiz-side-info{font-size:11px;color:var(--tx3);font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
+.quiz-question{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;padding:14px;position:relative}
+.quiz-question::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--ac),transparent);border-radius:14px 14px 0 0}
+.quiz-qtitle{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px}
+.quiz-qtext{font-size:15px;color:var(--tx);line-height:1.6;margin-bottom:12px}
+.quiz-position{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac);margin-bottom:0}
+
+/* ── QUIZ ANSWERS ── */
+.quiz-answers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quiz-ans{width:100%;padding:11px 10px;background:var(--bg3);border:1px solid var(--line2);border-radius:10px;color:var(--tx);font-size:14px;font-weight:600;font-family:'JetBrains Mono',monospace;text-align:center;cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;line-height:1.2}
+.quiz-ans:active{transform:scale(.98)}
+.quiz-ans.correct{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.4);color:#6ee7b7}
+.quiz-ans.wrong{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#fca5a5}
+.quiz-ans.reveal{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.25);color:#6ee7b7;opacity:.7}
+.quiz-ans:disabled{cursor:default}
+
+/* ── QUIZ FEEDBACK ── */
+.quiz-feedback{border-radius:12px;padding:13px 14px;margin-top:2px;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.ok{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2)}
+.quiz-feedback.ko{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2)}
+.quiz-fb-title{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+.quiz-feedback.ok .quiz-fb-title{color:#34d399}
+.quiz-feedback.ko .quiz-fb-title{color:#f87171}
+.quiz-fb-text{font-size:13px;color:var(--tx);line-height:1.5}
+
+/* ── QUIZ NEXT ── */
+.quiz-next{width:100%;padding:13px;background:linear-gradient(135deg,#c9a84c,#8a6820);border:none;border-radius:11px;color:#1a0e00;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;box-shadow:0 2px 12px rgba(201,168,76,.2);display:none;margin-top:4px;-webkit-tap-highlight-color:transparent}
+.quiz-next.show{display:block}
+.quiz-next:active{transform:scale(.98)}
+
+/* ── QUIZ FILTER ── */
+.quiz-filter{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:6px}
+.quiz-filter::-webkit-scrollbar{display:none}
+.qf-btn{flex-shrink:0;padding:5px 13px;background:var(--bg3);border:1px solid var(--line2);border-radius:20px;color:var(--tx3);font-size:11.5px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.qf-btn:active{transform:scale(.96)}
+.qf-btn.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.4);color:var(--ac)}
+.quiz-done{display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:2rem 1rem;text-align:center}
+.quiz-done.show{display:flex}
+.quiz-done-score{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:600;color:var(--ac)}
+.quiz-done-label{font-size:14px;color:var(--tx2)}
+.quiz-done-msg{font-size:16px;color:var(--tx);line-height:1.6;max-width:280px}
+.quiz-restart{padding:13px 32px;background:linear-gradient(135deg,#c9a84c,#8a6820);border:none;border-radius:11px;color:#1a0e00;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;margin-top:8px}
+
+
+/* ── SETTINGS BUTTON ── */
+.settings-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;font-size:18px;color:var(--tx3);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s}
+.settings-btn:active{transform:scale(.9)}
+.settings-btn.open{color:var(--ac)}
+
+/* ── SETTINGS DRAWER ── */
+.settings-overlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(2px)}
+.settings-overlay.show{opacity:1;pointer-events:all}
+.settings-drawer{position:fixed;bottom:0;left:0;right:0;z-index:91;background:var(--bg2);border-top:1px solid var(--line2);border-radius:20px 20px 0 0;padding:12px 20px 40px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.settings-drawer.show{transform:translateY(0)}
+.settings-handle{width:36px;height:4px;background:var(--line2);border-radius:2px;margin:0 auto 16px}
+.settings-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:16px;font-family:'Cormorant Garamond',serif;letter-spacing:.05em}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.settings-row-name{font-size:14px;font-weight:500;color:var(--tx)}
+.settings-row-sub{font-size:11px;color:var(--tx3);margin-top:2px}
+.piece-toggle{padding:7px 16px;background:var(--bg3);border:1px solid var(--line2);border-radius:8px;color:var(--tx3);font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.piece-toggle:active{transform:scale(.96)}
+.piece-toggle.classic{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.4);color:var(--ac)}
+.piece-toggle-label{pointer-events:none}
+
+
+/* ── LIGHT THEME ── */
+body.light{
+  --bg:#f5f0e8;--bg2:#ffffff;--bg3:#ede6d8;--bg4:#e0d8c8;
+  --tx:#1a1200;--tx2:rgba(26,18,0,.75);--tx3:rgba(26,18,0,.4);
+  --line:rgba(26,18,0,.1);--line2:rgba(26,18,0,.12);
+  --ac:#8a6820;--ac2:#c9a84c;--blue:#4a7090;--glow:rgba(138,104,32,.2);
+}
+body.light{--sl:#f0d9b5;--sd:#b58863;--board-shadow:0 0 0 1px rgba(138,104,32,.25),0 4px 16px rgba(0,0,0,.12);}
+body.light header{background:rgba(245,240,232,.95)}
+body.light .op-btn.active .on{color:#8a6820}
+body.light .vbtn.active .vn{color:#8a6820}
+body.light .nav-move.w,body.light .nav-move.b{color:#8a6820}
+body.light .nav-next{background:linear-gradient(135deg,#8a6820,#5a4010);color:#f5f0e8}
+body.light .acard::before{background:linear-gradient(90deg,transparent,#c9a84c,transparent)}
+body.light .ablock.g{background:rgba(138,104,32,.08);border-color:rgba(138,104,32,.2)}
+body.light .ablock.g .ablabel{color:#8a6820}
+body.light .quiz-next{background:linear-gradient(135deg,#8a6820,#5a4010);color:#f5f0e8}
+body.light .qf-btn.active{background:rgba(138,104,32,.12);border-color:rgba(138,104,32,.4);color:#8a6820}
+body.light .onboard-btn{background:linear-gradient(135deg,#8a6820,#5a4010);color:#f5f0e8}
+body.light .tab-btn.active{background:rgba(138,104,32,.12);border-color:rgba(138,104,32,.3);color:#8a6820}
+body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rgba(138,104,32,.4);color:#8a6820}
+
+/* ── SIDE INDICATOR ── */
+.aside-bar{height:3px;width:100%;transition:background .25s}
+.aside-bar.white{background:linear-gradient(90deg,rgba(255,255,255,.5),rgba(255,255,255,.15),transparent)}
+.aside-bar.black{background:linear-gradient(90deg,rgba(201,168,76,.6),rgba(201,168,76,.2),transparent)}
+.abody-side{display:flex;align-items:center;gap:7px;margin-bottom:3px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06)}
+.aside-pip{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.aside-pip.white{background:#f0ece0;box-shadow:0 0 0 1.5px #2a1e08}
+.aside-pip.black{background:#1a1200;box-shadow:0 0 0 1.5px #c9a84c}
+.aside-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3)}
+
+/* ── PRACTICE / SANDBOX ── */
+.prac-selectors{display:flex;flex-direction:column;gap:6px;padding:.6rem 1rem .2rem}
+.prac-filter{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.prac-filter::-webkit-scrollbar{display:none}
+.prac-chip{flex-shrink:0;padding:4px 12px;background:var(--bg3);border:1px solid var(--line2);border-radius:20px;color:var(--tx3);font-size:11px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.prac-chip.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.4);color:var(--ac)}
+.prac-board-section{display:flex;justify-content:center;padding:.05rem 0 0}
+.prac-feedback{min-height:0;display:flex;align-items:center;justify-content:center;padding:0 .8rem;text-align:center;margin-top:0}
+.prac-card{margin:1px .8rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--line2);background:var(--bg2)}
+.prac-feedback-msg{font-size:14px;font-weight:600;padding:8px 18px;border-radius:10px;transition:all .25s}
+.prac-feedback-msg.correct{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.3)}
+.prac-feedback-msg.wrong{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);animation:shake .3s ease}
+.prac-feedback-msg.info{background:rgba(201,168,76,.08);color:var(--ac);border:1px solid rgba(201,168,76,.2)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.prac-dots{display:flex;gap:6px;justify-content:center;padding:.2rem 0 .1rem}
+.prac-dot{width:10px;height:10px;border-radius:50%;background:var(--bg3);border:1px solid var(--line2);transition:all .2s}
+.prac-dot.done{background:var(--ac);border-color:var(--ac)}
+.prac-dot.current{background:transparent;border-color:var(--ac);box-shadow:0 0 0 2px rgba(201,168,76,.2)}
+.prac-status{padding:.3rem 1rem;text-align:center}
+.prac-status-text{font-size:13px;color:var(--tx3);font-family:'Inter',sans-serif}
+.prac-done{display:flex;flex-direction:column;align-items:center;gap:10px;padding:1.5rem 1rem;text-align:center}
+.prac-done-icon{font-size:44px;color:var(--ac)}
+.prac-done-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--ac)}
+.prac-done-msg{font-size:14px;color:var(--tx2);max-width:280px;line-height:1.5}
+/* Highlighted squares on practice board */
+.quiz-board .sq{position:relative;cursor:pointer}
+/* Case sélectionnée — bordure pointillée verte (départ) */
+.quiz-board .sq.selected{box-shadow:inset 0 0 0 2px rgba(74,222,128,.8)}
+/* Destinations — dot vert centré */
+.quiz-board .sq.hint::after{content:'';position:absolute;width:34%;height:34%;border-radius:50%;background:rgba(74,222,128,.75);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+/* Destination avec capture — ring vert */
+.quiz-board .sq.hint-capture::after{content:'';position:absolute;inset:4px;border-radius:50%;border:3px solid rgba(74,222,128,.8);background:transparent;pointer-events:none}
+
+
+/* ── PRACTICE TOP BAR ── */
+.prac-top-bar{display:flex;align-items:center;justify-content:space-between;padding:.15rem .8rem .05rem}
+.prac-status-text{font-size:11px;color:var(--tx3);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+/* ── PRACTICE FEEDBACK CARD ── */
+.prac-card{margin:1px .8rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--line2);background:var(--bg2)}
+.prac-card-header{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.prac-card-header.correct{background:rgba(74,222,128,.12);color:#34d399;border-bottom:1px solid rgba(74,222,128,.15)}
+.prac-card-header.wrong{background:rgba(239,68,68,.08);color:#f87171;border-bottom:1px solid rgba(239,68,68,.15)}
+.prac-card-header.opp{background:rgba(201,168,76,.08);color:var(--ac);border-bottom:1px solid rgba(201,168,76,.15)}
+.prac-card-idea{padding:10px 12px;font-size:14px;color:var(--tx);line-height:1.55;font-family:'Cormorant Garamond',serif;font-style:italic}
+
+/* ── PRACTICE FILTER GROUPS ── */
+.prac-selectors{display:flex;flex-direction:column;gap:0;padding:.2rem .8rem .05rem}
+.prac-filter-group{display:flex;flex-direction:column;gap:1px}
+.prac-filter-group--var{margin-top:3px;padding-top:3px;border-top:1px solid var(--line)}
+.prac-filter-label{font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);line-height:1}
+.prac-filter-label--var{color:rgba(201,168,76,.5)}
+
+/* ── YOUR TURN INDICATOR ── */
+.prac-turn{display:flex;align-items:center;justify-content:center;gap:7px;padding:.1rem .8rem .1rem}
+.prac-turn-dot{width:7px;height:7px;border-radius:50%;background:var(--ac);flex-shrink:0;animation:pulse-turn 1.4s ease-in-out infinite}
+.prac-turn-text{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ac)}
+@keyframes pulse-turn{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+.prac-wrong-badge{
+  margin-left:auto;
+  font-size:10px;font-weight:700;
+  color:#f87171;
+  background:rgba(239,68,68,.1);
+  border:1px solid rgba(239,68,68,.25);
+  border-radius:20px;
+  padding:2px 9px;
+  letter-spacing:.04em;
+  animation:badge-pop .2s ease;
+  display:none;
+}
+.prac-correct-badge{
+  margin-left:auto;
+  font-size:10px;font-weight:700;
+  color:#34d399;
+  background:rgba(52,211,153,.12);
+  border:1px solid rgba(52,211,153,.3);
+  border-radius:20px;
+  padding:2px 9px;
+  letter-spacing:.04em;
+  animation:badge-pop .2s ease;
+}
+@keyframes badge-pop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+
+.prac-chip--var{border-radius:6px;background:transparent;border:1px solid var(--line2);font-style:italic}
+.prac-chip--var.active{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.5);border-bottom:2px solid rgba(201,168,76,.6)}
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash" style="
+  position:fixed;inset:0;z-index:999;
+  background:#060400;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
+  animation:splashOut 0.6s ease-in-out 1.8s forwards;
+">
+  <img src="icon.png" style="
+    width:min(340px,82vw);height:min(340px,82vw);
+    border-radius:36px;
+    animation:splashIn 0.5s ease-out forwards;
+    opacity:0;
+  "/>
+  <div style="
+    font-size:10px;color:rgba(255,255,255,.2);
+    font-family:'Inter',sans-serif;letter-spacing:.06em;
+    animation:splashIn 0.5s ease-out 0.3s forwards;
+    opacity:0;
+  ">© 2026 William CHAUVET — ChessOpener</div>
+</div>
+
+<style>
+@keyframes splashIn{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes splashOut{
+  from{opacity:1;pointer-events:all}
+  to{opacity:0;pointer-events:none;visibility:hidden}
+}
+</style>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon"><img src="icon.png" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display='none';this.parentNode.textContent='♟'"/></div>
+    <div><div class="logo-title">ChessOpener</div><div class="logo-sub">Open · Understand · Master</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-learn" onclick="switchTab('learn')">Learn</button>
+    <button class="tab-btn" id="tab-quiz" onclick="switchTab('quiz')">Practice</button>
+  </div>
+  <button class="settings-btn" id="settings-btn" onclick="toggleSettings()" aria-label="Settings">⚙</button>
+</header>
+
+<div class="learn-view" id="learn-view"><div class="op-bar" id="op-bar"></div>
+
+<div class="page">
+  <div class="board-section">
+    <div class="side-label" id="side-label">
+      <span class="side-pip" id="side-pip"></span>
+      <span id="side-text"></span>
+    </div>
+    <div class="board-wrap">
+      <div class="bwr"><div class="rc" id="rc"></div><div class="board" id="board"></div></div>
+      <div class="fr" id="fr"></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="nav-bar">
+      <button class="nav-btn" id="bs">⏮</button>
+      <div class="nav-center" id="nav-center">
+        <span class="nav-move" id="nav-move"></span>
+        <span class="nav-dot" id="nav-dot"></span>
+        <span class="nav-ctx" id="nav-ctx"></span>
+      </div>
+      <button class="nav-btn" id="be">⏭</button>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-back" id="bp2">← Back</button>
+      <button class="nav-next" id="bn">Next →</button>
+    </div>
+  </div>
+  <div class="right-col">
+    <div><div class="slabel">Variation</div><div class="vlist" id="vlist"></div></div>
+    <div class="acard" id="acard">
+      <div class="aside-bar" id="aside-bar"></div>
+      <div class="abody">
+        <div class="acontent">
+          <div class="adesc" id="adesc"></div>
+          <div class="ablock g"><div class="ablabel">💡 The idea</div><div class="abtext" id="aidea"></div></div>
+          <div class="ablock b"><div class="ablabel">⚡ Watch out</div><div class="abtext" id="anext"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end learn-view -->
+
+<!-- PRACTICE VIEW -->
+<div class="quiz-view" id="quiz-view">
+
+  <!-- Sélecteur ouverture + variante -->
+  <div class="prac-selectors">
+    <div class="prac-filter-group">
+      <div class="prac-filter-label">Opening</div>
+      <div class="prac-filter" id="prac-op-filter"></div>
+    </div>
+    <div class="prac-filter-group prac-filter-group--var">
+      <div class="prac-filter" id="prac-var-filter"></div>
+    </div>
+  </div>
+
+  <!-- Board sandbox -->
+  <div class="prac-board-section" id="prac-board-section">
+    <div class="board-wrap">
+      <div class="bwr"><div class="rc" id="quiz-rc"></div><div class="quiz-board" id="quiz-board"></div></div>
+      <div class="fr" id="quiz-fr"></div>
+    </div>
+  </div>
+
+  <!-- Your turn + badges — même ligne, juste sous l'échiquier -->
+  <div class="prac-turn" id="prac-turn">
+    <span class="prac-turn-dot" id="prac-turn-dot"></span>
+    <span class="prac-turn-text" id="prac-turn-text">Your turn to play</span>
+    <span class="prac-correct-badge" id="prac-correct-badge" style="display:none">✓ Correct</span>
+    <span class="prac-wrong-badge" id="prac-wrong-badge" style="display:none">✗ Wrong</span>
+  </div>
+
+  <!-- Feedback card — juste sous l'échiquier -->
+  <div class="prac-feedback" id="prac-feedback"></div>
+  <div class="prac-card" id="prac-card" style="display:none">
+    <div class="prac-card-header" id="prac-card-header"></div>
+    <div class="prac-card-idea" id="prac-card-idea"></div>
+  </div>
+
+  <!-- Progress + Status -->
+  <div class="prac-top-bar" id="prac-top-bar">
+    <div class="prac-dots" id="prac-dots"></div>
+    <div class="prac-status-text" id="prac-status-text"></div>
+  </div>
+
+  <!-- Done -->
+  <div class="prac-done" id="prac-done" style="display:none">
+    <div class="prac-done-icon">✓</div>
+    <div class="prac-done-title">Perfect!</div>
+    <div class="prac-done-msg" id="prac-done-msg"></div>
+    <button class="nav-next" id="prac-restart" style="width:70%;margin:8px auto 0;display:block">Try again →</button>
+  </div>
+
+</div>
+
+
+<!-- SETTINGS DRAWER -->
+<div class="settings-overlay" id="settings-overlay" onclick="toggleSettings()"></div>
+<div class="settings-drawer" id="settings-drawer">
+  <div class="settings-handle"></div>
+  <div class="settings-title">Settings</div>
+  <div class="settings-row">
+    <div class="settings-row-label">
+      <div class="settings-row-name">Piece style</div>
+      <div class="settings-row-sub">Flat minimal or Lichess Classic</div>
+    </div>
+    <button class="piece-toggle" id="piece-toggle" onclick="togglePieceStyle()">
+      <span class="piece-toggle-label" id="piece-toggle-label">Flat</span>
+    </button>
+  </div>
+  <div class="settings-row">
+    <div class="settings-row-label">
+      <div class="settings-row-name">Board theme</div>
+      <div class="settings-row-sub">Dark premium or Light classic</div>
+    </div>
+    <button class="piece-toggle" id="theme-toggle" onclick="toggleTheme()">
+      <span class="piece-toggle-label" id="theme-toggle-label">Dark</span>
+    </button>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="onboard" id="onboard">
+  <div class="onboard-title">ChessOpener</div>
+  <div class="onboard-steps">
+    <div class="onboard-step"><span class="onboard-num">01</span><span class="onboard-desc">Choose an opening and tap <strong>Next</strong> to step through each move — with a plain-language explanation at every position.</span></div>
+    <div class="onboard-step"><span class="onboard-num">02</span><span class="onboard-desc">Switch to <strong>Practice</strong> and play the moves yourself. The app tells you if you're right or wrong.</span></div>
+    <div class="onboard-step"><span class="onboard-num">03</span><span class="onboard-desc">No jargon. No notation. Just chess.</span></div>
+  </div>
+  <button class="onboard-btn" id="onboard-btn">Let's start →</button>
+</div>
+
+<script>
+/* ════════════════ SVG PIECES (Lichess cburnett style) ════════════════ */
+function pieceSVG(type){
+  const w = type===type.toUpperCase();
+  const k = type.toLowerCase();
+
+  // ── FLAT set ──
+  const flat = {
+    p:`<circle cx="50" cy="54" r="20"/>`,
+    r:`<path d="M22 22H34V32H42V22H58V32H66V22H78V82H22Z"/>`,
+    n:`<path d="M68 82H32V66L46 22H66L56 44L74 56Z"/>`,
+    b:`<path d="M50 16L76 52L50 84L24 52Z"/>`,
+    q:`<path d="M18 82L24 30L36 52L50 8L64 52L76 30L82 82Z"/><rect x="14" y="75" width="72" height="11" rx="4"/>`,
+    k:`<path d="M24 94L30 42L70 42L76 94Z"/><path d="M30 42L30 18L40 28L50 4L60 28L70 18L70 42Z"/><rect x="45" y="0" width="10" height="26" rx="5"/><rect x="37" y="8" width="26" height="10" rx="5"/><rect x="18" y="86" width="64" height="9" rx="4"/>`,
+  };
+
+  // ── CLASSIC set — vrais paths Lichess cburnett ──
+  const classicW = {
+    p:`<path fill="#fff" stroke="#000" stroke-linecap="round" stroke-width="1.5" d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z"/>`,
+    r:`<g fill="#fff" fill-rule="evenodd" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path stroke-linecap="butt" d="M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h4V9h4v5"/><path d="M34 14l-3 3H14l-3-3"/><path stroke-linecap="butt" stroke-linejoin="miter" d="M31 17v12.5H14V17"/><path d="M31 29.5l1.5 2.5h-20l1.5-2.5"/><path fill="none" stroke-linejoin="miter" d="M11 14h23"/></g>`,
+    n:`<g fill="none" fill-rule="evenodd" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path fill="#fff" d="M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21"/><path fill="#fff" d="M24 18c.38 2.91-5.55 7.37-8 9-3 2-2.82 4.34-5 4-1.042-.94 1.41-3.04 0-3-1 0 .19 1.23-1 2-1 0-4.003 1-4-4 0-2 6-12 6-12s1.89-1.9 2-3.5c-.73-.994-.5-2-.5-3 1-1 3 2.5 3 2.5h2s.78-1.992 2.5-3c1 0 1 3 1 3"/><path fill="#000" d="M9.5 25.5a.5.5 0 1 1-1 0 .5.5 0 1 1 1 0m5.433-9.75a.5 1.5 30 1 1-.866-.5.5 1.5 30 1 1 .866.5"/></g>`,
+    b:`<g fill="none" fill-rule="evenodd" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><g fill="#fff" stroke-linecap="butt"><path d="M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.354.49-2.323.47-3-.5 1.354-1.94 3-2 3-2z"/><path d="M15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2z"/><path d="M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/></g><path stroke-linejoin="miter" d="M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5"/></g>`,
+    q:`<g fill="#fff" fill-rule="evenodd" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0m16.5-4.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0M41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0M16 8.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0M33 9a2 2 0 1 1-4 0 2 2 0 1 1 4 0"/><path stroke-linecap="butt" d="M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-14V25L7 14z"/><path stroke-linecap="butt" d="M9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z"/><path fill="none" d="M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0"/></g>`,
+    k:`<g fill="none" fill-rule="evenodd" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path stroke-linejoin="miter" d="M22.5 11.63V6M20 8h5"/><path fill="#fff" stroke-linecap="butt" stroke-linejoin="miter" d="M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5"/><path fill="#fff" d="M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10 5 10z"/><path d="M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0"/></g>`,
+  };
+
+  // Noirs : mêmes paths mais on remplace fill="#fff" → fill="#000" et stroke="#000" → stroke="#c9a84c"
+  function toBlack(svg){
+    return svg
+      .replace(/fill="#fff"/g, 'fill="#1a1200"')
+      .replace(/fill="#000"/g, 'fill="#c9a84c"')
+      .replace(/stroke="#000"/g, 'stroke="#c9a84c"');
+  }
+
+  const useClassic = typeof pieceStyle !== 'undefined' && pieceStyle === 'classic';
+
+  if(useClassic){
+    const inner = w ? classicW[k] : toBlack(classicW[k]);
+    return `<svg viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+  }
+
+  // Flat
+  const sw = k==='k' ? (w?'1.8':'2.5') : (w?'3':'4');
+  const fill = w ? '#ffffff' : '#0a0600';
+  const stroke = w ? '#2a1e08' : '#c9a84c';
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round">${flat[k]}</g></svg>`;
+}
+
+/* ════════════════ OPENINGS DATA ════════════════
+   Each opening: { id, name, tag, firstMove, flipBoard (true=black bottom), variants[] }
+   flipBoard=true  → défensive, noirs en bas
+   flipBoard=false → offensive, blancs en bas
+*/
+const OPENINGS = [
+
+{id:'queens-gambit',name:"Queen's Gambit",tag:'1.d4 d5 2.c4',flip:false,variants:[
+  {id:'declined',name:'Declined',tag:"2...e6 — most solid",moves:[
+    {w:'d4',b:'d5',e:50,
+     wdesc:"White places a pawn right in the middle of the board.",
+     widea:"Controlling the center is the first goal in chess. The more central space you own, the more your pieces can move freely.",
+     wnext:"Black will do the same. The real battle starts on the next move.",
+     bdesc:"Black immediately answers with a pawn in the center too.",
+     bidea:"Never let the opponent own the center for free. By mirroring, Black says: this space belongs to both of us.",
+     bnext:"White will now offer a pawn as a trap. Don't take it — stay focused on development."},
+    {w:'c4',b:'e6',e:50,
+     wdesc:"White offers a pawn — a classic temptation.",
+     widea:"This is a trap disguised as a gift. If Black takes the pawn, White gets to build a dominant center and develop all pieces faster.",
+     wnext:"Black will wisely refuse. The pawn isn't worth the space White would gain.",
+     bdesc:"Black says no thank you — and reinforces the center instead.",
+     bidea:"Refusing the pawn is the mature choice. Black keeps the position solid and focuses on getting the king to safety.",
+     bnext:"Don't be tempted by the pawn. A quiet, solid position is Black's strength here."},
+    {w:'Nc3',b:'Nf6',e:50,
+     wdesc:"White brings a knight out — it belongs in the game, not at home.",
+     widea:"Every move should do something useful. The knight comes out, puts pressure on the center, and prepares the rest of the pieces to follow.",
+     wnext:"Black will develop a knight too. The race to get pieces out is.",
+     bdesc:"Black develops a knight that immediately challenges White's control.",
+     bidea:"The knight on this square is active and useful — it fights for the center and prepares the king to castle safely.",
+     bnext:"Keep developing. Get all pieces out before thinking about attacking."},
+    {w:'Bg5',b:'Be7',e:50,
+     wdesc:"White puts the bishop on a square where it creates invisible pressure.",
+     widea:"The bishop doesn't attack anything directly — but it ties down Black's knight. If Black tries to be clever, the knight can't move freely to defend.",
+     wnext:"Black will simply neutralize the pressure. No need to panic.",
+     bdesc:"Black calmly removes the pressure and prepares to castle.",
+     bidea:"The best response to a threat is often the simplest one. Black steps out of the pin and focuses on one priority: getting the king safe.",
+     bnext:"Don't chase the bishop away — it wastes a move and creates a weakness that lasts all game."},
+    {w:'e3',b:'O-O',e:50,
+     wdesc:"White opens a path for the last undeveloped piece.",
+     widea:"Every piece needs to join the game. This move lets the last bishop out, and the structure becomes compact and hard to break.",
+     wnext:"Black will castle. White should finish developing too.",
+     bdesc:"Black tucks the king away in safety.",
+     bidea:"The king is vulnerable in the center. Castling early is almost always right — safety first, then think about attacking.",
+     bnext:"Don't start attacking before all pieces are developed. The foundation must be solid."},
+    {w:'Nf3',b:'Nbd7',e:50,
+     wdesc:"White's last piece joins the game — development is complete.",
+     widea:"All pieces are out. This is the ideal starting position: everything is connected, the king is safe, and White can now make a real plan.",
+     wnext:"Black brings out the last knight too — to a very specific square that keeps all options open.",
+     bdesc:"Black's last knight comes out — to the one square that doesn't block anything.",
+     bidea:"This knight placement is subtle but important: it supports the center without blocking the pawns that Black will need to advance later.",
+     bnext:"Now both sides have fully developed. The real middlegame strategy begins."},
+    {w:'Rc1',b:'c6',e:50,
+     wdesc:"White moves a rook to the most useful file before the center opens.",
+     widea:"The rook can't do much right now — but it's positioning itself. When the center opens, this rook will be perfectly placed to dominate.",
+     wnext:"Black will reinforce the center. The position is slowly building toward a critical moment.",
+     bdesc:"Black adds one more layer of protection to the center.",
+     bidea:"This pawn makes the center rock solid. Black's strategy is patience — build a wall, then find the right moment to strike.",
+     bnext:"Don't get impatient. Black's position is strong precisely because it's slow and deliberate."},
+    {w:'Bd3',b:'dxc4',e:51,
+     desc:"Develops. Black exchanges.",
+     idea:"Is the right moment: the is developed, so activates it toward the kingside. Black gains space and frees the position",
+     next:"Don't recapture with — that would give White a strong queenside pawn majority instead"},
+    {w:'Bxc4',b:'Nd5',e:51,
+     desc:"Recaptures. Black centralizes.",
+     idea:"Is a strong central outpost: it attacks and challenges White's coordination. The knight is hard to dislodge",
+     next:"Don't play immediately — first let the knight sit on and force White to react"},
+    {w:'Bxe7',b:'Qxe7',e:51,
+     desc:"Simplifies. The queen recaptures.",
+     idea:"Centralizes the queen naturally. Black has a solid, equal position — the queen defends and prepares later",
+     next:"Don't recapture with — the knight is better placed on and the queen is more active on"},
+    {w:'Ne4',b:'Nxc3',e:51,
+     desc:"White centralizes the knight powerfully. Black trades it off.",
+     idea:"Simplifies deliberately: Black eliminates an active piece and reduces White's attacking chances. Equality is the goal",
+     next:"Don't play instead — it looks active but loses the pawn after"},
+    {w:'Rxc3',b:'e5',e:52,
+     desc:"Recaptures. Black plays the liberating.",
+     idea:"Is the move Black has been preparing for 11 moves. It frees the position completely and equalizes. Timing is everything: too early and it fails, now it works perfectly",
+     next:"Don't hesitate — after. Black has full equality. The preparation paid off"},
+  ]},
+  {id:'accepted',name:'Accepted',tag:"2...dxc4 — pawn taken",moves:[
+    {w:'d4',b:'d5',e:50,
+     desc:"Queen's Pawn Opening.",
+     idea:"Occupies the center. The battle for the square begins immediately",
+     next:"Be ready for — the Queen's Gambit offer is coming"},
+    {w:'c4',b:'dxc4',e:51,
+     desc:"The Queen's Gambit. Black accepts.",
+     idea:"Wins a pawn but cedes central control. White gets a free center with next. Black's plan: hold the pawn as long as possible, then use the tempo",
+     next:"Don't try to hold with immediately — it weakens the queenside. Develop first"},
+    {w:'e4',b:'Nf6',e:51,
+     desc:"Seizes the center. Black develops.",
+     idea:"Attacks and develops. The pawn on is already forgotten — Black uses the time to challenge White's massive center",
+     next:"Don't play yet — after , White's center is too strong"},
+    {w:'e5',b:'Nd5',e:51,
+     desc:"Chases. The knight retreats.",
+     idea:"Is the ideal square: well-centralized and stable. The knight cannot be easily chased from here",
+     next:"Don't retreat to — is far better, staying active in the center"},
+    {w:'Nf3',b:'e6',e:51,
+     desc:"Develops. Black plays to consolidate.",
+     idea:"Supports the and prepares to develop the bishop. Black builds a solid structure before counterattacking",
+     next:"Don't play yet — first finish development and castle"},
+    {w:'Bxc4',b:'c5',e:51,
+     desc:"Reclaims the gambit pawn. Black strikes.",
+     idea:"Attacks — the thematic counterplay. Black cannot remain passive with an inferior pawn structure. The counterattack must come quickly",
+     next:"Don't delay — every move White consolidates makes it harder to equalize"},
+    {w:'O-O',b:'cxd4',e:51,
+     desc:"White castles. Black exchanges.",
+     idea:"Opens the position when White is already castled. Black simplifies the center and reduces White's space advantage",
+     next:"Don't keep the tension with — is the correct simplification here"},
+    {w:'Nxd4',b:'Nxd4',e:51,
+     desc:"Recaptures. Black exchanges knights.",
+     idea:"Simplifies further. Black is happy to trade pieces when behind in development — fewer pieces means less danger",
+     next:"Don't play instead — exchanging on first is more precise"},
+    {w:'Qxd4',b:'Nc6',e:51,
+     desc:"Recaptures with the queen. Black develops.",
+     idea:"Attacks the queen and develops. Black gains a tempo and catches up in development",
+     next:"Don't play before — the tempo gain is important here"},
+    {w:'Qe3',b:'Be7',e:51,
+     desc:"Retreats. Black develops.",
+     idea:"Prepares castling. Black has equalized and now simply finishes development",
+     next:"Don't play — it pins nothing useful and wastes a tempo"},
+    {w:'Nc3',b:'O-O',e:51,
+     desc:"White develops the last piece. Black castles to safety.",
+     idea:"Castling secures the king. Both sides are now fully developed. A slight White space advantage remains, but Black is solid",
+     next:"Don't castle queenside — with the open c-file and White's potential, kingside is safer"},
+    {w:'Rd1',b:'Qc7',e:51,
+     desc:"Activates the rook. Black centralizes the queen.",
+     idea:"Defends the position and prepares -. Black has a solid, slightly passive but defensible position",
+     next:"Don't play — it looks active but after , Black has a weak pawn"},
+  ]},
+  {id:'slav',name:'Slav Defense',tag:"2...c6 — very solid",moves:[
+    {w:'d4',b:'d5',e:50,
+     desc:"Queen's Pawn Opening.",
+     idea:"Occupies the center and prepares",
+     next:"Be ready for — the Queen's Gambit is coming"},
+    {w:'c4',b:'c6',e:50,
+     desc:"The Queen's Gambit. Black responds — the Slav Defense.",
+     idea:"Supports without closing the bishop diagonal — the Slav's key advantage over the QGD. The bishop can exit via or before closes the diagonal",
+     next:"Don't play here — that's the QGD and the bishop gets locked. keeps it free"},
+    {w:'Nf3',b:'Nf6',e:50,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Controls the center. Natural, principled development toward the center",
+     next:"Don't play too early — develop and first"},
+    {w:'Nc3',b:'dxc4',e:51,
+     desc:"Develops. Black takes — Slav Accepted.",
+     idea:"Is possible NOW because the bishop can still exit via. This is exactly what makes smarter than — the pawn capture comes with no structural cost",
+     next:"Don't play without immediately following with — White will play and reclaim the pawn advantageously"},
+    {w:'a4',b:'Bf5',e:51,
+     desc:"Prevents. Black develops — the key move.",
+     idea:"Is the point of the entire Slav Accepted: the bishop exits before closes the diagonal. This is what makes the Slav superior — Black keeps the pawn and develops actively",
+     next:"Don't play before — you'll lock in the bishop and lose the entire point of playing"},
+    {w:'e3',b:'e6',e:51,
+     desc:"Opens the diagonal. Black plays.",
+     idea:"Consolidates the structure now that the bishop is already out. The pawn no longer imprisons it — Black got the best of both worlds",
+     next:"Don't play yet — finish development with and castling first"},
+    {w:'Bxc4',b:'Bb4',e:51,
+     desc:"Reclaims the pawn. Black pins.",
+     idea:"Pins and adds pressure. Black plays actively — the pin makes it harder for White to expand with",
+     next:"Don't recapture with immediately — maintaining the pin is more valuable"},
+    {w:'O-O',b:'O-O',e:51,
+     desc:"Both sides castle. Main tabiya of the Slav Accepted.",
+     idea:"Both sides have developed well and castled safely. The position is rich with ideas — Black's solid structure vs White's space advantage",
+     next:"Don't rush counterplay — Black's structure is sound. Wait for the right moment"},
+    {w:'Qe2',b:'Nbd7',e:51,
+     desc:"Centralizes the queen. Black develops.",
+     idea:"Supports the center and prepares redeployment. The knight can head to or depending on White's plan",
+     next:"Don't play — is more flexible and doesn't block the c-pawn"},
+    {w:'e4',b:'Bg4',e:52,
+     desc:"Advances the center. Black pins.",
+     idea:"Fights back actively against White's central expansion. The pin on makes it harder for White to maintain -d4",
+     next:"Don't play immediately — maintain the pin and let it do its work first"},
+    {w:'h3',b:'Bxf3',e:52,
+     desc:"Challenges the bishop. Black exchanges.",
+     idea:"Is now correct: White has weakened the kingside slightly. Black simplifies and accepts a slightly passive position in exchange for solidity",
+     next:"Don't play to maintain the pin — after , the bishop is trapped"},
+    {w:'Qxf3',b:'e5',e:52,
+     desc:"Recaptures. Black plays the freeing.",
+     idea:"Liberates Black's game. Black refuses to remain passive — the timing is right now that White's queen is on",
+     next:"Is perfectly timed here — waiting for to misplace the queen is what makes it work"},
+  ]},
+  {id:'nimzo',name:'Nimzo-Indian',tag:"3...Bb4 — dynamic",moves:[
+    {w:'d4',b:'Nf6',e:50,
+     desc:"Black develops the knight immediately.",
+     idea:"Controls and prepares various Indian defenses. Highly flexible — Black waits to see White's setup before committing",
+     next:"Don't play immediately — keep the tension and see if White plays"},
+    {w:'c4',b:'e6',e:50,
+     desc:"To control. Black plays.",
+     idea:"Is deliberately flexible: it prepares but also keeps available if White plays. Black waits for the right moment",
+     next:"Don't play yet — wait. then is the Nimzo-Indian"},
+    {w:'Nc3',b:'Bb4',e:50,
+     desc:"Develops. Black plays — the Nimzo-Indian!",
+     idea:"Pins indirectly: if White plays , can't move and Black exchanges on doubling the pawns. This is the entire concept — control without occupying",
+     next:"Don't play now — is more powerful. Let the pin do the work"},
+    {w:'e3',b:'O-O',e:50,
+     desc:"Opens the diagonal solidly. Black castles.",
+     idea:"Castling secures the king immediately. Black doesn't need to act aggressively yet — the pin is already creating problems for White's center",
+     next:"Don't play before — the natural order is castling. then"},
+    {w:'Bd3',b:'d5',e:50,
+     desc:"Develops the bishop. Black plays.",
+     idea:"Challenges the center. The combination of pin + is the Nimzo's core: Black fights for the center indirectly and directly at once",
+     next:"Don't exchange on yet — keep the bishop on as long as it pressures the center"},
+    {w:'Nf3',b:'c5',e:51,
+     desc:"Develops. Black attacks.",
+     idea:"Attacks from two files simultaneously. Black's plan is now clear: create as many weaknesses in White's center as possible",
+     next:"Don't play instead of — attacks directly and is more forcing"},
+    {w:'O-O',b:'dxc4',e:51,
+     desc:"White castles. Black exchanges.",
+     idea:"Frees Black's game. After , the bishop is well-placed but Black gets active piece play in return",
+     next:"Don't play instead — first keeps more tension"},
+    {w:'Bxc4',b:'cxd4',e:51,
+     desc:"Recaptures. Black exchanges.",
+     idea:"Opens more lines. White must recapture. creating an isolated queen's pawn — a long-term structural target for Black",
+     next:"Don't rush to attack the isolated pawn immediately — develop all pieces first"},
+    {w:'exd4',b:'Nbd7',e:51,
+     desc:"Recaptures. Black develops.",
+     idea:"Is flexible: the knight can head.. Black keeps options open rather than committing prematurely",
+     next:"Don't play — is more flexible and doesn't block the c-pawn"},
+    {w:'Qd3',b:'Nb6',e:51,
+     desc:"Centralizes. Black's knight jumps.",
+     idea:"Attacks the and prepares. Black continues to put pressure on White's pieces rather than playing passively",
+     next:"Don't play — attacking the bishop gains more time"},
+    {w:'Bb3',b:'Bd7',e:51,
+     desc:"Retreats to safety. Black develops.",
+     idea:"Completes development and prepares. All of Black's pieces are coordinating toward White's center",
+     next:"Don't play until — wait for the right moment when it causes maximum damage"},
+    {w:'Re1',b:'Bxc3',e:52,
+     desc:"Activates the rook. Black exchanges — the key moment.",
+     idea:"NOW is correct: the means White can't recapture with the queen. doubles the pawns. Black gives up the bishop pair but gets a permanent structural advantage",
+     next:"Timing is everything — had to come first to make this exchange effective"},
+  ]},
+  {id:'tarrasch-qg',name:'Tarrasch',tag:"3...c5 — isolated pawn",moves:[
+    {w:'d4',b:'d5',e:50,
+     desc:"Queen's Pawn Opening.",
+     idea:"Stakes out the center immediately and prepares — the first move of a strategic battle",
+     next:"Be ready — the position is about to get sharp."},
+    {w:'c4',b:'e6',e:50,
+     desc:"The Queen's Gambit. Black declines.",
+     idea:"Prepares a solid. Black waits before revealing the Tarrasch plan",
+     next:"After , Black plays — the Tarrasch"},
+    {w:'Nc3',b:'c5',e:51,
+     desc:"Develops. Black strikes with — the Tarrasch Defense.",
+     idea:"Is a bold choice: Black accepts a potential isolated queen's pawn (IQP) on in exchange for dynamic, active piece play. The IQP gives space and open lines — a fair trade for an aggressive player",
+     next:"Don't be scared of the IQP — the active pieces compensate fully. Many GMs play this deliberately"},
+    {w:'cxd5',b:'exd5',e:51,
+     desc:"Exchanges. recaptures — the isolated pawn is created.",
+     idea:"Is the correct recapture: the open e-file gives the rook an active diagonal and the center pawn grants space. The 'weakness' comes with tremendous activity",
+     next:"Don't recapture with — that creates two isolated pawns and is much worse"},
+    {w:'Nf3',b:'Nc6',e:51,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Supports the center and prepares castling. Black develops quickly — activity is the key.",
+     next:"Don't play before — the order matters for keeping the pawn mobile"},
+    {w:'g3',b:'Nf6',e:51,
+     desc:"Prepares the fianchetto. Black develops.",
+     idea:"Completes development. White's will put long-term pressure on — Black must act before it becomes a real target",
+     next:"Don't play to 'get rid of' the IQP — it becomes a passed pawn and is much stronger"},
+    {w:'Bg2',b:'Be7',e:51,
+     desc:"Fianchettos. Black develops.",
+     idea:"Prepares castling. Black accepts the pressure because the pieces are too active to worry about it yet",
+     next:"Don't play to defend — it's too passive. Castle and keep the initiative"},
+    {w:'O-O',b:'O-O',e:51,
+     desc:"Both sides castle. Main tabiya of the Tarrasch.",
+     idea:"After castling, the position is rich and imbalanced. The key strategic question: will White blockade. or will Black push to make it a passed pawn?",
+     next:"Don't let White play comfortably — be ready to push at the right moment"},
+    {w:'dxc5',b:'Bxc5',e:52,
+     desc:"Exchanges. The bishop recaptures.",
+     idea:"Activates the bishop on a strong diagonal. The pawn is now potentially a dangerous passed pawn — Black's compensation is very real",
+     next:"Don't recapture with — the bishop on is much more active"},
+    {w:'Nb5',b:'d4',e:52,
+     desc:"Attacks the. Black pushes — the pawn marches!",
+     idea:"Is the move Black has been waiting for: the IQP becomes a powerful passed pawn that cannot be easily stopped. The 'weakness' transforms into a weapon",
+     next:"Don't retreat or defend — push it forward! This is what the whole opening was about"},
+    {w:'Bf4',b:'Ne4',e:52,
+     desc:"White develops. Black's knight leaps to a strong outpost.",
+     idea:"Is an excellent outpost: it threatens or and cannot be easily kicked out. Black's active pieces are justifying the IQP",
+     next:"Don't exchange too quickly — let it sit and create threats first"},
+    {w:'Nbd4',b:'Nxd4',e:52,
+     desc:"Centralizes. Black exchanges.",
+     idea:"Simplifies, but the passed pawn remains very powerful. Black has excellent winning chances with precise play",
+     next:"Don't trade all the pieces — Black needs at least one active piece to support the pawn advance"},
+  ]},
+]},
+
+{id:'caro',name:'Caro-Kann',tag:'1.e4 c6',flip:true,variants:[
+  {id:'classical',name:'Classical',tag:'3.Nc3 Bf5',moves:[
+    {w:'e4',b:'c6',e:50,
+     desc:"the Caro-Kann Defense.",
+     idea:"Prepares next move without blocking the bishop. This single detail is why the Caro-Kann is considered superior to the French for many players",
+     next:"Don't play immediately — first sets up the support"},
+    {w:'d4',b:'d5',e:52,
+     desc:"Builds the center. contests immediately.",
+     idea:"Challenges while provides the support. This is the Caro-Kann's fundamental idea: contest the center without creating a passive bishop",
+     next:"Don't play instead — that's the French and locks the bishop in"},
+    {w:'Nc3',b:'dxe4',e:52,
+     desc:"Defends. Black exchanges.",
+     idea:"Frees the position immediately. Black doesn't want a locked center — the exchange opens lines and prepares the key move",
+     next:"Don't keep the tension with delayed — exchange now and play before it's too late"},
+    {w:'Nxe4',b:'Bf5',e:50,
+     desc:"Recaptures. Black plays — the signature Caro-Kann move.",
+     idea:"MUST come here: after , the -h3 diagonal closes forever. This is exactly why Black played instead. The bishop gets out — the French bishop never does",
+     next:"Don't delay even one move — if you play first, you've just played a bad French"},
+    {w:'Ng3',b:'Bg6',e:50,
+     desc:"Chases the bishop. Black retreats.",
+     idea:"Is the correct retreat: the bishop stays active, controls the center. and cannot be traded off without White weakening their structure. Never retreat to or",
+     next:"Don't play — you lose a valuable bishop for a knight unnecessarily"},
+    {w:'Nf3',b:'Nd7',e:50,
+     desc:"White develops. Black makes a key move.",
+     idea:"(not !) is the key: it doesn't block and keeps all options open. The knight can go. or — maximum flexibility",
+     next:"Don't play — it blocks the c-pawn and limits the knight's future options"},
+    {w:'h4',b:'h6',e:53,
+     desc:"The Bronstein plan. Black blocks.",
+     idea:"Is mandatory: if Black ignores , White plays and the bishop is trapped behind Black's own pawns for the rest of the game. This is a permanent positional disaster",
+     next:"Don't skip — the bishop on is one of Black's best pieces. Protect it at all costs"},
+    {w:'Bd3',b:'Bxd3',e:53,
+     desc:"Develops toward the kingside. Black exchanges.",
+     idea:"Is the right moment: the queen recaptures on which is far less dangerous than an active bishop pointing at the king. Exchange active pieces when they become threats",
+     next:"Don't let sit — removes it immediately before it causes damage"},
+    {w:'Qxd3',b:'Ngf6',e:53,
+     desc:"Recaptures. Black completes development.",
+     idea:"Black has achieved the Caro-Kann dream: solid structure, bishop already out, no weaknesses. White has a slight space edge but it is very hard to exploit",
+     next:"Don't rush counterplay — the position is solid. and then castling complete the setup"},
+    {w:'Bd2',b:'e6',e:54,
+     desc:"Completes White's development. Black plays.",
+     idea:"Now prepares castling. Unlike the French, Black played after the bishop came out — so it doesn't imprison anything. This timing difference is the whole point of the Caro-Kann",
+     next:"Don't castle queenside — White is going there. Castle kingside to be on opposite flanks"},
+    {w:'O-O-O',b:'Qc7',e:55,
+     desc:"Queenside castling — White castles queenside! Opposite-side castling begins.",
+     idea:"Is the thematic response: prepares kingside castling and counterattacks on the queenside. When your opponent castles long, you must castle short and attack",
+     next:"Don't castle queenside too — that would be on White's side where all the action is. Castle kingside"},
+    {w:'Ne4',b:'O-O',e:55,
+     desc:"Centralizes from. Black castles kingside.",
+     idea:"The knight on is White's best piece: controls the center. and simultaneously. With opposite-side castling, both players race to attack — don't defend passively, counterattack with or",
+     next:"Don't wait — launch queenside counterplay with or immediately. This is a race"},
+  ]},
+  {id:'advance',name:'Advance',tag:'3.e5 Short',moves:[
+    {w:'e4',b:'c6',e:50,
+     desc:"the Caro-Kann Defense.",
+     idea:"Prepares without blocking the bishop. The fundamental idea of the Caro-Kann",
+     next:"Is coming — be ready to contest with"},
+    {w:'d4',b:'d5',e:52,
+     desc:"White builds a powerful pawn center. Black contests it immediately.",
+     idea:"Challenges , supported. The central tension is set — White will now advance",
+     next:"After , the key move is — get it out before closes the diagonal"},
+    {w:'e5',b:'Bf5',e:53,
+     desc:"Advances, claiming space. Black develops immediately.",
+     idea:"Must come NOW, before closes the diagonal permanently. This is the entire lesson of the Advance Caro-Kann: get the bishop out first, then consolidate",
+     next:"Don't play before — you'll imprison your best piece for the whole game"},
+    {w:'Nf3',b:'e6',e:53,
+     desc:"Develops and supports. Black plays.",
+     idea:"Is now safe to play: the bishop is already out. Black consolidates and prepares to develop the bishop. Perfect order",
+     next:"Don't play before — first solidifies the structure"},
+    {w:'Be2',b:'Nd7',e:53,
+     desc:"Prepares quiet kingside castling. Black develops.",
+     idea:"This is the key piece: it prepares the route to challenge the central pawn. The knight heads to an ideal outpost.",
+     next:"Don't play yet — it gets immediately kicked. first, then , then"},
+    {w:'O-O',b:'Ne7',e:53,
+     desc:"White castles. Black's knight heads toward.",
+     idea:"Is the relay: the knight heads to to attack. This is Black's standard plan in the Advance — the entire strategy centers on undermining the pawn",
+     next:"Don't stop here — the knight must continue to to make the plan work"},
+    {w:'Nbd2',b:'Ng6',e:52,
+     desc:"Reinforces. Black's knight arrives on, attacking.",
+     idea:"Puts direct pressure. White has spent two moves defending it. The preparation has paid off — now Black follows with to attack",
+     next:"Don't play prematurely — attack with first to undermine"},
+    {w:'Nb3',b:'c5',e:50,
+     desc:"Defends. Black plays — the thematic counterattack.",
+     idea:"Attacks , the base of White's center. This is the move Black has been building toward: the whole — maneuver was preparation for this central strike",
+     next:"Don't hesitate on — it's the point of the whole variation. Attack the base"},
+    {w:'c3',b:'Qb6',e:50,
+     desc:"Supports. Black's queen attacks and simultaneously.",
+     idea:"Creates two threats at once. White cannot defend both adequately. This is how Black generates counterplay in the Advance: attack the center from the queenside",
+     next:"Don't play instead — is much more forcing and effective"},
+    {w:'Be3',b:'cxd4',e:50,
+     desc:"Develops and defends. Black exchanges.",
+     idea:"Opens lines at the right moment. The is developed, White has committed — now is the time to open the position",
+     next:"Don't exchange too early — wait until White's pieces are committed, like now"},
+    {w:'cxd4',b:'Nxe5',e:50,
+     desc:"Recaptures. Black captures on — the reward!",
+     idea:"Recovers the pawn that has been restricting Black's game since move 3. Eight moves of preparation for this one capture. The knight on is magnificent",
+     next:"Don't worry about material — is winning the pawn that was cramping you. Take it"},
+    {w:'Nxe5',b:'Nxe5',e:50,
+     desc:"Exchanges on. The position simplifies toward equality.",
+     idea:"Black has fully achieved the Advance Caro-Kann goal: neutralized White's space advantage and recovered the pawn. A complete success",
+     next:"Don't overplay — the position is equal. Precise endgame technique is enough"},
+  ]},
+  {id:'exchange',name:'Exchange',tag:'2.exd5 Carlsbad',moves:[
+    {w:'e4',b:'c6',e:50,
+     desc:"the Caro-Kann Defense.",
+     idea:"Prepares. The bishop stays free — the Caro-Kann's key asset",
+     next:"And then the exchange on"},
+    {w:'exd5',b:'cxd5',e:52,
+     desc:"The Exchange variation. White exchanges.",
+     idea:"Creates a symmetrical Carlsbad structure. White avoids the theoretical battles of 3. and aims for a slow, positional squeeze. Less ambitious, but solid",
+     next:"Don't panic at the symmetry — Black has an easy, comfortable game here"},
+    {w:'d4',b:'Nf6',e:52,
+     desc:"Occupies the center. Black develops.",
+     idea:"Controls the center. The Exchange gives Black a very free development — the position is genuinely equal",
+     next:"Don't play yet — develop and first, then if needed"},
+    {w:'Nc3',b:'Nc6',e:52,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Supports and prepares. Black is developing freely — the Exchange is one of Black's easiest Caro-Kann variations",
+     next:"Don't rush — develop both knights first"},
+    {w:'Nf3',b:'Bg4',e:52,
+     desc:"White develops a piece. Black pins it immediately.",
+     idea:"Creates indirect pressure on : if White ignores it, doubles the pawns. Active play from the very start",
+     next:"Don't play too quickly — maintain the pin and let it work"},
+    {w:'Be2',b:'e6',e:52,
+     desc:"Breaks the pin. Black plays.",
+     idea:"Frees the bishop and consolidates. Black has a comfortable, equal position with no weaknesses",
+     next:"Don't worry about the pawn structure — it's completely symmetrical and fine for Black"},
+    {w:'O-O',b:'Bd6',e:52,
+     desc:"White castles. Black develops.",
+     idea:"Points at the White kingside via the -h2 diagonal. A subtle long-term threat that keeps White on guard",
+     next:"Don't castle yet — develop first to set up the diagonal threat"},
+    {w:'h3',b:'Bh5',e:52,
+     desc:"Challenges the bishop. Black retreats to, maintaining the pin.",
+     idea:"Keeps the pressure alive. If White plays , it weakens the kingside and the push costs White more than the pin cost Black",
+     next:"Don't exchange on yet — is stronger. Let the pin do its work"},
+    {w:'Be3',b:'O-O',e:52,
+     desc:"White develops the last piece. Black castles to safety.",
+     idea:"Castling secures the king. Both sides are fully developed and equal. This is a solid, comfortable draw option for Black — or a positional battle",
+     next:"Don't worry — the Exchange is one of Black's most comfortable variations"},
+    {w:'Ne5',b:'Bxe2',e:52,
+     desc:"Centralizes. Black exchanges.",
+     idea:"Eliminates the active bishop before it becomes dangerous. Exchange active enemy pieces — a key positional principle",
+     next:"Don't let stay — it's White's best piece. Remove it"},
+    {w:'Qxe2',b:'Nxe5',e:51,
+     desc:"Recaptures. Black eliminates the central knight.",
+     idea:"Removes White's best piece. The position simplifies toward equality. Black plays for a draw or a slight advantage",
+     next:"Don't avoid the exchange — is the right simplification"},
+    {w:'dxe5',b:'Bc7',e:51,
+     desc:"Recaptures. The bishop retreats.",
+     idea:"Preserves the bishop and prepares to attack the pawn. Black has a slight but real pressure on the pawn",
+     next:"Don't worry about the pawn being advanced — it can become a target with"},
+  ]},
+  {id:'karpov',name:'Karpov',tag:'3.Nd2 solid',moves:[
+    {w:'e4',b:'c6',e:50,
+     desc:"the Caro-Kann Defense.",
+     idea:"Prepares without blocking the bishop",
+     next:"Is coming — be ready to contest with"},
+    {w:'d4',b:'d5',e:52,
+     desc:"White builds a powerful pawn center. Black contests it immediately.",
+     idea:"The -d4 vs -c6 tension defines the Caro-Kann",
+     next:"Karpov's solid alternative to 3"},
+    {w:'Nd2',b:'dxe4',e:52,
+     desc:"Defends without creating a pin target. Black exchanges.",
+     idea:"Instead of is Karpov's subtle refinement: there is no pin available, and the knight on is more solid. A small but significant difference",
+     next:"Don't stay in the center with delayed — exchange and play before"},
+    {w:'Nxe4',b:'Bf5',e:52,
+     desc:"Recaptures. Black plays — the thematic move.",
+     idea:"Comes out just as in the Classical, but without the pin trick available. Same excellent result for Black",
+     next:"Don't play first — before , always"},
+    {w:'Ng3',b:'Bg6',e:52,
+     desc:"Chases the bishop. Black retreats.",
+     idea:"Is the right square — active, safe, and hard to attack. Never retreat to where it becomes passive",
+     next:"Don't play — you give up a good bishop for a knight unnecessarily"},
+    {w:'Nf3',b:'Nd7',e:52,
+     desc:"Develops. Black plays — flexible.",
+     idea:"Keeps all options open. Without on the board, White cannot play to trade the flexible knight. Karpov's variation gives Black more freedom",
+     next:"Don't play — is more flexible. It can go. or"},
+    {w:'h4',b:'h6',e:53,
+     desc:"The Bronstein attack on the bishop. Black blocks.",
+     idea:"Is mandatory. Without it, traps the bishop permanently. This response is not optional",
+     next:"Never skip when facing. The bishop on is invaluable — protect it"},
+    {w:'Bd3',b:'Bxd3',e:53,
+     desc:"Develops toward the kingside. Black exchanges.",
+     idea:"At the right moment: the queen recaptures and is far less threatening than an active bishop. Trade active enemy pieces when they become dangers",
+     next:"Don't delay — exchange immediately before it gets dangerous"},
+    {w:'Qxd3',b:'Ngf6',e:53,
+     desc:"Recaptures. Black completes development.",
+     idea:"Black has achieved the Caro-Kann structure perfectly: solid, active bishop already out, no weaknesses. Without , White has less attacking potential than in the Classical",
+     next:"Then castling completes the setup — play it naturally"},
+    {w:'Bd2',b:'e6',e:53,
+     desc:"Completes White's setup. Black plays.",
+     idea:"NOW is fine because the bishop already exited on move 4. This is the key lesson: timing after — not before",
+     next:"Don't castle the same side as White — after queenside castling from White, castle kingside"},
+    {w:'O-O-O',b:'Qc7',e:54,
+     desc:"Queenside castling — White goes queenside! Black centralizes the queen.",
+     idea:"Is the thematic reply: prepares kingside castling and queenside counterplay. When White castles long, Black must castle short and attack",
+     next:"Castle kingside and launch or immediately — this is a race"},
+    {w:'Ne4',b:'O-O',e:54,
+     desc:"Centralizes from. Black castles kingside.",
+     idea:"On the perfect outpost: controls key squares. Pure Karpovian domination through structure. Black must counterattack quickly — or to open lines against the White king",
+     next:"Don't defend passively — counterattack immediately with. It's a race"},
+  ]},
+  {id:'two-knights',name:'Two Knights',tag:'2.Nc3 Bg4',moves:[
+    {w:'e4',b:'c6',e:50,
+     desc:"the Caro-Kann Defense.",
+     idea:"Prepares. The bishop stays free",
+     next:"White stays flexible without committing yet"},
+    {w:'Nc3',b:'d5',e:51,
+     desc:"Two Knights. Black plays.",
+     idea:"Before is flexible: White can play. or later. But it also allows , pinning the — Black exploits this immediately",
+     next:"Develop next to set up the pin"},
+    {w:'Nf3',b:'Bg4',e:51,
+     desc:"White develops a piece. Black pins it immediately.",
+     idea:"Exploits the setup: if , White's pawns get doubled. This is the entire point of the Two Knights for Black — use the pin aggressively",
+     next:"Don't rush — wait for to force the issue on YOUR terms"},
+    {w:'h3',b:'Bxf3',e:50,
+     desc:"Challenges. Black exchanges.",
+     idea:"Now: White played , weakening the kingside slightly. Black doubles the pawns and accepts giving up the dark-squared bishop. The structural damage to White is the compensation",
+     next:"Don't maintain the pin with after — after the bishop is trapped"},
+    {w:'Qxf3',b:'e6',e:50,
+     desc:"Recaptures with the queen. Black plays.",
+     idea:"Solidifies before counterattacking. The queen on looks active but it's actually a target — Black will challenge it",
+     next:"Don't rush — build the center with and then later"},
+    {w:'d4',b:'dxe4',e:50,
+     desc:"Builds the center. Black exchanges.",
+     idea:"Forces the queen off. Black gains important tempos — the queen must move again. Every tempo matters when you've given up a bishop",
+     next:"Don't allow White to play -d5 — exchange immediately"},
+    {w:'Qxe4',b:'Nf6',e:50,
+     desc:"Recaptures. Black develops attacking the queen.",
+     idea:"Gains another tempo. The queen has now moved three times. Black has caught up completely in development",
+     next:"Don't play — attacks the queen and gains the tempo you need"},
+    {w:'Qd3',b:'c5',e:50,
+     desc:"Retreats. Black counterattacks.",
+     idea:"Attacks and opens the diagonal. Black uses all the tempos gained to strike in the center immediately",
+     next:"Don't delay — strike while White is still reorganizing"},
+    {w:'dxc5',b:'Bxc5',e:50,
+     desc:"Exchanges. The bishop develops.",
+     idea:"Activates the bishop: it eyes and can relocate. This is the compensation for giving up the dark-squared bishop earlier",
+     next:"Don't recapture with — the bishop on is much more active"},
+    {w:'Bd2',b:'Nc6',e:50,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Reinforces the center and prepares castling. Black has fully equalized from the doubled-pawn compensation",
+     next:"Castle and complete development — the position is balanced"},
+    {w:'O-O-O',b:'Qe7',e:51,
+     desc:"Queenside castling — White goes long. Black centralizes the queen.",
+     idea:"Defends and prepares castling. When White castles queenside, Black must castle kingside and counterattack. Don't castle on the same side",
+     next:"Castle kingside immediately and counterattack"},
+    {w:'Bc4',b:'O-O',e:52,
+     desc:"Points at. Black castles kingside.",
+     idea:"Castling secures the king despite the pressure. The position is sharp and unbalanced — both sides have their chances. Calculate carefully",
+     next:"Don't panic at — castling is fine. The threat is not immediately dangerous"},
+  ]},
+  {id:'fantasy',name:'Fantasy',tag:'3.f3 Tal',moves:[
+    {w:'e4',b:'c6',e:50,
+     desc:"the Caro-Kann Defense.",
+     idea:"Is the Caro-Kann: Black prepares with solid support, avoiding weaknesses from the start",
+     next:"A powerful move is coming — the position will open up completely."},
+    {w:'d4',b:'d5',e:52,
+     desc:"White builds a powerful pawn center. Black contests it immediately.",
+     idea:"The central tension defines the whole game — both sides fight to control the key squares",
+     next:"a shocking move from Tal. Be ready"},
+    {w:'f3',b:'dxe4',e:50,
+     desc:"The Fantasy variation! Tal's surprise weapon. Black takes.",
+     idea:"Is the critical response: force which creates an isolated pawn and weakens White's dark squares. This is considered a refutation at the highest level",
+     next:"Don't play too late — first, then next move. The order is critical"},
+    {w:'fxe4',b:'e5',e:49,
+     desc:"Recaptures. Black plays — the main refutation.",
+     idea:"Attacks immediately, before White can consolidate. White's center is already crumbling — the Fantasy is unsound at the highest level precisely because of this sequence",
+     next:"Don't delay — it must come immediately after. Every move counts"},
+    {w:'Nf3',b:'Bg4',e:49,
+     desc:"Develops and defends. Black pins.",
+     idea:"Creates double trouble: the knight is pinned AND is still under attack. White is already struggling to hold the position together",
+     next:"Don't release the pin early — keep maximum pressure on White's crumbling center"},
+    {w:'Bc4',b:'Nd7',e:49,
+     desc:"Develops aggressively toward. Black develops.",
+     idea:"Prepares to attack again. The threat is not concrete yet — develop and attack first",
+     next:"Don't worry about — your pieces aren't ready yet. then"},
+    {w:'O-O',b:'Ngf6',e:48,
+     desc:"White castles. Black develops, attacking again.",
+     idea:"Attacks for the third time with two pieces ( + ). The isolated pawn is indefensible. White must sacrifice material to get compensation",
+     next:"Don't take yet — let White defend it and then take to open lines"},
+    {w:'Qe1',b:'exd4',e:47,
+     desc:"Defends desperately. Black exchanges.",
+     idea:"Opens the diagonal toward the White king and creates a dangerous passed pawn. White's center has completely collapsed",
+     next:"Don't take now — is much more powerful, opening lines and creating a passed pawn"},
+    {w:'e5',b:'d3',e:46,
+     desc:"Pushes forward desperately. Black plays — one square from queening!",
+     idea:"Is a monster passed pawn — one square from promotion. White must respond to everything at once: maintain AND stop. It's too much",
+     next:"Push without hesitation. This pawn will queen or win massive material"},
+    {w:'exf6',b:'dxc2',e:48,
+     desc:"Captures. Black pushes — one square from promotion!",
+     idea:"Threatens to promote. White is forced to respond on that file. The position is completely chaotic — this is what Tal loved",
+     next:"Don't stop — push the pawn all the way. Promotion is coming"},
+    {w:'fxg7',b:'cxb1Q',e:50,
+     desc:"Pushes. Black promotes a new queen on!",
+     idea:"A new queen! This is the Fantasy's natural conclusion: mutual promotions in a position that was supposed to be a quiet opening. Total chess chaos",
+     next:"Use the new queen immediately — or to attack the White king"},
+    {w:'gxh8Q',b:'Qxa2',e:50,
+     desc:"=Q — White promotes too! Three queens on the board!",
+     idea:"The Fantasy has produced one of chess's rarest positions: three queens simultaneously. The result is completely unclear. This is exactly why Tal played it — confusion is his weapon",
+     next:"Calculate! With three queens, tactics decide everything. There are no general principles here"},
+  ]},
+]},
+
+{id:'sicilian',name:'Sicilian',tag:'1.e4 c5',flip:true,variants:[
+  {id:'najdorf',name:'Najdorf',tag:"5...a6 — most played",moves:[
+    {w:'e4',b:'c5',e:50,
+     desc:"The Sicilian Defense — the most popular opening in chess.",
+     idea:"Attacks asymmetrically: Black refuses the symmetrical to create an imbalanced position with queenside counterplay. The most popular response to 1",
+     next:"Don't play or immediately — keeps the position flexible and asymmetric"},
+    {w:'Nf3',b:'d6',e:50,
+     desc:"Develops and prepares. Black plays.",
+     idea:"Prepares and supports a future. The key point: is flexible — it works in many Sicilian structures",
+     next:"Don't play — that gives White a huge center. is more solid"},
+    {w:'d4',b:'cxd4',e:50,
+     desc:"Opens the center. Black exchanges.",
+     idea:"Is correct: Black gives White the center in exchange for the semi-open c-file. This file will be Black's main counterplay channel for the entire game",
+     next:"Don't decline with — always take with to get the c-file"},
+    {w:'Nxd4',b:'Nf6',e:50,
+     desc:"Recaptures. Black develops.",
+     idea:"Attacks and develops. White must defend — this forces White to commit pieces",
+     next:"Don't play yet — attacks immediately which is more forcing"},
+    {w:'Nc3',b:'a6',e:50,
+     desc:"Defends. Black plays — Najdorf's move.",
+     idea:"Prevents which would restrict Black's queenside. It also prepares for immediate counterplay. One prophylactic move that opens a whole queenside expansion",
+     next:"Don't play or immediately — first to stop , then follow with or"},
+    {w:'Be3',b:'e5',e:51,
+     desc:"The English Attack. Black plays gaining central space.",
+     idea:"Chases the and grabs central space. Black refuses to be passive. The Najdorf is not a defensive opening — it fights for the center from move 1",
+     next:"Don't play — that's the Scheveningen. is the Najdorf's fighting move"},
+    {w:'Nb3',b:'Be7',e:51,
+     desc:"Retreats safely. Black develops.",
+     idea:"Prepares kingside castling. The king must go to safety before launching the queenside attack with",
+     next:"Don't play — it gets attacked and wastes time. and castling first"},
+    {w:'f3',b:'Be6',e:51,
+     desc:"Reinforces and prepares. Black develops.",
+     idea:"Develops and offers to exchange bishops. Reducing the attacking pieces makes defense easier — a practical decision",
+     next:"Don't play castling yet — develop first, then castle. White's -g5 attack is coming"},
+    {w:'Qd2',b:'Nbd7',e:51,
+     desc:"Prepares queenside castling and the attack. Black develops.",
+     idea:"Completes development. The knight can go to or to pressure White's position",
+     next:"Don't castle yet — wait to see where White castles, then go the opposite side"},
+    {w:'g4',b:'Nb6',e:52,
+     desc:"The attack begins! Black responds.",
+     idea:"Attacks and prepares — an immediate counterattack. When White attacks on one flank, Black counterattacks on the other. Never defend passively",
+     next:"Don't play castling into the attack — castle queenside or find counterplay on the queenside"},
+    {w:'g5',b:'Nc4',e:52,
+     desc:"Chases. Black's knight leaps.",
+     idea:"Attacks and simultaneously. This is Black's counterplay — while White attacks the kingside, Black infiltrates the queenside",
+     next:"Don't retreat the knight — is the counterattack Black has been building"},
+    {w:'Bxc4',b:'Nxe4',e:50,
+     desc:"Eliminates the knight. Black captures.",
+     idea:"Wins back the pawn and creates complications. Both sides have taken risks — the position requires sharp calculation",
+     next:"Calculate carefully — the position is extremely complex. Both sides have real chances"},
+  ]},
+  {id:'dragon',name:'Dragon',tag:"5...g6 — active counterplay",moves:[
+    {w:'e4',b:'c5',e:50,
+     desc:"The Sicilian Defense — the most popular opening in chess.",
+     idea:"Creates asymmetry. Black fights for the queenside while White fights for the center",
+     next:"To open the center"},
+    {w:'Nf3',b:'d6',e:50,
+     desc:"White develops. Black makes a key move.",
+     idea:"Prepares and supports. Flexible setup",
+     next:"To open the center"},
+    {w:'d4',b:'cxd4',e:50,
+     desc:"Opens the center. Black exchanges.",
+     idea:"Gives Black the semi-open c-file for queenside counterplay",
+     next:"Then the Dragon plan begins with"},
+    {w:'Nxd4',b:'Nf6',e:50,
+     desc:"Recaptures. Black develops.",
+     idea:"Attacks , develops a piece, and prepares to castle — the most principled reply",
+     next:"To defend. Then — the Dragon"},
+    {w:'Nc3',b:'g6',e:50,
+     desc:"Defends. Black plays — the Dragon begins.",
+     idea:"Prepares the fianchetto of. the Dragon bishop: the most powerful fianchettoed bishop in chess. It will control the entire -h8 diagonal",
+     next:"Develop immediately — the Dragon only works with the bishop on"},
+    {w:'Be3',b:'Bg7',e:50,
+     desc:"Develops. Black activates the Dragon bishop.",
+     idea:"Is the Dragon's soul: it controls the entire -h8 diagonal and powers Black's queenside attack. With this bishop, Black plays for checkmate — not a draw",
+     next:"Don't delay castling — the Dragon position requires castling quickly to activate the rook on"},
+    {w:'f3',b:'O-O',e:50,
+     desc:"Prepares the Yugoslav Attack. Black castles.",
+     idea:"Castling is essential: the rook on supports the Dragon bishop's attack. The position is ready — White will castle long and the race begins",
+     next:"Don't delay — castle immediately. Every tempo matters in the Dragon"},
+    {w:'Qd2',b:'Nc6',e:51,
+     desc:"Prepares queenside castling. Black develops.",
+     idea:"Attacks the and prepares. Black is not waiting — the Dragon is an attacking defense, not a passive one",
+     next:"Don't play yet — develop and pressure the first"},
+    {w:'Bc4',b:'Bd7',e:51,
+     desc:"Yugoslav Attack! Points at. Black develops.",
+     idea:"Prepares and to attack. Black fights every piece — the must be challenged before it causes damage",
+     next:"Don't play — prepare and to attack directly"},
+    {w:'Bb3',b:'Rc8',e:51,
+     desc:"Retreats to safety. Black activates.",
+     idea:"Pressures and prepares to attack. Black's queenside attack is being organized move by move",
+     next:"Don't delay — every tempo in the Dragon belongs to attack, never defense"},
+    {w:'O-O-O',b:'Ne5',e:52,
+     desc:"Queenside castling — the Yugoslav Attack! Opposite castling. Black plays.",
+     idea:"Opposite castling is the Dragon's defining moment: both sides attack the opponent's king. This is the most violent opening in chess — it is literally a race to deliver checkmate",
+     next:"Don't defend — attack!. — every move must threaten something"},
+    {w:'h4',b:'Nc4',e:52,
+     desc:"Launches the frontal attack. Black's knight infiltrates.",
+     idea:"Attacks and simultaneously. Both sides are playing for checkmate — the Dragon is the most double-edged opening in chess. Calculated aggression wins",
+     next:"Calculate mate threats. Don't stop attacking — in the Dragon, the first to slow down loses"},
+  ]},
+  {id:'scheveningen',name:'Scheveningen',tag:"5...e6 — solid",moves:[
+    {w:'e4',b:'c5',e:50,
+     desc:"The Sicilian Defense — the most popular opening in chess.",
+     idea:"Creates asymmetry. Black fights for active queenside counterplay",
+     next:"Then the Scheveningen structure"},
+    {w:'Nf3',b:'d6',e:50,
+     desc:"White develops. Black makes a key move.",
+     idea:"Is the Sicilian backbone: it supports and prepares without allowing",
+     next:"This creates open lines — the pieces can finally come alive."},
+    {w:'d4',b:'cxd4',e:50,
+     desc:"White opens the position. Black exchanges immediately.",
+     idea:"Opens the c-file for Black — a key strategic asset in the Sicilian middlegame",
+     next:""},
+    {w:'Nxd4',b:'Nf6',e:50,
+     desc:"Recaptures. Black develops.",
+     idea:"Attacks immediately — Black challenges the center without committing a pawn",
+     next:"Defence is the priority now — hold the position and wait for the right moment."},
+    {w:'Nc3',b:'e6',e:50,
+     desc:"Defends. Black plays — the Scheveningen.",
+     idea:"Creates the hedgehog formation -e6: Black concedes space but gets a fortress. The position is hard to attack but also hard to win from. Choose this if you prefer safety over excitement",
+     next:"Don't play or too early — the hedgehog needs patience. Develop first"},
+    {w:'Be2',b:'Be7',e:50,
+     desc:"Prepares quiet development. Black develops.",
+     idea:"Prepares kingside castling. Black builds solidly before counterattacking",
+     next:"Don't play — it complicates without real benefit here. and castling first"},
+    {w:'O-O',b:'O-O',e:50,
+     desc:"Both sides castle kingside. The real game begins.",
+     idea:"After castling, the strategic battle begins. White will try -f5 to attack, Black will respond with or to break the center. The hedgehog is about timing the break correctly",
+     next:"Don't break with or too early — wait until you have maximum preparation"},
+    {w:'f4',b:'Nc6',e:51,
+     desc:"The English Attack. Black develops.",
+     idea:"Develops and prepares. Black refuses to be passive — always fight for activity even in solid structures",
+     next:"Don't play and yet — develop first, then launch queenside counterplay"},
+    {w:'Be3',b:'Qc7',e:51,
+     desc:"Develops the last bishop. Black centralizes.",
+     idea:"Is the Scheveningen's key multipurpose move: defends , prepares -b5, and keeps options open. One move, three functions",
+     next:"Don't play before — is more important and sets up everything"},
+    {w:'Qe1',b:'a6',e:51,
+     desc:"Prepares to attack. Black plays.",
+     idea:"Prevents and prepares. Black must generate queenside counterplay before White's -f5 attack becomes decisive",
+     next:"Don't wait — launch on the next move. The race has started"},
+    {w:'Qg3',b:'b5',e:52,
+     desc:"Threatens the king. Black launches — the counterattack!",
+     idea:"Is the counterattack Black has been preparing. Both sides now race: White attacks the Black king, Black attacks the White king. First to mate wins",
+     next:"Don't retreat or defend — attack.. Meet aggression with aggression"},
+    {w:'e5',b:'dxe5',e:52,
+     desc:"Advances in the center. Black exchanges.",
+     idea:"Opens lines. The position becomes very sharp — both sides have genuine winning chances. The Scheveningen rewards the player who attacks more precisely",
+     next:"Calculate! After , Black has counterplay on the queenside. Don't defend passively"},
+  ]},
+  {id:'kan',name:'Kan / Taimanov',tag:"4...a6 or Nc6",moves:[
+    {w:'e4',b:'c5',e:50,
+     desc:"The Sicilian Defense — the most popular opening in chess.",
+     idea:"Creates asymmetry. Black fights for queenside counterplay",
+     next:"Then for the Kan or for the Taimanov"},
+    {w:'Nf3',b:'e6',e:50,
+     desc:"Develops. Black plays — the Kan/Taimanov beginning.",
+     idea:"Is maximally flexible: without , Black can play in one move if White isn't careful. The Kan keeps White guessing longer than any other Sicilian",
+     next:"Don't play — it commits too early. keeps all options open"},
+    {w:'d4',b:'cxd4',e:50,
+     desc:"White opens the position. Black exchanges immediately.",
+     idea:"Gives Black the c-file. The center temporarily belongs to White",
+     next:"Then for the Taimanov or for the Kan"},
+    {w:'Nxd4',b:'Nc6',e:50,
+     desc:"Recaptures. Black plays — the Taimanov.",
+     idea:"Attacks the immediately. Black forces White to make a decision about the knight before completing development",
+     next:"Don't play here — attacks the knight directly"},
+    {w:'Nc3',b:'Qc7',e:50,
+     desc:"Defends. Black centralizes.",
+     idea:"Is the Taimanov's signature move: defends , prepares -b5, and watches everything at once. One of the most versatile queen moves in the Sicilian",
+     next:"Don't play — it attacks but is easily chased. is better positioned"},
+    {w:'Be3',b:'a6',e:51,
+     desc:"White develops. Black makes a key move.",
+     idea:"Prevents and prepares for queenside expansion. A small pawn move with big consequences — it changes the entire pawn structure",
+     next:"Don't rush before finishing development — first, then. castling, then"},
+    {w:'Bd3',b:'Nf6',e:51,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Attacks and forces White to defend. Black's development is advancing quickly",
+     next:"Don't play yet — complete development first. castling"},
+    {w:'O-O',b:'Ne5',e:51,
+     desc:"White castles. Black's knight leaps.",
+     idea:"Attacks and stakes out a central outpost. Black is fighting for space actively — the Taimanov is not a passive defense",
+     next:"Don't retreat — is an excellent central post. Make White deal with it"},
+    {w:'f4',b:'Nxd3',e:51,
+     desc:"Chases the knight. Black exchanges.",
+     idea:"Forces : the queen is. slightly less well-placed. Trading pieces to reduce White's attacking potential is a good practical decision",
+     next:"Don't try to keep the knight — exchanging it for the bishop is fine"},
+    {w:'Qxd3',b:'d6',e:51,
+     desc:"Recaptures. Black plays.",
+     idea:"Consolidates and prepares to counterattack. Black has a solid, slightly passive but defensible position",
+     next:"Don't rush immediately — make sure the center is stable first"},
+    {w:'Nf5',b:'Bf8',e:52,
+     desc:"Leaps to an active square. Black retreats the bishop.",
+     idea:"Defends precisely. The retreat looks passive but it covers the key squares is threatening",
+     next:"Don't panic at — is the calm, correct defense. White's knight will be chased away"},
+    {w:'Qh3',b:'g6',e:52,
+     desc:"Threatens. Black plays to defend.",
+     idea:"Chases the and defends. The structure weakens slightly but the alternative is worse",
+     next:"Don't play — chases the knight and is more active"},
+  ]},
+  {id:'closed',name:'Closed',tag:"2.Nc3 — different angle",moves:[
+    {w:'e4',b:'c5',e:50,
+     desc:"The Sicilian Defense — the most popular opening in chess.",
+     idea:"Creates asymmetry. Black fights for queenside counterplay",
+     next:"the Closed Sicilian. White avoids all Open Sicilian theory"},
+    {w:'Nc3',b:'Nc6',e:50,
+     desc:"the Closed Sicilian. Black develops.",
+     idea:"Sidesteps the entire Open Sicilian theory. White plays for a slower, maneuvering game. A good choice against heavily-prepared opponents",
+     next:"To fianchetto the bishop — White's main plan in the Closed"},
+    {w:'g3',b:'g6',e:50,
+     desc:"Prepares the fianchetto. Black mirrors.",
+     idea:"Prepares to control the -h8 diagonal and put pressure. Black mirrors to create a symmetrical fianchetto battle",
+     next:"To complete the fianchetto"},
+    {w:'Bg2',b:'Bg7',e:50,
+     desc:"Completes the fianchetto. Black activates.",
+     idea:"Both bishops face off on the long diagonal. The battle for control of and will define the game",
+     next:"To consolidate — White builds slowly"},
+    {w:'d3',b:'d6',e:50,
+     desc:"Consolidates the center. Black mirrors.",
+     idea:"Is deliberately solid. White will advance to later after full preparation. Patience is White's weapon in the Closed",
+     next:"— the main attacking plan in the Closed Sicilian"},
+    {w:'f4',b:'e6',e:51,
+     desc:"Prepares for a kingside assault. Black plays.",
+     idea:"Slows down White's advance by preparing. Black must react or White gets a free kingside attack",
+     next:"Don't ignore — respond with to prepare and stop"},
+    {w:'Nf3',b:'Nge7',e:51,
+     desc:"White develops. Black makes a key move.",
+     idea:"Is more flexible than : it's not exposed to and can head to or from. In the Closed, knight placement is crucial",
+     next:"Don't play — it gets hit. is the correct knight development"},
+    {w:'O-O',b:'O-O',e:51,
+     desc:"Both sides castle kingside. Maneuvering begins.",
+     idea:"After castling, both sides maneuver: White prepares , Black prepares. The position resembles a King's Indian in reverse",
+     next:"Prepare — it's Black's main counter to White's -f5 plan"},
+    {w:'d4',b:'cxd4',e:51,
+     desc:"Finally opens the center. Black exchanges.",
+     idea:"Transforms the game: White gains space but Black gets active squares. The position becomes sharper",
+     next:"— the position opens up. Be ready for active piece play"},
+    {w:'Nxd4',b:'Nxd4',e:51,
+     desc:"Recaptures. Black exchanges knights.",
+     idea:"Simplifies. White has a slight space advantage but the position is very playable for Black",
+     next:"— the position is equal. Both sides maneuver"},
+    {w:'Qxd4',b:'Nc6',e:51,
+     desc:"Recaptures. Black develops.",
+     idea:"Attacks the queen and develops. Black catches up and equalizes",
+     next:"And the position is balanced — typical Closed Sicilian"},
+    {w:'Qd2',b:'Nd4',e:51,
+     desc:"Retreats. Black's knight leaps to — a central outpost.",
+     idea:"Is an excellent outpost in the center. The knight is difficult to dislodge and controls key squares. Black has equalized with an active position",
+     next:"Don't trade too quickly — let it sit and create pressure first"},
+  ]},
+]},
+
+{id:'french',name:'French',tag:'1.e4 e6',flip:true,variants:[
+  {id:'winawer',name:'Winawer',tag:"3...Bb4 — counterplay",moves:[
+    {w:'e4',b:'e6',e:50,
+     desc:"the French Defense.",
+     idea:"Prepares next move. The price is the bishop which gets locked behind its own pawns — this is the French Defense's eternal problem",
+     next:"Don't forget about the bishop — freeing it is Black's main strategic task"},
+    {w:'d4',b:'d5',e:50,
+     desc:"White builds a powerful pawn center. Black contests it immediately.",
+     idea:"The French is defined by this pawn structure: White's -d4 center vs Black's -d5 chain. Everything flows from this tension",
+     next:"To defend — then Black pins with (Winawer) or attacks with (Classical)"},
+    {w:'Nc3',b:'Bb4',e:50,
+     desc:"Defends. Black pins with — the Winawer.",
+     idea:"Is the Winawer's fighting move: pin so that when White plays , the pressure on intensifies. Black is fighting for the initiative from move 3",
+     next:"Don't play or — is the fighting choice. Commit to the Winawer"},
+    {w:'e5',b:'c5',e:50,
+     desc:"Stakes out space. Black counterattacks.",
+     idea:"Attacks immediately — the correct and fighting response. The Winawer is not about defending; it's about creating counterplay from the very first moves",
+     next:"Don't play instead — attacks directly which is more forcing"},
+    {w:'a3',b:'Bxc3',e:51,
+     desc:"Forces a decision. Black exchanges.",
+     idea:"Is the correct follow-through: Black wrecks White's pawn structure. White gets the bishop pair and doubled c-pawns. A dynamic imbalance that gives both sides winning chances",
+     next:"Don't retreat the bishop — is the point. Execute the plan"},
+    {w:'bxc3',b:'Ne7',e:51,
+     desc:"Recaptures with the pawn. Black develops.",
+     idea:"Is flexible: it can go to to attack or to defend. More flexible than which gets attacked by",
+     next:"Don't play — it gets hit immediately. is the correct Winawer knight development"},
+    {w:'Qg4',b:'O-O',e:52,
+     desc:"Threatens. Black must castle urgently.",
+     idea:"Castling is the only correct defense: the king goes to safety and is defended. Black accepts the tension — the position is razor-sharp and both sides have chances",
+     next:"Don't play — castling is correct. The king is safer behind the rook"},
+    {w:'Qxg7',b:'Rg8',e:52,
+     desc:"Takes the pawn! Black plays — trapping the queen!",
+     idea:"Traps the White queen. This famous trap has been analyzed for decades. Black sacrifices the pawn for a permanent positional initiative. The queen will escape but at great cost",
+     next:"Don't panic — this is theory. Play confidently and follow the plan"},
+    {w:'Qxh7',b:'cxd4',e:52,
+     desc:"Escapes. Black opens lines.",
+     idea:"Opens lines against the White king. Black has sacrificed a pawn but has a massive initiative — open files, active pieces, and White's queen is offside on",
+     next:"Don't rush — Black has time. The queen on is not threatening anything"},
+    {w:'cxd4',b:'Nbc6',e:52,
+     desc:"Recaptures. Black develops rapidly.",
+     idea:"Develops with tempo (attacks ) and prepares to harass the queen. Every move must attack in the Winawer",
+     next:"Don't stop attacking — is coming to hit the queen. Keep the pressure"},
+    {w:'Nf3',b:'Bd7',e:52,
+     desc:"Develops and defends. Black develops.",
+     idea:"Completes development and prepares queenside castling. Black has traded a pawn for a massive initiative — now convert it",
+     next:"Castle queenside — it brings the rook into the attack and secures the king"},
+    {w:'Bd3',b:'O-O-O',e:53,
+     desc:"Develops. Black castles queenside!",
+     idea:"Queenside castling is the final piece of the plan: the king goes to safety, the rook activates, and the attack is fully organized. Black has tremendous compensation for the pawn",
+     next:"Launch the attack —. and the pawns forward. White's position is very difficult"},
+  ]},
+  {id:'classical',name:'Classical',tag:"3...Nf6 — solid",moves:[
+    {w:'e4',b:'e6',e:50,
+     desc:"the French Defense.",
+     idea:"Prepares. Solid but the bishop gets restricted. The French requires patience",
+     next:"The battle for the center is about to begin — both sides want the same squares."},
+    {w:'d4',b:'d5',e:50,
+     desc:"White builds a powerful pawn center. Black contests it immediately.",
+     idea:"The French structure is set: White's -d4 vs Black's -d5. The bishop is Black's main problem to solve",
+     next:"Defence is the priority now — hold the position and wait for the right moment."},
+    {w:'Nc3',b:'Nf6',e:50,
+     desc:"Defends. Black plays — the Classical French.",
+     idea:"Attacks and prepares. A solid, principled response — Black develops actively before White can close the position with",
+     next:"Don't play before — attacks first which is more forcing"},
+    {w:'Bg5',b:'Be7',e:50,
+     desc:"Pins. Black unpins.",
+     idea:"Breaks the pin cleanly and prepares castling. The king goes to safety first — Black can worry about counterplay after",
+     next:"Don't play — that creates a weakness. is the solid, principled move"},
+    {w:'e5',b:'Nfd7',e:50,
+     desc:"Closes the center. The knight retreats.",
+     idea:"Retreats to a seemingly passive square, but it prepares — the liberating move of the entire French. Every French player must learn this retreat",
+     next:"Don't play reluctantly — it's the correct move. is coming on the next moves"},
+    {w:'Bxe7',b:'Qxe7',e:50,
+     desc:"Simplifies. The queen recaptures.",
+     idea:"Centralizes the queen and prepares castling. Black has simplified the position and can now focus entirely on the counterattack",
+     next:"Castle and then play — this is Black's plan in the Classical"},
+    {w:'f4',b:'O-O',e:51,
+     desc:"Reinforces and prepares. Black castles.",
+     idea:"Castling gets the king to safety before launching. White's looks aggressive but makes the structure rigid — the -f4 pawns can become targets",
+     next:"Castle first, then immediately. The counterattack must come quickly"},
+    {w:'Nf3',b:'c5',e:51,
+     desc:"Develops. Black plays — the liberating counterattack!",
+     idea:"Is the move the entire French has been building toward: it attacks , the base of White's center. Every French structure leads to this move eventually",
+     next:"Don't delay even one more move — every tempo White gets is another pawn down the board"},
+    {w:'dxc5',b:'Nc6',e:51,
+     desc:"Exchanges. Black develops.",
+     idea:"Develops and prepares to recover the pawn immediately. Black is not worried about the pawn — it will be recovered",
+     next:"Don't worry about the pawn — recover it next move with"},
+    {w:'Bd3',b:'Nxc5',e:51,
+     desc:"Develops. Black recovers the pawn.",
+     idea:"Recovers with an excellent knight on : it attacks and controls key squares. Black has achieved a completely satisfactory position",
+     next:"Don't rush — the position is balanced. Develop naturally and complete castling"},
+    {w:'O-O',b:'a5',e:51,
+     desc:"White castles. Black plays.",
+     idea:"Prepares to fix White's queenside pawns and stop. A prophylactic move that improves the long-term structure",
+     next:"Don't rush into complications — is a patient, correct move"},
+    {w:'Qe2',b:'Bd7',e:51,
+     desc:"Centralizes. Black develops.",
+     idea:"Completes development. Black has solved the French's main problem — the bishop is out. The position is comfortable and equal",
+     next:"Don't worry — the Classical leads to a solid, equal position. Perfect for Black"},
+  ]},
+  {id:'advance',name:'Advance',tag:"3.e5 — space advantage",moves:[
+    {w:'e4',b:'e6',e:50,
+     desc:"the French Defense.",
+     idea:"Prepares. Solid but the bishop will be restricted",
+     next:"The battle for the center is about to begin — both sides want the same squares."},
+    {w:'d4',b:'d5',e:50,
+     desc:"White builds a powerful pawn center. Black contests it immediately.",
+     idea:"The pawn structure is now fixed for the whole game. White has more space, Black has a solid wall.",
+     next:"— the Advance variation is coming"},
+    {w:'e5',b:'c5',e:50,
+     desc:"Advances, claiming space. Black counterattacks with immediately.",
+     idea:"Must come immediately in response to — it attacks before White can consolidate. This is Black's thematic response in every French Advance structure",
+     next:"Don't play before — attacks directly. Always first"},
+    {w:'c3',b:'Nc6',e:50,
+     desc:"Supports. Black develops.",
+     idea:"Adds more pressure. Now is under attack from two pieces — White must defend very carefully",
+     next:"Don't play yet — develop first to add more pieces to the attack"},
+    {w:'Nf3',b:'Qb6',e:51,
+     desc:"Develops. Black attacks.",
+     idea:"Is a powerful move: it threatens AND simultaneously. White must respond to two threats at once. This is how Black generates counterplay in the Advance",
+     next:"Don't play instead — with the double threat is much more effective"},
+    {w:'Be2',b:'cxd4',e:51,
+     desc:"Develops and defends. Black exchanges.",
+     idea:"Is the right moment to exchange: White has just developed the bishop, so the timing is correct. Open the position when White's pieces are committed",
+     next:"Don't exchange too early — wait until White commits all the defending pieces"},
+    {w:'cxd4',b:'Nh6',e:51,
+     desc:"Recaptures. Black plays — Nimzowitsch's idea.",
+     idea:"Is unusual but effective: the knight heads to where it attacks. A concept from Nimzowitsch — sometimes the rook's pawn file is the best route",
+     next:"Don't play — -f5 is more active. Trust the unusual knight route"},
+    {w:'Nc3',b:'Nf5',e:51,
+     desc:"Develops. The knight arrives.",
+     idea:"Attacks and simultaneously. An excellent outpost that justifies the unusual route",
+     next:"Don't exchange immediately — keep on its great square and add more pressure"},
+    {w:'Bf4',b:'Bb4',e:52,
+     desc:"White develops a piece. Black pins it immediately.",
+     idea:"Pins which defends. Now is under triple pressure. White cannot maintain the center",
+     next:"Don't retreat the bishop — is the most active response, pinning the knight"},
+    {w:'Bd3',b:'Bxc3',e:52,
+     desc:"Counter-plays. Black exchanges.",
+     idea:"Doubles White's pawns and weakens permanently. Black has a better pawn structure and a slight advantage",
+     next:"Don't hesitate — wrecks White's structure. Execute the plan"},
+    {w:'bxc3',b:'Nxd4',e:52,
+     desc:"Recaptures. Black captures on!",
+     idea:"Wins a pawn. White has the bishop pair as compensation but Black has the material advantage. The opening has been a success",
+     next:"Don't worry about the bishop pair — you have the extra pawn. Play precisely"},
+    {w:'Nxd4',b:'Qxd4',e:52,
+     desc:"Recaptures. Black's queen takes.",
+     idea:"Wins material with a powerful, centralized queen. Black has a concrete advantage",
+     next:"Keep the queen active — is a strong piece. Use it aggressively"},
+  ]},
+  {id:'tarrasch',name:'Tarrasch',tag:"3.Nd2 — solid",moves:[
+    {w:'e4',b:'e6',e:50,
+     desc:"the French Defense.",
+     idea:"Prepares. Solid but the bishop will be restricted",
+     next:"The battle for the center is about to begin — both sides want the same squares."},
+    {w:'d4',b:'d5',e:50,
+     desc:"White builds a powerful pawn center. Black contests it immediately.",
+     idea:"The pawn structure is now fixed for the whole game. White has more space, Black has a solid wall.",
+     next:"the Tarrasch, solid and flexible"},
+    {w:'Nd2',b:'Nf6',e:50,
+     desc:"Defends without a pin target. Black develops.",
+     idea:"Avoids the pin available after. More solid, less ambitious. Black attacks with — the same as usual",
+     next:"— White's typical response in the Tarrasch"},
+    {w:'e5',b:'Nfd7',e:50,
+     desc:"Closes the center. The knight retreats.",
+     idea:"Retreats to prepare — the liberating counterattack. Every French player must master this knight retreat: it looks passive but it's the preparation for the key break",
+     next:"Don't hesitate — is correct. follows in the next moves"},
+    {w:'Bd3',b:'c5',e:51,
+     desc:"Develops. Black counterattacks.",
+     idea:"Is the French's central counterattack — it must come when White commits. Timing the break is the key skill in all French Advance structures",
+     next:"Don't delay — the is now developed, the timing is right"},
+    {w:'c3',b:'Nc6',e:51,
+     desc:"Supports. Black develops.",
+     idea:"Adds pressure. More pieces attacking the center — Black builds the attack methodically",
+     next:"Don't rush — add more pieces to the attack first"},
+    {w:'Ne2',b:'cxd4',e:51,
+     desc:"White develops. Black makes an important exchange.",
+     idea:"Opens the game when the and are developed. Good timing: open the position when your pieces are ready",
+     next:"Don't delay — now opens the position at the right moment"},
+    {w:'cxd4',b:'f6',e:51,
+     desc:"Recaptures. Black attacks directly with!",
+     idea:"Is the direct counter-thrust against. Black demolishes White's center — this is the fighting move in the Tarrasch French",
+     next:"Don't be afraid of — it's the correct fighting move to break White's center"},
+    {w:'exf6',b:'Nxf6',e:51,
+     desc:"An exchange happens in the center. Black recaptures.",
+     idea:"Activates the knight and opens lines toward the White king. Black has excellent play after this exchange",
+     next:"Don't recapture with — is much better, activating the piece"},
+    {w:'Nf3',b:'Bd6',e:51,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Points at the White king. Black prepares kingside castling and a potential attack",
+     next:"Castle and then consider or for attack"},
+    {w:'O-O',b:'O-O',e:51,
+     desc:"Both sides castle. Balanced but sharp position.",
+     idea:"After castling, Black has active pieces and open lines that compensate for any structural issues. The Tarrasch is fighting chess",
+     next:"Play or to create immediate threats"},
+    {w:'Nc3',b:'Qe7',e:51,
+     desc:"Reinforces. Black centralizes the queen.",
+     idea:"Defends and prepares or threats. Black has a dynamic, active position — the bishop problem has been solved",
+     next:"Launch or — Black has all pieces developed and ready to attack"},
+  ]},
+  {id:'exchange',name:'Exchange',tag:"3.exd5 — symmetrical",moves:[
+    {w:'e4',b:'e6',e:50,
+     desc:"the French Defense.",
+     idea:"This is how the French Defense starts — Black prepares to fight for the center on the next move.",
+     next:"White will build the center with two pawns. Black must be ready to challenge immediately."},
+    {w:'d4',b:'d5',e:50,
+     desc:"White builds a powerful pawn center. Black contests it immediately.",
+     idea:"The pawn structure is now fixed for the whole game. White has more space, Black has a solid wall.",
+     next:"— the Exchange variation"},
+    {w:'exd5',b:'exd5',e:52,
+     desc:"The Exchange variation. A symmetrical structure.",
+     idea:"Is White's most solid choice in the French: it creates a symmetrical position and avoids all the complex French theory. White aims for a slow, technical game",
+     next:"Don't worry — the Exchange is one of Black's most comfortable French variations"},
+    {w:'Nf3',b:'Nf6',e:52,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Controls the center. In the Exchange French, Black develops freely — there is no bishop problem because the diagonal was never closed",
+     next:"Don't play again — develop actively. , and castling quickly"},
+    {w:'Bd3',b:'Bd6',e:52,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Is the key move: it activates the bishop toward the White kingside. The Exchange French gives Black a free, easy development",
+     next:"Don't castle yet — first sets up the kingside pressure"},
+    {w:'O-O',b:'O-O',e:52,
+     desc:"Both sides castle. Comfortable, equal position.",
+     idea:"After castling, Black has a fully equal game with no weaknesses. The Exchange French is perfect if you want a comfortable equality against the French move order",
+     next:"Play now to fight for the center — don't be passive"},
+    {w:'c4',b:'c6',e:52,
+     desc:"Attacks. Black defends.",
+     idea:"Defends firmly. The pawn is NOT a weakness if properly defended — this is the key understanding in the Exchange French",
+     next:"Don't worry about — it's perfectly defensible with and"},
+    {w:'Nc3',b:'Nbd7',e:52,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Supports and prepares. Black's development is completely natural",
+     next:"Don't rush — develop all pieces first"},
+    {w:'cxd5',b:'Nxd5',e:52,
+     desc:"An exchange happens in the center. Black recaptures.",
+     idea:"Centralizes the knight. White has eliminated the pawn but Black gets an active, centralized knight in return",
+     next:"Was the right choice — centralizing the knight is far stronger than recapturing with the pawn"},
+    {w:'Re1',b:'Nxc3',e:52,
+     desc:"White activates the rook on the best file. Black exchanges.",
+     idea:"Simplifies and eliminates an active White knight. Black reduces White's attacking potential",
+     next:"Don't avoid the trade — simplifying is correct when you have a comfortable position"},
+    {w:'bxc3',b:'Nf6',e:52,
+     desc:"Recaptures. Black redeploys.",
+     idea:"Is an excellent redeployment. The knight returns to a great central square",
+     next:"The Exchange French gives Black a solid, comfortable game. Well done"},
+    {w:'Bg5',b:'h6',e:52,
+     desc:"Pins. Black plays to challenge.",
+     idea:"Forces White's hand. The pin is the only way to fight for an advantage in this line.",
+     next:"Don't worry about weakening the kingside — it's a necessary challenge"},
+  ]},
+]},
+
+{id:'ruylopez',name:'Ruy Lopez',tag:'1.e4 e5 2.Nf3 3.Bb5',flip:false,variants:[
+  {id:'morphy',name:'Morphy / Closed',tag:"3...a6 4.Ba4 Nf6",moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games. Both sides occupy the center.",
+     idea:"And create central symmetry. White will try to break it. and eventually. The struggle for the pawn defines the next moves",
+     next:"To attack — the most natural move"},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. Black defends.",
+     idea:"Defends and develops. The most natural move — simple chess",
+     next:"— the Ruy Lopez. The bishop pins indirectly"},
+    {w:'Bb5',b:'a6',e:50,
+     desc:"The Ruy Lopez. Black responds — the Morphy Defense.",
+     idea:"Asks the bishop: take on and give me the bishop pair, or retreat? White usually retreats. This little pawn move begins one of the most complex opening systems in chess",
+     next:"Begins the Morphy Defense — one of the most theoretical lines in chess. Know your theory"},
+    {w:'Ba4',b:'Nf6',e:50,
+     desc:"White maintains the pressure. Black quietly continues developing.",
+     idea:"Attacks — a concrete, immediate threat. Black develops while creating pressure on White's center",
+     next:"Don't play before — attacks and gains time"},
+    {w:'O-O',b:'Be7',e:50,
+     desc:"White castles. Black develops.",
+     idea:"Prepares castling. Black follows the same plan: king to safety first, then counterplay. is more solid than the Marshall with",
+     next:"Don't play — that's the Marshall Attack and requires deep preparation. and castling is safer"},
+    {w:'Re1',b:'b5',e:50,
+     desc:"Supports. Black pushes chasing the bishop.",
+     idea:"Gains queenside space and chases the bishop. Black takes the initiative on the queenside while White prepares in the center",
+     next:"Don't delay — it's the thematic move that starts Black's counterplay"},
+    {w:'Bb3',b:'d6',e:50,
+     desc:"Retreats safely. Black plays.",
+     idea:"Supports and prepares. Black builds a solid structure — the Closed Ruy Lopez is a slow, complex opening",
+     next:"Don't rush — is solid. or - comes later to challenge"},
+    {w:'c3',b:'O-O',e:50,
+     desc:"Prepares. Black castles.",
+     idea:"Castling secures the king. Black now prepares the counterplay: to challenge , or - (the Breyer) for deep rerouting",
+     next:"Don't play immediately — castle first, then. King safety before counterplay"},
+    {w:'h3',b:'Nb8',e:50,
+     desc:"Prevents. Black plays — the Breyer retreat!",
+     idea:"Is the Breyer Defense: the knight retreats ALL the way back to to reroute via to a better square. It looks crazy but it's one of the deepest ideas in chess",
+     next:"Don't be confused by — it's a profound positional idea, not a mistake"},
+    {w:'d4',b:'Nbd7',e:50,
+     desc:"Opens the center. Black redeploys.",
+     idea:"Is the Breyer redeployment: from , the knight goes. then to -e6 or -g6 for a much better position. The journey was worth it",
+     next:"Continue the knight journey — and then or are the target squares"},
+    {w:'Nbd2',b:'Bb7',e:50,
+     desc:"White develops a piece. Black activates the bishop.",
+     idea:"Is an excellent piece: it controls the long diagonal and supports from afar. In the Closed Ruy, every piece finds its ideal square over many moves",
+     next:"Continue with — the rook supports and the position is ready for battle"},
+    {w:'Nf1',b:'Re8',e:50,
+     desc:"Redeploys toward. Black activates.",
+     idea:"Supports and prepares -g7 or -g6. The Closed Ruy Lopez is a masterclass in piece coordination over many moves — each piece finds the perfect square",
+     next:"The position is deeply complex. Both sides will maneuver for many more moves"},
+  ]},
+  {id:'berlin',name:'Berlin',tag:"3...Nf6 — the Wall",moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games.",
+     idea:"— central symmetry. White will try to break it",
+     next:"The attack is ready to launch — timing is everything from here."},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. defends.",
+     idea:"Defends and develops naturally",
+     next:"— the Ruy Lopez"},
+    {w:'Bb5',b:'Nf6',e:50,
+     desc:"The Ruy Lopez. Black plays — the Berlin Wall!",
+     idea:"Attacks instead of defending. A counterattacking move that leads to one of the most solid endgames in chess. Kasparov faced it 6 times against Kramnik in 2000 and never won",
+     next:"Don't play — if you want the Berlin, play and accept the endgame"},
+    {w:'O-O',b:'Nxe4',e:50,
+     desc:"White castles. Black captures on!",
+     idea:"Is legal because after , White attacks , then , and Black must give back the pawn. The Berlin leads to an endgame, not a middlegame",
+     next:"Don't be scared — is the point of the Berlin. Accept the endgame"},
+    {w:'d4',b:'Nd6',e:50,
+     desc:"Attacks the knight. The knight retreats.",
+     idea:"Is the key Berlin move: a strategic retreat that keeps the knight active. From , it defends and stays relevant",
+     next:"Don't retreat to — is the correct Berlin retreat"},
+    {w:'Bxc6',b:'dxc6',e:51,
+     desc:"Doubles Black's pawns. recaptures.",
+     idea:"Is the correct recapture: it opens the d-file for the rook and the diagonal for the bishop. The doubled c-pawns are not a weakness — they control key central squares",
+     next:"Don't recapture — is better, opening the d-file"},
+    {w:'dxe5',b:'Nf5',e:51,
+     desc:"Takes the pawn. The knight leaps.",
+     idea:"Attacks and is very active. Black has given up the central pawn structure but the pieces are very well placed",
+     next:"Don't worry about the structure — the piece activity compensates fully"},
+    {w:'Qxd8',b:'Kxd8',e:51,
+     desc:"+ forces the queen trade. The king recaptures — the Berlin endgame.",
+     idea:"The Berlin endgame is one of the most studied positions in chess. Without queens, Black's slightly damaged structure is compensated by active pieces. It's basically equal with precise play",
+     next:"Don't worry about the king being in the center — in the Berlin endgame, the king is SUPPOSED to be active"},
+    {w:'Nc3',b:'Ke8',e:51,
+     desc:"Develops. The king retreats.",
+     idea:"Centralizes the king for the endgame — a key Berlin concept. The king is not in danger and becomes an active piece",
+     next:"The Berlin endgame requires exact play. Don't be impatient"},
+    {w:'h3',b:'h5',e:51,
+     desc:"Prevents. Black plays — active play.",
+     idea:"Prepares to fix White's kingside structure, or to activate the rook via the h-file. Even in the endgame, Black plays actively",
+     next:"Don't be passive — is the active choice in the Berlin endgame"},
+    {w:'Ne2',b:'b6',e:51,
+     desc:"Redeploys. Black plays.",
+     idea:"Prepares to develop the last bishop on the long diagonal. Every piece must be activated in the Berlin endgame",
+     next:"Don't leave the bishop undeveloped — and brings it into the game"},
+    {w:'Ng3',b:'Bb7',e:51,
+     desc:"Targets. Black develops.",
+     idea:"Is very active on the long diagonal. Black has all pieces activated — this is why the Berlin endgame is so hard to win for White. It's simply solid",
+     next:"Play precisely — the Berlin endgame is a draw with correct play"},
+  ]},
+  {id:'open',name:'Open Lopez',tag:"5...Nxe4 — complications",moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games.",
+     idea:"Both sides immediately claim space in the middle — whoever controls the center controls the game.",
+     next:""},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. defends.",
+     idea:"A perfect move: it protects an important piece AND develops a new one. Two goals in one.",
+     next:"— the Ruy Lopez"},
+    {w:'Bb5',b:'a6',e:50,
+     desc:"The Ruy Lopez. chases the bishop.",
+     idea:"Is the Morphy Defense. White retreats with",
+     next:"Black develops naturally and prepares to fight back."},
+    {w:'Ba4',b:'Nf6',e:50,
+     desc:"Maintains. Black develops.",
+     idea:"Attacks — the concrete threat that forces White to react",
+     next:"Castling. Then Black plays — the Open Lopez"},
+    {w:'O-O',b:'Nxe4',e:51,
+     desc:"White castles. Black captures — the Open Lopez!",
+     idea:"Is the most aggressive response: Black wins a pawn and accepts very complex complications. The Open Lopez requires deep theoretical knowledge",
+     next:"Requires precise memorization — the forced variations are long and unforgiving"},
+    {w:'d4',b:'b5',e:51,
+     desc:"Attacks the knight. Black pushes.",
+     idea:"Chases the bishop from before White recovers the pawn. This pawn push is mandatory — if Black doesn't play , White recovers with a clear advantage",
+     next:"Don't delay — it's the most critical move in the Open Lopez"},
+    {w:'Bb3',b:'d5',e:51,
+     desc:"Retreats. Black plays — central counterattack!",
+     idea:"Is the essential counter: Black opens the center before White can recover the pawn. This is the key move that makes the Open Lopez work",
+     next:"Don't skip — it's the move that justifies the entire idea"},
+    {w:'dxe5',b:'Be6',e:51,
+     desc:"Takes the pawn. Black develops.",
+     idea:"Develops and prepares to exchange the active White bishop. Black gets open lines and active pieces as compensation for the complex pawn structure",
+     next:"Exchange soon — the White bishop on is powerful and must be traded"},
+    {w:'c3',b:'Be7',e:51,
+     desc:"Consolidates. Black develops.",
+     idea:"Prepares castling. Despite the complications, Black follows the same principle: develop and castle safely",
+     next:"Castle quickly — the position is very sharp and king safety is paramount"},
+    {w:'Nbd2',b:'O-O',e:51,
+     desc:"Prepares to recover the knight. Black castles.",
+     idea:"Castling secures the king in a very dynamic position. Black has survived the opening complications and has a playable game",
+     next:"Don't relax — the position is still very sharp. Calculate carefully"},
+    {w:'Nxe4',b:'dxe4',e:51,
+     desc:"Recovers the pawn. recaptures.",
+     idea:"Opens lines. The Open Lopez has reached a position with mutual chances — both sides have real winning opportunities",
+     next:"Play precisely — both sides have winning chances in the Open Lopez"},
+    {w:'Bc2',b:'f5',e:52,
+     desc:"Repositions. Black plays to support.",
+     idea:"Supports the pawn and prepares. Black is playing very aggressively — the Open Lopez is one of the sharpest variations in 1",
+     next:"The Open Lopez requires exact calculation. Good luck!"},
+  ]},
+  {id:'exchange',name:'Exchange Lopez',tag:"3.Bxc6 — fixed structure",moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games.",
+     idea:"Both sides immediately claim space in the middle — whoever controls the center controls the game.",
+     next:"The position will clarify on the next few moves — stay patient."},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. defends.",
+     idea:"A perfect move: it protects an important piece AND develops a new one. Two goals in one.",
+     next:"Then immediately"},
+    {w:'Bb5',b:'Nf6',e:50,
+     desc:"The Ruy Lopez. Black develops.",
+     idea:"Attacks. White plays anyway to fix the structure regardless",
+     next:"— the Exchange variation. White fixes the structure immediately"},
+    {w:'Bxc6',b:'dxc6',e:52,
+     desc:"The Exchange. White gives up the bishop for the knight.",
+     idea:"White gets the bishop pair. Black gets doubled c-pawns but a strong center with and available. Historically, this variation favors White slightly — Fischer used it many times",
+     next:"Don't recapture — is correct, keeping the central pawn structure"},
+    {w:'d3',b:'Bd6',e:52,
+     desc:"Consolidates the center. Black develops.",
+     idea:"Develops actively: the bishop points at the White kingside on the -h2 diagonal. A subtle long-term threat",
+     next:"Don't rush — develop first to set up the diagonal"},
+    {w:'Nc3',b:'O-O',e:52,
+     desc:"White develops the last piece. Black castles to safety.",
+     idea:"Castling secures the king. Black prepares to support the critical pawn — protecting it is Black's first priority",
+     next:"Play next — supporting is the key task for Black"},
+    {w:'O-O',b:'Re8',e:52,
+     desc:"White castles. Black plays.",
+     idea:"Supports — the most important pawn in Black's structure. Lose and the position collapses",
+     next:"Don't neglect — is the correct priority"},
+    {w:'h3',b:'Nd7',e:52,
+     desc:"Prevents. Black redeploys.",
+     idea:"Is the key redeployment: the knight heads to (attacking ) or -e6 (centralizing). Black's knights need to find active squares to compensate for the doubled pawns",
+     next:"Don't play — it gets challenged immediately. is the correct redeployment"},
+    {w:'Be3',b:'Nc5',e:52,
+     desc:"White develops. Black's knight leaps to a strong outpost.",
+     idea:"Attacks and prepares for a central outpost. Black's knights are finding excellent squares",
+     next:"Keep the knight on — it attacks and prepares"},
+    {w:'Nd2',b:'Ne6',e:52,
+     desc:"Defends. Black's knight centralizes.",
+     idea:"Is a magnificent outpost: controls the center. and prepares the ultimate. The knight maneuver —- is one of Black's best plans",
+     next:"The knight is heading to — the ideal central outpost in the Exchange Lopez"},
+    {w:'Nf1',b:'Nd4',e:53,
+     desc:"Redeploys. Black's knight settles on — the dream outpost.",
+     idea:"Is the Exchange Lopez's ideal square: the knight dominates the center, cannot be easily moved, and controls the entire board. Black has achieved the strategic goal",
+     next:"Keep the knight on — defend it carefully and build around it"},
+    {w:'Ne3',b:'c5',e:53,
+     desc:"Contests. Black plays to cement the outpost.",
+     idea:"Fixes the pawn structure and guarantees the stays forever. Black has a slight structural advantage — a model Exchange Lopez for Black",
+     next:"The position is slightly better for Black. Defend the knight and the advantage will tell"},
+  ]},
+  {id:'italian-link',name:'Italian',tag:"3.Bc4 — Giuoco Piano",moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games.",
+     idea:"Both sides immediately claim space in the middle — whoever controls the center controls the game.",
+     next:"To develop and attack"},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. defends.",
+     idea:"A perfect move: it protects an important piece AND develops a new one. Two goals in one.",
+     next:"— the Italian Game. Giuoco Piano"},
+    {w:'Bc4',b:'Bc5',e:50,
+     desc:"The Italian Game. Both bishops face each other.",
+     idea:"And face off — the Giuoco Piano (Italian for 'quiet game'). Both bishops control central squares. The position looks symmetrical but White has the move advantage",
+     next:"Don't rush — the Italian is a strategic game. and is White's plan"},
+    {w:'c3',b:'Nf6',e:50,
+     desc:"Prepares. Black develops.",
+     idea:"Attacks and forces White to defend. Black challenges the center before White can build it",
+     next:"Don't play yet — attacks immediately which is more forcing"},
+    {w:'d4',b:'exd4',e:50,
+     desc:"Opens the center. Black exchanges.",
+     idea:"Is correct: Black opens the position when both bishops are already active. The Italian becomes very sharp",
+     next:"Don't defend — exchange to open the game"},
+    {w:'cxd4',b:'Bb4',e:51,
+     desc:"Recaptures. Black pins.",
+     idea:"Is an active response: the pin on makes White's center harder to maintain. Black is fighting for initiative",
+     next:"Don't retreat the bishop — pins at the critical moment"},
+    {w:'Nc3',b:'Nxe4',e:51,
+     desc:"Develops despite the pin. Black captures!",
+     idea:"Wins a pawn. White has strong compensation — the pieces are very active and an attack is coming. This requires precise defense from Black",
+     next:"Be ready to defend precisely — White's compensation is real"},
+    {w:'O-O',b:'Bxc3',e:51,
+     desc:"White castles. Black captures.",
+     idea:"Wrecks White's pawn structure but Black's development is behind. White has a powerful initiative for the material",
+     next:"Don't relax after — White has dangerous compensation. Develop quickly"},
+    {w:'d5',b:'Bf6',e:51,
+     desc:"Advances to chase the knight. The bishop retreats.",
+     idea:"Defends the and keeps the pawn. The position is very dynamic — material is unbalanced",
+     next:"Defend precisely — White's initiative is strong but Black's extra material can tell"},
+    {w:'Re1',b:'Ne7',e:52,
+     desc:"Pins the knight. The knight retreats.",
+     idea:"Defends and prepares. White has a powerful initiative — the rook, bishop, and pawns are all bearing down on Black's position",
+     next:"Don't give up material — defend precisely. holds the position"},
+    {w:'Rxe4',b:'d6',e:52,
+     desc:"White recovers the pawn with the active rook. Black plays on.",
+     idea:"Consolidates but the is extremely active. White has strong pressure and Black must defend carefully",
+     next:"Hold on — is the correct defense. White has the initiative but it's not decisive yet"},
+    {w:'Bg5',b:'Bxg5',e:52,
+     desc:"Pins. Black exchanges.",
+     idea:"Simplifies. White recovers with keeping the initiative. The Italian leads to fascinating unbalanced positions",
+     next:"The position is rich and complex. Both sides have real chances"},
+  ]},
+]},
+
+{id:'italian',name:'Italian Game',tag:'1.e4 e5 2.Nf3 3.Bc4',flip:false,variants:[
+  {id:'giuoco-piano',name:'Giuoco Piano',tag:'3...Bc5 4.c3',moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games. Both sides seize the center.",
+     idea:"And create immediate central tension. White will develop toward the center and castle quickly — the classic opening principles in action",
+     next:"Is the most natural developing move, attacking"},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. defends and develops.",
+     idea:"Defends and develops a piece. Simple, principled chess — defend what's attacked, develop a piece",
+     next:"— the Italian Game. The bishop targets the square"},
+    {w:'Bc4',b:'Bc5',e:50,
+     desc:"The Italian Game. Black mirrors.",
+     idea:"Targets , Black's weakest square. mirrors the plan — both bishops eye the center. This is the Giuoco Piano: quiet, principled, and deeply strategic",
+     next:"To prepare — the thematic Italian plan"},
+    {w:'c3',b:'Nf6',e:50,
+     desc:"Prepares. Black develops, attacking.",
+     idea:"Attacks and develops. Black uses every move to fight for the center. White must defend before pushing",
+     next:"To strike the center — the Italian's key plan"},
+    {w:'d4',b:'exd4',e:50,
+     desc:"Opens the center. Black exchanges.",
+     idea:"Is correct: open the center when your pieces are developed. The position opens and both bishops become very active",
+     next:"To recapture. Black's bishop on is now under pressure"},
+    {w:'cxd4',b:'Bb4',e:51,
+     desc:"Recaptures. Black pins.",
+     idea:"Is the active response: pin the and put pressure. Black refuses to retreat passively",
+     next:"Don't panic — is fine. White has a strong center and active pieces"},
+    {w:'Nc3',b:'Nxe4',e:51,
+     desc:"Develops. Black captures on!",
+     idea:"Wins a pawn but requires precise calculation. White has strong compensation with the bishop pair and central pawns",
+     next:"Castling to castle and activate pieces immediately"},
+    {w:'O-O',b:'Bxc3',e:51,
+     desc:"White castles. Black takes the knight.",
+     idea:"Trades the bishop for the knight, wrecking White's pawn structure. But Black is behind in development — White's initiative is very dangerous",
+     next:"To chase the knight and gain central space"},
+    {w:'d5',b:'Bf6',e:51,
+     desc:"Advances to chase the knight. The bishop retreats.",
+     idea:"Defends the and holds the extra pawn. The position is razor sharp — White has a powerful attack for the material",
+     next:"To attack the knight directly with the rook"},
+    {w:'Re1',b:'Ne7',e:52,
+     desc:"Attacks the knight. The knight retreats.",
+     idea:"Defends and prepares. White has a powerful initiative — every piece is working. Black must defend precisely",
+     next:"To recover the pawn with the active rook"},
+    {w:'Rxe4',b:'d6',e:52,
+     desc:"White recovers the pawn with the active rook. Black plays on.",
+     idea:"Consolidates but White's rook on is a monster. White has full compensation and a slight advantage",
+     next:"To pin the and increase the pressure"},
+    {w:'Bg5',b:'Bxg5',e:52,
+     desc:"Pins. Black exchanges.",
+     idea:"Simplifies. White recaptures with keeping the initiative. The Italian Game rewards active, energetic play",
+     next:". White retains the initiative"},
+  ]},
+  {id:'evan-gambit',name:"Evans Gambit",tag:'4.b4 — romantic',moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games.",
+     idea:"And — central symmetry. White will break it aggressively",
+     next:"— then the Evans Gambit!"},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. defends.",
+     idea:"Natural development. Both sides develop toward the center",
+     next:"— the Italian Game setup"},
+    {w:'Bc4',b:'Bc5',e:50,
+     desc:"Italian Game. Black mirrors.",
+     idea:"Both bishops face each other on the long diagonals. White now plays the Evans Gambit",
+     next:"— the Evans Gambit! A pawn sacrifice for rapid development"},
+    {w:'b4',b:'Bxb4',e:51,
+     desc:"The Evans Gambit! Black accepts.",
+     idea:"Sacrifices a pawn for rapid development and control of the center. One of the most romantic gambits in chess — Kasparov used it to demolish Anand in 1995",
+     next:"Don't refuse with — take the pawn. The gambit works better when accepted"},
+    {w:'c3',b:'Ba5',e:51,
+     desc:"Develops and attacks the bishop. The bishop retreats.",
+     idea:"Is the safest retreat. The bishop keeps an eye on the center from. Black has the extra pawn but White gets a massive center",
+     next:"To seize the center immediately"},
+    {w:'d4',b:'exd4',e:51,
+     desc:"White stakes out the center. Black immediately exchanges.",
+     idea:"Opens the position — correct when behind in development. White now has -d4 and will play for a kingside attack",
+     next:"Activate the rooks — and to support the center"},
+    {w:'O-O',b:'dxc3',e:51,
+     desc:"White castles. Black takes the pawn — grabbing material.",
+     idea:"Takes the pawn but gives White a powerful attack. The Evans Gambit is not about material — it's about destroying Black's position with rapid development",
+     next:"To attack and simultaneously — the classic Evans attack"},
+    {w:'Qb3',b:'Qf6',e:52,
+     desc:"Attacks and simultaneously. Black defends.",
+     idea:"Defends. White has given up two pawns but has a massive lead in development and a very dangerous attack",
+     next:"To chase the queen and gain more space"},
+    {w:'e5',b:'Qg6',e:52,
+     desc:"Chases the queen. Black retreats.",
+     idea:"The queen is forced back. White's pieces are incredibly active — this is the Evans Gambit's reward for the sacrificed pawns",
+     next:"To support and add more pieces to the attack"},
+    {w:'Re1',b:'Nge7',e:52,
+     desc:"Supports. Black develops.",
+     idea:"Prepares to castle and develop. Black is trying to survive the attack and use the extra material in the endgame",
+     next:"To prevent Black from castling and increase the pressure"},
+    {w:'Ba3',b:'b5',e:52,
+     desc:"Prevents Black from castling. Black plays to counterattack.",
+     idea:"Counterattacks. Black fights back — the Evans Gambit gives both sides great winning chances. Exciting, unbalanced chess",
+     next:"To take the pawn. The position explodes"},
+    {w:'Bxb5',b:'cxb2',e:52,
+     desc:"Takes the pawn. Black promotes the pawn to!",
+     idea:"Threatens to promote! The Evans Gambit reaches its chaotic conclusion — White has a furious attack, Black threatens promotion. This is why the Evans is called 'romantic'",
+     next:"Explosive position! Both sides have tremendous chances"},
+  ]},
+  {id:'four-knights-italian',name:'Four Knights',tag:'3...Nf6 4.Nc3',moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games.",
+     idea:"And — central symmetry. Simple, principled chess",
+     next:"To develop and attack"},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. defends.",
+     idea:"Natural development. Both sides fight for the center",
+     next:"— the Italian Game"},
+    {w:'Bc4',b:'Nf6',e:50,
+     desc:"Italian Game. Black develops, attacking.",
+     idea:"Attacks instead of mirroring. Black fights for the center immediately. This leads to the Four Knights Italian",
+     next:"To defend — the Four Knights begins"},
+    {w:'Nc3',b:'Bc5',e:50,
+     desc:"Defends. Black develops — Four Knights Italian.",
+     idea:"Develops the bishop naturally. Both sides have all four knights and active bishops — a harmonious, balanced position",
+     next:"For a solid setup — or castling to castle quickly"},
+    {w:'d3',b:'d6',e:50,
+     desc:"Consolidates solidly. Black plays.",
+     idea:"Is the modern approach: solid, flexible, no early commitments. White will expand with or -g3 later",
+     next:"Castling to castle before committing further"},
+    {w:'O-O',b:'O-O',e:50,
+     desc:"Both sides castle. Perfect development achieved.",
+     idea:"Both sides have achieved perfect development: all pieces developed, kings safe, rooks ready to activate. The position is completely balanced — a masterclass in opening principles",
+     next:"To prevent and prepare to expand"},
+    {w:'h3',b:'a6',e:50,
+     desc:"Prevents. Black plays.",
+     idea:"Prepares to reposition the bishop or for queenside space. Both sides maneuver for small advantages",
+     next:"To support the center"},
+    {w:'Re1',b:'Ba7',e:50,
+     desc:"White activates the rook. Black repositions the bishop.",
+     idea:"Is a common Italian repositioning: the bishop on is safe from attacks and controls the square indirectly",
+     next:"To reposition the White bishop safely"},
+    {w:'Bb3',b:'Re8',e:50,
+     desc:"Repositions. Black activates.",
+     idea:"Supports the pawn — the most important pawn in Black's structure. Don't let it fall",
+     next:"To redeploy the knight toward the kingside"},
+    {w:'Ne2',b:'d5',e:51,
+     desc:"Redeploys. Black strikes the center with!",
+     idea:"Is the thematic break — Black has enough support now to challenge White's center. The position opens up",
+     next:"To accept the challenge. for Black"},
+    {w:'exd5',b:'Nxd5',e:51,
+     desc:"Exchanges. Black recaptures.",
+     idea:"Centralizes the knight powerfully. The position is equal and rich — typical Italian Game complexity",
+     next:"To simplify. The endgame is completely balanced"},
+    {w:'Nxd5',b:'Qxd5',e:51,
+     desc:"Exchanges. The queen recaptures.",
+     idea:"Centralizes the queen. The position simplifies toward equality. A model Italian Game: both sides developed perfectly, position balanced",
+     next:"Equal, well-played position. A solid draw or rich middlegame"},
+  ]},
+  {id:'hungarian',name:'Hungarian Defense',tag:'3...Be7 — solid',moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games.",
+     idea:"And — central tension. White will develop actively",
+     next:"— then Black plays"},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. defends.",
+     idea:"Natural development. Both sides fight for the center",
+     next:"— the Italian Game"},
+    {w:'Bc4',b:'Be7',e:50,
+     desc:"Italian Game. Black plays — the Hungarian Defense.",
+     idea:"Is ultra-solid: Black refuses to fight for the center aggressively and simply develops. Not the most ambitious, but extremely solid",
+     next:"Don't underestimate — it's a legitimate defensive system"},
+    {w:'d4',b:'d6',e:50,
+     desc:"Stakes out the center. Black solidifies.",
+     idea:"Supports and prepares to develop the bishop. Black builds a solid position without weaknesses",
+     next:"To challenge. Black recaptures"},
+    {w:'dxe5',b:'dxe5',e:51,
+     desc:"Exchanges in the center. recaptures.",
+     idea:"Opens the d-file. White now has a slight space advantage but Black's position has no weaknesses",
+     next:"+ to force the queen exchange"},
+    {w:'Qxd8',b:'Bxd8',e:51,
+     desc:"+ forces queens off. Black recaptures.",
+     idea:"The queens come off. The Hungarian Defense often leads to equal endgames — Black's strategy is to simplify and equalize",
+     next:"To develop and fight for the center"},
+    {w:'Nc3',b:'Nf6',e:51,
+     desc:"Both sides continue developing their pieces.",
+     idea:"Develops actively, attacking. Black has equalized completely",
+     next:"A pin is coming — one piece will be tied down and unable to move freely."},
+    {w:'Bg5',b:'c6',e:51,
+     desc:"Pins. Black plays.",
+     idea:"Prepares and keeps the position solid. Black's plan is simple: develop, castle, and defend",
+     next:"Queenside castling for White — or a simple"},
+    {w:'O-O-O',b:'Be6',e:51,
+     desc:"White castles queenside. Black develops.",
+     idea:"Develops naturally and challenges. Black's solid position is becoming comfortable",
+     next:"To simplify. Black recaptures"},
+    {w:'Bxe6',b:'fxe6',e:51,
+     desc:"The pieces trade off — Black's pawn structure is slightly weakened.",
+     idea:"Opens the f-file and slightly weakens the pawn structure, but Black gets the bishop pair in compensation",
+     next:"To exploit the central square"},
+    {w:'Nd5',b:'Nxd5',e:51,
+     desc:"Occupies the central outpost. Black exchanges.",
+     idea:"Is forced — the knight on was too powerful. White recaptures with and has a slight advantage",
+     next:"To recapture with a slight White advantage"},
+    {w:'exd5',b:'cxd5',e:51,
+     desc:"Recaptures. Black recaptures.",
+     idea:"Keeps the structure relatively intact. The position is slightly better for White but Black is very solid",
+     next:"Slight White advantage but very drawish. Black holds comfortably"},
+  ]},
+  {id:'scotch-italian',name:'Scotch-Italian',tag:'3...Nf6 4.d4',moves:[
+    {w:'e4',b:'e5',e:50,
+     desc:"Open Games.",
+     idea:"And — central symmetry. White fights to break it immediately",
+     next:"— then , the Scotch-Italian"},
+    {w:'Nf3',b:'Nc6',e:50,
+     desc:"Attacks. defends.",
+     idea:"Natural development. Both sides fight for the center",
+     next:"— the Italian Game"},
+    {w:'Bc4',b:'Nf6',e:50,
+     desc:"Italian Game. Black develops.",
+     idea:"Attacks — a direct, fighting move. Black refuses to be passive from the start",
+     next:"— the Scotch-Italian! White immediately opens the center"},
+    {w:'d4',b:'exd4',e:51,
+     desc:"The Scotch-Italian. Black exchanges.",
+     idea:"Opens the center immediately. The Scotch-Italian is more aggressive than the Giuoco Piano — White doesn't wait for preparation",
+     next:"Gains central space with tempo — Black must react carefully"},
+    {w:'e5',b:'d5',e:51,
+     desc:"Chases. Black responds — attacking!",
+     idea:"Is the key counter: Black attacks the while also fighting for central space. This is why the Scotch-Italian is so sharp",
+     next:"To retreat the bishop safely"},
+    {w:'Bb3',b:'Ne4',e:51,
+     desc:"Retreats. Black's knight leaps to!",
+     idea:"Is an excellent centralized outpost. The knight is powerful on — it attacks the center and is hard to dislodge",
+     next:"To recapture the pawn"},
+    {w:'Nxd4',b:'Bc5',e:51,
+     desc:"Recaptures. Black develops — attacking.",
+     idea:"Develops with tempo: it attacks the and develops. Black is fighting for the initiative",
+     next:"To simplify the center"},
+    {w:'Nxc6',b:'bxc6',e:51,
+     desc:"Exchanges. recaptures — Black gets the open b-file.",
+     idea:"Is correct: the open b-file will be useful for Black's rook. The doubled c-pawns control central squares",
+     next:"To attack with the queen"},
+    {w:'Qh5',b:'O-O',e:52,
+     desc:"Attacks. Black castles urgently!",
+     idea:"Castling is the correct defense: castle and let the rook defend. The queen looks threatening but can be chased",
+     next:"To develop and support the queen's attack"},
+    {w:'Nc3',b:'Nxc3',e:52,
+     desc:"White develops. Black makes an important exchange.",
+     idea:"Simplifies. Black gives up the excellent knight to reduce White's attacking chances",
+     next:"To recapture. Sharp, imbalanced position"},
+    {w:'bxc3',b:'Re8',e:52,
+     desc:"Recaptures. Black activates.",
+     idea:"Supports and keeps the pressure on White's center. Very dynamic, imbalanced position",
+     next:"Highly tactical position. Both sides have great winning chances"},
+    {w:'Qf3',b:'Qd7',e:52,
+     desc:"Repositions to a safer square. Black centralizes.",
+     idea:"Prepares to exchange queens and simplify. Black has survived the attack and has a solid, equal position",
+     next:"Complex position. Sharp play required from both sides"},
+  ]},
+]},
+
+{id:'kings-indian',name:"King's Indian",tag:'1.d4 Nf6 2.c4 g6',flip:true,variants:[
+  {id:'classical-kid',name:'Classical',tag:'5.Nf3 O-O 6.Be2',moves:[
+    {w:'d4',b:'Nf6',e:50,
+     desc:"Black develops the knight immediately.",
+     idea:"Controls and keeps all options open. Black refuses to commit — the hypermodern approach: let White build a center, then attack it",
+     next:"To build a broad center"},
+    {w:'c4',b:'g6',e:50,
+     desc:"Builds the center. Black plays — the King's Indian begins.",
+     idea:"Prepares , the King's Indian bishop: one of the most powerful fianchettoed bishops in chess. Black is preparing a massive kingside attack",
+     next:"To develop and control"},
+    {w:'Nc3',b:'Bg7',e:50,
+     desc:"Develops. Black activates the King's Indian bishop.",
+     idea:"Is the soul of the King's Indian: it controls the -h8 diagonal and will power Black's kingside attack. Fischer called it 'the best bishop in chess'",
+     next:"To seize the center. Black castles"},
+    {w:'e4',b:'d6',e:50,
+     desc:"Seizes the center. Black plays.",
+     idea:"Supports and prepares. White has a massive center — Black's plan is to undermine it, not occupy it",
+     next:"To develop. Black will castle"},
+    {w:'Nf3',b:'O-O',e:50,
+     desc:"Develops. Black castles — the King's Indian is set.",
+     idea:"Castling is the signal: the King's Indian machine is ready. Black will now play to challenge White's center. Everything was preparation for this",
+     next:"— the Classical variation. Solid and deeply theoretical"},
+    {w:'Be2',b:'e5',e:51,
+     desc:"Develops solidly. Black plays — the key move!",
+     idea:"Is the King's Indian's central counterattack. Black challenges White's massive center head-. The position is now the most analyzed in all of chess",
+     next:"To close the center — or to open it"},
+    {w:'d5',b:'Nbd7',e:51,
+     desc:"Closes the center. Black develops.",
+     idea:"Is White's main plan: close the center and attack on the queenside. Black responds with the knight. preparing and the kingside attack",
+     next:"Black will launch the kingside attack with and -h5 or -c7-b5"},
+    {w:'O-O',b:'Nc5',e:51,
+     desc:"White castles. Black's knight leaps to — the ideal outpost.",
+     idea:"Is the key maneuver: the knight targets and puts pressure on White's queenside. Meanwhile Black prepares for the kingside attack",
+     next:"To defend. Black prepares"},
+    {w:'Nd2',b:'f5',e:52,
+     desc:"Defends. Black launches — the kingside attack begins!",
+     idea:"Is the moment the King's Indian has been building toward: a direct kingside pawn storm. White attacks queenside, Black attacks kingside — the most exciting race in chess",
+     next:"To attack on the queenside. Black plays"},
+    {w:'b4',b:'f4',e:52,
+     desc:"Launches the queenside attack. Black advances — both sides attack!",
+     idea:"Closes the kingside and prepares -g4 to storm the White king. This is the King's Indian at its purest: mutual attacks on opposite flanks. Both players race to mate",
+     next:"Don't defend — attack! The first to stop loses"},
+    {w:'c5',b:'g5',e:52,
+     desc:"Pushes on the queenside. Black advances — the attack intensifies!",
+     idea:"Opens lines against the White king. Meanwhile White's is tearing apart Black's queenside. Two simultaneous attacks — who gets there first?",
+     next:"Both sides play for checkmate. This is the King's Indian"},
+    {w:'cxd6',b:'cxd6',e:52,
+     desc:"Exchanges. recaptures — the position opens.",
+     idea:"Both attacks are at their peak. The King's Indian is the most combative opening in chess: mutual sacrifices, opposite attacks, maximum tension",
+     next:"Extremely complex position. Both sides have winning chances"},
+  ]},
+  {id:'samisch-kid',name:'Sämisch',tag:'5.f3 — aggressive',moves:[
+    {w:'d4',b:'Nf6',e:50,
+     desc:"Black develops the knight toward the center.",
+     idea:"Controls the center. The hypermodern approach: let White build a center, then attack it",
+     next:"Then — the Sämisch"},
+    {w:'c4',b:'g6',e:50,
+     desc:"Builds the center. — the King's Indian begins.",
+     idea:"Prepares the fianchetto. Black is preparing a kingside attack",
+     next:"To develop. Black fianchettos"},
+    {w:'Nc3',b:'Bg7',e:50,
+     desc:"Develops. Black activates the King's Indian bishop.",
+     idea:"This bishop is the soul of the opening — it sits quietly but controls the entire board diagonally.",
+     next:"To seize the center"},
+    {w:'e4',b:'d6',e:50,
+     desc:"Seizes the center. supports.",
+     idea:"Prepares. White has a massive center — Black will attack it",
+     next:"— the Sämisch! Very aggressive"},
+    {w:'f3',b:'O-O',e:51,
+     desc:"The Sämisch variation. Black castles.",
+     idea:"Is the Sämisch: White reinforces the center and prepares —queenside castling for a queenside attack. Very aggressive — White is playing for a direct win",
+     next:"Don't castle — you're walking into the storm. But castling is still correct here"},
+    {w:'Be3',b:'e5',e:51,
+     desc:"Develops. Black plays — fighting back immediately.",
+     idea:"Must come before White can consolidate. Black immediately challenges the center rather than allowing White to set up the attack uncontested",
+     next:"To close the center"},
+    {w:'d5',b:'Nh5',e:52,
+     desc:"Closes the center. Black's knight jumps to!",
+     idea:"This is the critical move in this variation: the knight repositions to a better square and avoids being chased by the pawns. This knight maneuver is the key to the kingside attack.",
+     next:"To prepare queenside castling. Black plays"},
+    {w:'Qd2',b:'f5',e:52,
+     desc:"Prepares queenside castling. Black launches!",
+     idea:"Begins the kingside pawn storm. White is preparing queenside castling for a queenside attack. Both sides race to attack the opposing king",
+     next:"Queenside castling to castle queenside and begin the attack"},
+    {w:'O-O-O',b:'f4',e:52,
+     desc:"Queenside castling — White castles queenside! Black advances.",
+     idea:"Opposite castling! closes the kingside and advances the attack. This is the Sämisch at full intensity: mutual attacks with no room for error",
+     next:"To reposition. Black plays -g4"},
+    {w:'Bf2',b:'g5',e:53,
+     desc:"Repositions the bishop. Black pushes!",
+     idea:"Opens the g-file for Black's rook. White must attack just as fast on the queenside or be mated. Pure chess violence",
+     next:"To counter or -b5 for the queenside attack"},
+    {w:'b4',b:'Nf6',e:53,
+     desc:"Launches the queenside attack. Black redeploys the knight.",
+     idea:"Returns to defend and prepare -g3. Black's attack on the kingside is very dangerous",
+     next:"To continue the queenside advance"},
+    {w:'b5',b:'g4',e:53,
+     desc:"Pushes further. Black advances — the race is on!",
+     idea:"Opens the g-file for the attack on White's king. The Sämisch is the most violent King's Indian variation — both sides attack relentlessly. First to hesitate loses",
+     next:"Extreme tension. Calculate mate threats on both sides!"},
+  ]},
+  {id:'four-pawns-kid',name:'Four Pawns Attack',tag:'5.f4 — ambitious',moves:[
+    {w:'d4',b:'Nf6',e:50,
+     desc:"the King's Indian setup begins.",
+     idea:"Controls the center. Black prepares the King's Indian",
+     next:"White is about to build the biggest pawn center possible. Black must act fast."},
+    {w:'c4',b:'g6',e:50,
+     desc:"Builds the center. — King's Indian.",
+     idea:"White builds a broad center — two pawns side by side controlling the middle of the board.",
+     next:"Black will bring the bishop to the long diagonal. A powerful defensive weapon is taking shape."},
+    {w:'Nc3',b:'Bg7',e:50,
+     desc:"Develops. Black activates the King's Indian bishop.",
+     idea:"This bishop is the soul of the opening — it sits quietly but controls the entire board diagonally.",
+     next:"Black's next move is the heart of this opening — watch closely."},
+    {w:'e4',b:'d6',e:50,
+     desc:"Seizes the center. supports.",
+     idea:"Prepares. White has a massive center",
+     next:"— the Four Pawns Attack! Maximum ambition"},
+    {w:'f4',b:'O-O',e:51,
+     desc:"The Four Pawns Attack! White builds a massive pawn center.",
+     idea:"Is extremely ambitious: White occupies -f4-d4-c4 with pawns — a massive formation. The risk: if Black can break through, the whole structure collapses",
+     next:"To develop. Black must act immediately"},
+    {w:'Nf3',b:'c5',e:51,
+     desc:"Develops. Black strikes with immediately!",
+     idea:"Is the correct response: attack the base of White's massive pawn center before it can advance. Every tempo matters — the center must be challenged NOW",
+     next:"To close the center"},
+    {w:'d5',b:'e6',e:51,
+     desc:"Closes the center. Black plays to fight back.",
+     idea:"Attacks and tries to undermine the center. Black refuses to let White consolidate the four pawns",
+     next:"To develop. Black plays"},
+    {w:'Be2',b:'exd5',e:51,
+     desc:"White develops. Black makes an important exchange.",
+     idea:"Opens lines. White's massive center starts to crumble — this is what Black was aiming for",
+     next:"To recapture. Black plays"},
+    {w:'cxd5',b:'Re8',e:52,
+     desc:"Recaptures. Black activates.",
+     idea:"Attacks — the weakest point in White's center. The Four Pawns Attack's weakness is that the pawn can become a target",
+     next:"To advance. Black plays"},
+    {w:'e5',b:'dxe5',e:52,
+     desc:"Advances. Black exchanges.",
+     idea:"Wins a pawn or creates a passed pawn. White's massive center has been broken down — Black's counterattack has succeeded",
+     next:". Dynamic position with chances for both sides"},
+    {w:'fxe5',b:'Ng4',e:52,
+     desc:"Recaptures. Black's knight leaps to!",
+     idea:"Attacks the pawn and creates immediate threats. The Four Pawns Attack has been refuted — Black has active pieces and the passed pawn",
+     next:"To defend. Black has excellent counterplay"},
+    {w:'Bf4',b:'Nxe5',e:52,
+     desc:"White defends the position. Black wins a pawn.",
+     idea:"Recovers the pawn with a beautiful centralized knight. Black has successfully neutralized White's ambitious Four Pawns Attack",
+     next:"Dynamic position. Black has successfully equalized"},
+  ]},
+  {id:'averbakh-kid',name:'Averbakh',tag:'5.Be2 e4 6.Bg5',moves:[
+    {w:'d4',b:'Nf6',e:50,
+     desc:"King's Indian setup.",
+     idea:"Controls the center. The hypermodern approach",
+     next:"This is the Averbakh system — White prevents Black's counterplay before it starts."},
+    {w:'c4',b:'g6',e:50,
+     desc:"Builds the center. — King's Indian.",
+     idea:"The pawn steps aside to make room for the bishop. A powerful diagonal is about to open.",
+     next:"Finish developing. Every piece needs to be active before launching any plan."},
+    {w:'Nc3',b:'Bg7',e:50,
+     desc:"Develops. Black activates the King's Indian bishop.",
+     idea:"— the soul of the King's Indian",
+     next:"To seize the center"},
+    {w:'e4',b:'d6',e:50,
+     desc:"Seizes the center. supports.",
+     idea:"Prepares. White now plays the Averbakh",
+     next:"Then — the Averbakh variation"},
+    {w:'Be2',b:'O-O',e:50,
+     desc:"White develops the last piece. Black castles to safety.",
+     idea:"Castling castles and prepares. The King's Indian machine is ready",
+     next:"— the Averbakh! The bishop pins the knight and prevents"},
+    {w:'Bg5',b:'c5',e:51,
+     desc:"The Averbakh variation. Black plays!",
+     idea:"Is the best response: attack immediately before White can consolidate the pin. The Averbakh tries to prevent — Black must act quickly",
+     next:"To close the center"},
+    {w:'d5',b:'h6',e:51,
+     desc:"Closes the center. Black plays to challenge.",
+     idea:"Chases the bishop. The was preventing and maneuvers — Black removes it immediately",
+     next:"To maintain the pin"},
+    {w:'Bh4',b:'g5',e:52,
+     desc:"Maintains the pin. Black advances!",
+     idea:"Is extremely aggressive: Black chases the bishop while advancing the kingside pawns. The pawn on starts the kingside attack immediately",
+     next:"To retreat. Black plays"},
+    {w:'Bg3',b:'Ne8',e:52,
+     desc:"Retreats. The knight goes to — unusual but deep.",
+     idea:"Is the Averbakh's key strategic retreat: the knight heads to to support and prepare. Black reorganizes for the queenside counterattack",
+     next:"To attack. Black plays"},
+    {w:'h4',b:'f5',e:52,
+     desc:"Attacks. Black launches — the kingside attack!",
+     idea:"Begins the pawn storm. Despite the unusual knight retreat, Black has organized a powerful kingside attack",
+     next:"Or — very complex position"},
+    {w:'hxg5',b:'hxg5',e:53,
+     desc:"Exchanges. recaptures — the g-file opens!",
+     idea:"Opens the h-file for Black's rook. The position is extremely sharp — Black's attack on the kingside is very dangerous",
+     next:"To prepare queenside castling. Black attacks with"},
+    {w:'Qd2',b:'f4',e:53,
+     desc:"Prepares queenside castling. Black advances — the attack continues.",
+     idea:"Closes the center and drives the attack forward. The Averbakh leads to very complex, tactical positions where both sides have genuine winning chances",
+     next:"Very complex position. Both sides attack aggressively"},
+  ]},
+  {id:'fianchetto-kid',name:'Fianchetto',tag:'3.g3 — positional',moves:[
+    {w:'d4',b:'Nf6',e:50,
+     desc:"King's Indian setup.",
+     idea:"Controls the center. Black prepares the King's Indian",
+     next:"— the Fianchetto variation. White mirrors Black's plan"},
+    {w:'c4',b:'g6',e:50,
+     desc:"Builds the center. — King's Indian.",
+     idea:"Every piece needs to find its best square. This move quietly prepares something important.",
+     next:"— the Fianchetto. White also fianchettos!"},
+    {w:'g3',b:'Bg7',e:50,
+     desc:"The Fianchetto variation. Black activates.",
+     idea:"Prepares. White mirrors Black's plan: both sides fianchetto their bishops on the long diagonal. The battle of the two dragons",
+     next:"— White fianchettos too"},
+    {w:'Bg2',b:'O-O',e:50,
+     desc:"White's fianchetto is complete. Black castles.",
+     idea:"Both bishops face each other on the -h8 diagonal. This is the Fianchetto King's Indian: positional, strategic, and less explosive than the Classical",
+     next:"To develop. Black plays"},
+    {w:'Nc3',b:'d6',e:50,
+     desc:"White develops. Black makes a key move.",
+     idea:"Supports and prepares. Black builds the standard King's Indian structure",
+     next:"To develop. Black plays"},
+    {w:'Nf3',b:'e5',e:51,
+     desc:"Develops. Black plays — the central challenge.",
+     idea:"Is the King's Indian's key move: challenge White's center before it becomes too strong. The Fianchetto makes this slightly harder than the Classical — White's supports",
+     next:"Black develops to fight for the center"},
+    {w:'O-O',b:'Nc6',e:51,
+     desc:"White castles. Black develops.",
+     idea:"Develops and pressures. The battle of the two bishops on the long diagonal begins",
+     next:"To close or to open — two different strategies"},
+    {w:'d5',b:'Ne7',e:51,
+     desc:"Closes the center. Black redeploys the knight.",
+     idea:"The knight heads to a better square — a classic maneuver in this opening. Black is quietly preparing a kingside attack.",
+     next:"To build the pawn center"},
+    {w:'e4',b:'Nd7',e:51,
+     desc:"Builds the pawn center. Black redeploys.",
+     idea:"Prepares to attack the — the key positional idea in the Fianchetto King's Indian",
+     next:"To redeploy the knight. for Black"},
+    {w:'Ne1',b:'Nc5',e:52,
+     desc:"White redeploys a piece. Black's knight arrives on a strong central square.",
+     idea:"Attacks the and is a strong outpost. The Fianchetto King's Indian is a positional battle — both sides maneuver for small advantages",
+     next:"To challenge the"},
+    {w:'Nd3',b:'Nxd3',e:52,
+     desc:"Challenges the. Black exchanges.",
+     idea:"Simplifies. Black gives up the knight but forces , giving White isolated pawns. Positional compensation",
+     next:"To recapture. Balanced, strategic position"},
+    {w:'cxd3',b:'f5',e:52,
+     desc:"Recaptures. Black launches — the kingside attack!",
+     idea:"Begins the pawn storm even in the Fianchetto variation. Black's strategy: maneuver patiently, then attack. The battle of the two bishops continues",
+     next:"To defend. Very rich positional position"},
+  ]},
+]},
+]; // end OPENINGS
+
+/* ════════════════ ENGINE ════════════════ */
+const FI={a:0,b:1,c:2,d:3,e:4,f:5,g:6,h:7};
+function initBoard(){return[['r','n','b','q','k','b','n','r'],['p','p','p','p','p','p','p','p'],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],['P','P','P','P','P','P','P','P'],['R','N','B','Q','K','B','N','R']];}
+function cloneB(b){return b.map(r=>r.slice());}
+function canReach(board,fr,fc,tr,tc,piece){
+  const p=piece.toLowerCase(),dr=tr-fr,dc=tc-fc;
+  if(p==='n')return(Math.abs(dr)===2&&Math.abs(dc)===1)||(Math.abs(dr)===1&&Math.abs(dc)===2);
+  if(p==='k')return Math.abs(dr)<=1&&Math.abs(dc)<=1;
+  if(p==='b'){if(Math.abs(dr)!==Math.abs(dc))return false;const rs=Math.sign(dr),cs=Math.sign(dc);for(let i=1;i<Math.abs(dr);i++)if(board[fr+i*rs][fc+i*cs])return false;return true;}
+  if(p==='r'){if(dr!==0&&dc!==0)return false;const rs=Math.sign(dr),cs=Math.sign(dc);for(let i=1;i<Math.max(Math.abs(dr),Math.abs(dc));i++)if(board[fr+i*rs][fc+i*cs])return false;return true;}
+  if(p==='q')return canReach(board,fr,fc,tr,tc,'r')||canReach(board,fr,fc,tr,tc,'b');
+  return false;
+}
+function applyMove(board,san,isW){
+  const b=cloneB(board),s=san.replace(/[+#!=?]/g,'').trim();
+  if(s==='O-O'){const row=isW?7:0;b[row][6]=b[row][4];b[row][4]=null;b[row][5]=b[row][7];b[row][7]=null;return b;}
+  if(s==='O-O-O'){const row=isW?7:0;b[row][2]=b[row][4];b[row][4]=null;b[row][3]=b[row][0];b[row][0]=null;return b;}
+  const pm1=s.match(/^([a-h])x([a-h])([18])=?([QRBN])$/);
+  if(pm1){const fc=FI[pm1[1]],tc=FI[pm1[2]],tr=8-parseInt(pm1[3]),pr=isW?pm1[4]:pm1[4].toLowerCase();for(let r=0;r<8;r++)if(b[r][fc]===(isW?'P':'p')){b[r][fc]=null;break;}b[tr][tc]=pr;return b;}
+  const pm2=s.match(/^([a-h])([18])=?([QRBN])$/);
+  if(pm2){const tc=FI[pm2[1]],tr=8-parseInt(pm2[2]),pr=isW?pm2[3]:pm2[3].toLowerCase();const dir=isW?1:-1;if(b[tr+dir]&&b[tr+dir][tc])b[tr+dir][tc]=null;b[tr][tc]=pr;return b;}
+  if(/^[a-h][1-8]$/.test(s)){const tc=FI[s[0]],tr=8-parseInt(s[1]),pp=isW?'P':'p';for(let r=0;r<8;r++){if(b[r][tc]===pp){const dist=Math.abs(r-tr);if(dist===1||(dist===2&&b[(r+tr)>>1][tc]===null)){b[tr][tc]=pp;b[r][tc]=null;return b;}}}return b;}
+  if(/^[a-h]x[a-h][1-8]$/.test(s)){const fc=FI[s[0]],tc=FI[s[2]],tr=8-parseInt(s[3]),pp=isW?'P':'p';for(let r=0;r<8;r++)if(b[r][fc]===pp){b[tr][tc]=pp;b[r][fc]=null;return b;}return b;}
+  const m=s.match(/^([NBRQK])([a-h]?[1-8]?)x?([a-h][1-8])$/);
+  if(m){const letter=m[1],hint=m[2],pt=isW?letter:letter.toLowerCase(),tc=FI[m[3][0]],tr=8-parseInt(m[3][1]);
+    for(let r=0;r<8;r++)for(let c=0;c<8;c++){if(b[r][c]!==pt)continue;
+      if(hint.length===1){if(/[a-h]/.test(hint)&&c!==FI[hint])continue;if(/[1-8]/.test(hint)&&r!==8-parseInt(hint))continue;}
+      else if(hint.length===2&&(c!==FI[hint[0]]||r!==8-parseInt(hint[1])))continue;
+      if(canReach(b,r,c,tr,tc,pt)){b[tr][tc]=pt;b[r][c]=null;return b;}}}
+  return b;
+}
+function boardAt(variant,halfStep){
+  let board=initBoard();
+  for(let i=0;i<variant.moves.length;i++){
+    const mv=variant.moves[i],wH=i*2,bH=i*2+1;
+    if(halfStep>=wH)board=applyMove(board,mv.w,true);else break;
+    if(halfStep===wH)break;
+    if(halfStep>=bH)board=applyMove(board,mv.b,false);else break;
+    if(halfStep===bH)break;
+  }
+  return board;
+}
+
+/* ════════════════ STATE ════════════════ */
+let curOp=OPENINGS[0], curV=OPENINGS[0].variants[0], curH=-1;
+const maxH=()=>curV.moves.length*2-1;
+
+/* ════════════════ RENDER ════════════════ */
+function buildCoords(){
+  // rebuilt when opening changes (because flip changes)
+}
+function renderCoords(){
+  const rc=document.getElementById('rc');
+  rc.innerHTML='';
+  const flip=curOp.flip;
+  for(let d=0;d<8;d++){
+    const el=document.createElement('div');
+    el.className='rl';
+    el.textContent=flip?(d+1):(8-d);
+    rc.appendChild(el);
+  }
+  const fr=document.getElementById('fr');
+  fr.innerHTML='';
+  for(let c=0;c<8;c++){
+    const el=document.createElement('div');
+    el.className='fl';
+    const file='abcdefgh';
+    el.textContent=flip?file[7-c]:file[c];
+    fr.appendChild(el);
+  }
+}
+
+function renderBoard(){
+  const boardEl=document.getElementById('board');
+  boardEl.innerHTML='';
+  const cur=curH<0?initBoard():boardAt(curV,curH);
+  const prev=curH>0?boardAt(curV,curH-1):(curH===0?initBoard():null);
+  const flip=curOp.flip;
+  for(let dispRow=0;dispRow<8;dispRow++){
+    const r=flip?(7-dispRow):dispRow;
+    for(let dispCol=0;dispCol<8;dispCol++){
+      const co=flip?(7-dispCol):dispCol;
+      const sq=document.createElement('div');
+      sq.className='sq '+((r+co)%2===0?'l':'d');
+      if(prev){const was=prev[r][co],is=cur[r][co];
+        if(was!==is){
+          if(was&&!is) sq.classList.add('hf');
+          else if(is) sq.classList.add('ht');
+        }
+      }
+      const piece=cur[r][co];
+      if(piece)sq.innerHTML=pieceSVG(piece);
+      boardEl.appendChild(sq);
+    }
+  }
+
+}
+
+function renderSideLabel(){
+  const flip=curOp.flip;
+  const pip=document.getElementById('side-pip');
+  const txt=document.getElementById('side-text');
+  if(flip){
+    pip.className='side-pip black';
+    txt.textContent='You play Black';
+  } else {
+    pip.className='side-pip white';
+    txt.textContent='You play White';
+  }
+}
+
+function renderCoupBadge(){
+  const move=document.getElementById('nav-move');
+  const dot=document.getElementById('nav-dot');
+  const ctx=document.getElementById('nav-ctx');
+  if(curH<0){
+    move.textContent='';
+    dot.className='nav-dot';
+    const totalTurns = Math.ceil((maxH()+1) / 2);
+    ctx.textContent='Turn 1 of '+totalTurns+' — tap Next to start';
+    const bn=document.getElementById('bn');
+    if(bn) bn.disabled=false;
+    return;
+  }
+  const mi=Math.floor(curH/2),isB=curH%2===1,mv=curV.moves[mi];
+  move.textContent=`${mi+1}. ${isB?mv.b:mv.w}`;
+  move.className='nav-move '+(isB?'b':'w');
+  dot.className='nav-dot '+(isB?'b':'w');
+  const totalTurns = Math.ceil((maxH()+1) / 2);
+  const currentTurn = Math.floor(curH/2) + 1;
+  ctx.textContent=(isB?'Black':'White')+' plays · turn '+currentTurn+' of '+totalTurns;
+  const bn=document.getElementById('bn');
+  if(bn) bn.disabled=curH>=maxH();
+}
+
+function renderAnalysis(){
+  if(curH<0){
+    const g=document.querySelector('.ablock.g');
+    const b=document.querySelector('.ablock.b');
+    if(g)g.style.display='none';if(b)b.style.display='none';
+    const adesc=document.getElementById('adesc');
+    if(adesc)adesc.textContent='Tap Next to start. The first move will play automatically.';
+    return;
+  }
+  const mi=Math.floor(curH/2), isB=curH%2===1, mv=curV.moves[mi];
+  const g = document.querySelector('.ablock.g');
+  const b = document.querySelector('.ablock.b');
+  if(g) g.style.display='';
+  if(b) b.style.display='';
+
+  // Side indicator
+  const bar = document.getElementById('aside-bar');
+  if(bar) bar.className = 'aside-bar ' + (isB?'black':'white');
+
+  // Side label inside acontent
+  let sideEl = document.getElementById('aside-label-row');
+  if(!sideEl){
+    sideEl = document.createElement('div');
+    sideEl.id = 'aside-label-row';
+    sideEl.className = 'abody-side';
+    const pip = document.createElement('span');
+    pip.id = 'aside-pip';
+    pip.className = 'aside-pip';
+    const lbl = document.createElement('span');
+    lbl.id = 'aside-label';
+    lbl.className = 'aside-label';
+    sideEl.appendChild(pip);
+    sideEl.appendChild(lbl);
+    const acontent = document.querySelector('.acontent');
+    if(acontent) acontent.insertBefore(sideEl, acontent.firstChild);
+  }
+  const pip = document.getElementById('aside-pip');
+  const lbl = document.getElementById('aside-label');
+  if(pip) pip.className = 'aside-pip ' + (isB?'black':'white');
+  if(lbl) lbl.textContent = isB ? 'Black plays' : 'White plays';
+
+  // Texts
+  if(!isB && mv.wdesc){
+    document.getElementById('adesc').textContent=mv.wdesc;
+    document.getElementById('aidea').textContent=mv.widea;
+    document.getElementById('anext').textContent=mv.wnext;
+  } else if(isB && mv.bdesc){
+    document.getElementById('adesc').textContent=mv.bdesc;
+    document.getElementById('aidea').textContent=mv.bidea;
+    document.getElementById('anext').textContent=mv.bnext;
+  } else {
+    document.getElementById('adesc').textContent=mv.desc;
+    document.getElementById('aidea').textContent=mv.idea;
+    document.getElementById('anext').textContent=mv.next;
+  }
+}
+
+
+
+function renderOpenings(){
+  const bar=document.getElementById('op-bar');
+  bar.innerHTML='';
+  OPENINGS.forEach(op=>{
+    const btn=document.createElement('button');
+    btn.className='op-btn'+(op.id===curOp.id?' active':'');
+    btn.innerHTML=`<span class="on">${op.name}</span>`;
+    btn.onclick=()=>{curOp=op;curV=op.variants[0];curH=-1;update();};
+    bar.appendChild(btn);
+  });
+}
+
+
+
+// ── SEEN VARIANTS tracking ──
+const seenVariants = new Set();
+
+function renderProgress(){
+  const pct = curH<0 ? 0 : (maxH()===0 ? 100 : Math.round((curH / maxH()) * 100));
+  const fill = document.getElementById('progress-fill');
+  if(fill) fill.style.width = pct + '%';
+  // mark variant as done
+  if(curH >= 0 && curH >= maxH()) seenVariants.add(curOp.id + '::' + curV.id);
+}
+
+function renderNav(){
+  ['bp2','bs'].forEach(id=>{ const el=document.getElementById(id); if(el) el.disabled=curH===0; });
+  ['bn','be'].forEach(id=>{ const el=document.getElementById(id); if(el) el.disabled=curH>=maxH(); });
+}
+
+function renderVariants(){
+  const list=document.getElementById('vlist'); list.innerHTML='';
+  curOp.variants.forEach(v=>{
+    const btn=document.createElement('button');
+    const done=seenVariants.has(curOp.id+'::'+v.id);
+    btn.className='vbtn'+(v.id===curV.id?' active':'')+(done?' done':'');
+    btn.innerHTML=`<span class="vn">${v.name}${done?' ✓':''}</span>`;
+    btn.onclick=()=>{curV=v;curH=-1;update();};
+    list.appendChild(btn);
+  });
+}
+
+function update(){
+  renderCoords();renderBoard();renderSideLabel();renderCoupBadge();
+  renderOpenings();renderVariants();
+  renderAnalysis();renderProgress();renderNav();
+}
+
+/* ════════════════ ONBOARDING ════════════════ */
+(function(){
+  const ob=document.getElementById('onboard');
+  if(localStorage.getItem('co_seen')) ob.style.display='none';
+  document.getElementById('onboard-btn').onclick=()=>{
+    ob.style.opacity='0';ob.style.transition='opacity .4s';
+    setTimeout(()=>ob.style.display='none',400);
+    localStorage.setItem('co_seen','1');
+  };
+})();
+
+
+/* ════════════════ TAB SWITCHER ════════════════ */
+function switchTab(tab){
+  document.getElementById('learn-view').classList.toggle('hidden', tab==='quiz');
+  document.getElementById('quiz-view').classList.toggle('active', tab==='quiz');
+  document.getElementById('tab-learn').classList.toggle('active', tab==='learn');
+  document.getElementById('tab-quiz').classList.toggle('active', tab==='quiz');
+  if(tab==='quiz') initPractice();
+}
+
+/* ════════════════ LEGAL MOVES ════════════════ */
+function getLegalMoves(board, isW){
+  const moves = [];
+  const files = 'abcdefgh';
+  const own = p => p && (isW ? p===p.toUpperCase() : p===p.toLowerCase());
+  const enemy = p => p && (isW ? p===p.toLowerCase() : p===p.toUpperCase());
+
+  const addSlide = (r,c,dr,dc,prefix) => {
+    for(let s=1;s<8;s++){
+      const nr=r+dr*s, nc=c+dc*s;
+      if(nr<0||nr>7||nc<0||nc>7) break;
+      const target = board[nr][nc];
+      if(own(target)) break;
+      const cap = enemy(target) ? 'x' : '';
+      moves.push(prefix+cap+files[nc]+(8-nr));
+      if(target) break;
+    }
+  };
+
+  const piecePositions = {};
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const p=board[r][c];
+    if(p&&own(p)){ if(!piecePositions[p]) piecePositions[p]=[]; piecePositions[p].push([r,c]); }
+  }
+
+  for(let r=0;r<8;r++){
+    for(let c=0;c<8;c++){
+      const p = board[r][c];
+      if(!p || !own(p)) continue;
+      const pt = p.toLowerCase();
+
+      if(pt==='p'){
+        const dir = isW ? -1 : 1;
+        const startRow = isW ? 6 : 1;
+        const nr = r+dir;
+        if(nr>=0&&nr<8){
+          if(!board[nr][c]){
+            moves.push(files[c]+(8-nr));
+            const nr2 = r+dir*2;
+            if(r===startRow && !board[nr2][c]) moves.push(files[c]+(8-nr2));
+          }
+          if(c>0 && enemy(board[nr][c-1])) moves.push(files[c]+'x'+files[c-1]+(8-nr));
+          if(c<7 && enemy(board[nr][c+1])) moves.push(files[c]+'x'+files[c+1]+(8-nr));
+        }
+      }
+      if(pt==='n'){
+        [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc])=>{
+          const nr=r+dr, nc=c+dc;
+          if(nr<0||nr>7||nc<0||nc>7||own(board[nr][nc])) return;
+          const cap = enemy(board[nr][nc]) ? 'x' : '';
+          const dest = files[nc]+(8-nr);
+          const sameKnights = (piecePositions[p]||[]).filter(([or,oc])=>or!==r||oc!==c);
+          const ambig = sameKnights.some(([or,oc])=>{
+            const dr2=nr-or, dc2=nc-oc;
+            return (Math.abs(dr2)===2&&Math.abs(dc2)===1)||(Math.abs(dr2)===1&&Math.abs(dc2)===2);
+          });
+          moves.push((ambig ? 'N'+files[c] : 'N')+cap+dest);
+        });
+      }
+      if(pt==='b') [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc])=>addSlide(r,c,dr,dc,'B'));
+      if(pt==='r') [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>addSlide(r,c,dr,dc,'R'));
+      if(pt==='q') [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc])=>addSlide(r,c,dr,dc,'Q'));
+      if(pt==='k'){
+        [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc])=>{
+          const nr=r+dr, nc=c+dc;
+          if(nr<0||nr>7||nc<0||nc>7||own(board[nr][nc])) return;
+          const cap = enemy(board[nr][nc]) ? 'x' : '';
+          moves.push('K'+cap+files[nc]+(8-nr));
+        });
+        const kingRow = isW ? 7 : 0;
+        if(r===kingRow && c===4){
+          if(!board[kingRow][5]&&!board[kingRow][6]&&board[kingRow][7]) moves.push('O-O');
+          if(!board[kingRow][3]&&!board[kingRow][2]&&!board[kingRow][1]&&board[kingRow][0]) moves.push('O-O-O');
+        }
+      }
+    }
+  }
+  return [...new Set(moves)];
+}
+
+/* ════════════════ PRACTICE ENGINE ════════════════ */
+let pracOp = null, pracVar = null;
+let pracBoard = null, pracStep = 0, pracMaxSteps = 5;
+let pracSelected = null;
+let pracFlip = false;
+let pracLocked = false;
+let pracPrevBoard = null;
+
+function initPractice(){
+  pracOp = OPENINGS[0];
+  pracVar = pracOp.variants[0];
+  renderOpFilter();
+  renderVarFilter();
+  startPractice();
+}
+
+function renderOpFilter(){
+  const bar = document.getElementById('prac-op-filter');
+  bar.innerHTML = '';
+  OPENINGS.forEach(op => {
+    const btn = document.createElement('button');
+    btn.className = 'prac-chip' + (op.id === pracOp.id ? ' active' : '');
+    btn.textContent = op.name;
+    btn.onclick = () => { pracOp = op; pracVar = op.variants[0]; renderOpFilter(); renderVarFilter(); startPractice(); };
+    bar.appendChild(btn);
+  });
+}
+
+function renderVarFilter(){
+  const bar = document.getElementById('prac-var-filter');
+  bar.innerHTML = '';
+  pracOp.variants.forEach(v => {
+    const btn = document.createElement('button');
+    btn.className = 'prac-chip prac-chip--var' + (v.id === pracVar.id ? ' active' : '');
+    btn.textContent = v.name;
+    btn.onclick = () => { pracVar = v; renderVarFilter(); startPractice(); };
+    bar.appendChild(btn);
+  });
+}
+
+function showPracBadge(type){
+  const ok = document.getElementById('prac-correct-badge');
+  const ko = document.getElementById('prac-wrong-badge');
+  if(ok) ok.style.display = type==='correct' ? 'inline' : 'none';
+  if(ko) ko.style.display = type==='wrong' ? 'inline' : 'none';
+}
+
+function showPracCard(type, header, idea){
+  const card = document.getElementById('prac-card');
+  const h = document.getElementById('prac-card-header');
+  const i = document.getElementById('prac-card-idea');
+  if(!card||!h||!i) return;
+  h.className = 'prac-card-header ' + type;
+  h.textContent = header;
+  i.textContent = idea;
+  {const _s=card;if(_s)_s.style.display='';}
+}
+
+function showPracDone(){
+  const _el_prac_board_section=document.getElementById('prac-board-section');if(_el_prac_board_section)_el_prac_board_section.style.display = 'none';
+  const _el_prac_top_bar=document.getElementById('prac-top-bar');if(_el_prac_top_bar)_el_prac_top_bar.style.display = 'none';
+  const _el_prac_dots=document.getElementById('prac-dots');if(_el_prac_dots)_el_prac_dots.style.display = 'none';
+  setFeedback('', '');
+  const _el_prac_done=document.getElementById('prac-done');if(_el_prac_done)_el_prac_done.style.display = 'flex';
+  document.getElementById('prac-done-msg').textContent =
+    `You played the ${pracOp.name} — ${pracVar.name} perfectly. Well done!`;
+}
+
+function startPractice(){
+  pracBoard = initBoard();
+  pracStep = 0;
+  pracMaxSteps = pracVar.moves.length * 2;
+  pracSelected = null;
+  pracLocked = false;
+  pracPrevBoard = null;
+  pracFlip = pracOp.flip || false;
+  const _el_prac_done=document.getElementById('prac-done');if(_el_prac_done)_el_prac_done.style.display = 'none';
+  const _el_prac_board_section=document.getElementById('prac-board-section');if(_el_prac_board_section)_el_prac_board_section.style.display = '';
+  const _el_prac_top_bar=document.getElementById('prac-top-bar');if(_el_prac_top_bar)_el_prac_top_bar.style.display = '';
+  const _el_prac_dots=document.getElementById('prac-dots');if(_el_prac_dots)_el_prac_dots.style.display = '';
+  const card = document.getElementById('prac-card');
+  if(card) card.style.display = 'none';
+  setFeedback('', '');
+  showPracBadge('none');
+  renderPracBoard();
+  renderDots();
+  updateStatus();
+
+  // If player plays Black, auto-play White's first move
+  if(pracFlip && pracStep < pracMaxSteps){
+    setTimeout(() => autoPlayOpponent(), 500);
+  }
+
+  const rb = document.getElementById('prac-restart');
+  if(rb) rb.onclick = () => startPractice();
+}
+
+function autoPlayOpponent(){
+  const mi = Math.floor(pracStep / 2);
+  const isB = pracStep % 2 === 1;
+  const opMove = isB ? pracVar.moves[mi].b : pracVar.moves[mi].w;
+  pracPrevBoard = cloneB(pracBoard);
+  pracBoard = applyMove(pracBoard, opMove, !isB);
+  pracStep++;
+  renderPracBoard();
+  renderDots();
+  updateStatus();
+}
+
+function isWhiteTurn(){ return pracStep % 2 === 0; }
+function isPlayerTurn(){
+  // Player plays White if flip=false, Black if flip=true
+  return pracFlip ? (pracStep % 2 === 1) : (pracStep % 2 === 0);
+}
+
+function expectedMove(){
+  const mi = Math.floor(pracStep / 2);
+  const isB = pracStep % 2 === 1;
+  const mv = pracVar.moves[mi];
+  return isB ? mv.b : mv.w;
+}
+
+function renderPracBoard(){
+  const boardEl = document.getElementById('quiz-board');
+  const rcEl = document.getElementById('quiz-rc');
+  const frEl = document.getElementById('quiz-fr');
+  boardEl.innerHTML = ''; rcEl.innerHTML = ''; frEl.innerHTML = '';
+
+  const legal = pracSelected ? getLegalMoves(pracBoard, isWhiteTurn()) : [];
+  const [sr, sc] = pracSelected || [-1, -1];
+
+  // Find legal destinations for the selected piece specifically
+  const legalDests = new Set();
+  if(pracSelected){
+    const [sr2, sc2] = pracSelected;
+    const selPiece = pracBoard[sr2][sc2];
+    if(selPiece){
+      const allLegal = getLegalMoves(pracBoard, isWhiteTurn());
+      allLegal.forEach(mv => {
+        const testBoard = cloneB(pracBoard);
+        const result = applyMove(testBoard, mv, isWhiteTurn());
+        if(!result) return;
+        if(result[sr2][sc2] !== selPiece){
+          let dest = '';
+          if(mv === 'O-O') dest = isWhiteTurn() ? 'g1' : 'g8';
+          else if(mv === 'O-O-O') dest = isWhiteTurn() ? 'c1' : 'c8';
+          else { const m = mv.match(/([a-h][1-8])[+#=]?$/); if(m) dest = m[1]; }
+          if(dest){
+            const dc = dest.charCodeAt(0) - 97;
+            const dr = 8 - parseInt(dest[1]);
+            legalDests.add(dr * 8 + dc);
+          }
+        }
+      });
+    }
+  }
+
+  for(let dispRow = 0; dispRow < 8; dispRow++){
+    const r = pracFlip ? (7 - dispRow) : dispRow;
+    const rl = document.createElement('div');
+    rl.className = 'rl';
+    rl.textContent = pracFlip ? (dispRow + 1) : (8 - dispRow);
+    rcEl.appendChild(rl);
+
+    for(let dispCol = 0; dispCol < 8; dispCol++){
+      const c2 = pracFlip ? (7 - dispCol) : dispCol;
+      const sq = document.createElement('div');
+      const isLight = (r + c2) % 2 === 0;
+      sq.className = 'sq ' + (isLight ? 'l' : 'd');
+
+      // Last move highlight (hf=from, ht=to)
+      if(pracPrevBoard){
+        const was = pracPrevBoard[r][c2], is = pracBoard[r][c2];
+        if(was !== is){
+          if(was && !is) sq.classList.add('hf');
+          else if(is && !was) sq.classList.add('ht');
+        }
+      }
+
+      // Selection and hints (override last move highlight)
+      if(pracSelected && r === sr && c2 === sc) sq.classList.add('selected');
+      else if(legalDests.has(r * 8 + c2)) sq.classList.add('hint');
+
+      const piece = pracBoard[r][c2];
+      if(piece) sq.innerHTML = pieceSVG(piece);
+
+      const rr = r, cc = c2;
+      sq.onclick = () => handlePracClick(rr, cc);
+      boardEl.appendChild(sq);
+    }
+  }
+
+  const files = 'abcdefgh';
+  for(let col = 0; col < 8; col++){
+    const fl = document.createElement('div');
+    fl.className = 'fl';
+    fl.textContent = pracFlip ? files[7 - col] : files[col];
+    frEl.appendChild(fl);
+  }
+}
+
+function handlePracClick(r, c){
+  if(pracStep >= pracMaxSteps) return;
+  if(!isPlayerTurn()) return;
+  if(pracLocked) return; // locked after correct move
+  const piece = pracBoard[r][c];
+  const myPiece = isWhiteTurn()
+    ? (piece && piece === piece.toUpperCase())
+    : (piece && piece === piece.toLowerCase());
+
+  if(myPiece){
+    setFeedback('', '');
+    pracSelected = [r, c];
+    renderPracBoard();
+    return;
+  }
+
+  if(!pracSelected) return;
+  const [sr, sc] = pracSelected;
+
+  // Try to make the move
+  const fromFile = 'abcdefgh'[sc];
+  const fromRank = 8 - sr;
+  const toFile = 'abcdefgh'[c];
+  const toRank = 8 - r;
+  const srcPiece = pracBoard[sr][sc];
+
+  // Build candidate SAN moves
+  const expected = expectedMove();
+  const legal = getLegalMoves(pracBoard, isWhiteTurn());
+
+  // Find which legal move matches this from->to
+  let matchedMove = null;
+  for(const mv of legal){
+    // Check if this move ends on the target square
+    let dest = '';
+    if(mv === 'O-O'){ dest = isWhiteTurn() ? 'g1' : 'g8'; }
+    else if(mv === 'O-O-O'){ dest = isWhiteTurn() ? 'c1' : 'c8'; }
+    else { dest = mv.replace(/^.*?([a-h][1-8])$/, '$1'); }
+    const dc = dest.charCodeAt(0) - 97;
+    const dr = 8 - parseInt(dest[1]);
+    if(dr === r && dc === c){
+      // Also check the piece matches (disambiguation)
+      const tempBoard = cloneB(pracBoard);
+      const result = applyMove(tempBoard, mv, isWhiteTurn());
+      if(result && result[r][c]){ matchedMove = mv; break; }
+    }
+  }
+
+  pracSelected = null;
+
+  if(!matchedMove){
+    // Illegal move
+    setFeedback('That piece can\'t go there.', 'wrong');
+    renderPracBoard();
+    return;
+  }
+
+  if(matchedMove === expected || movesMatch(matchedMove, expected)){
+    // Correct!
+    const prevStep = pracStep;
+    pracPrevBoard = cloneB(pracBoard);
+    pracBoard = applyMove(pracBoard, expected, isWhiteTurn());
+    pracStep++;
+    pracSelected = null;
+    renderPracBoard();
+    renderDots();
+
+    pracLocked = true; // lock clicks until opponent plays
+    // Show pedagogical feedback for this move
+    const mi2 = Math.floor(prevStep / 2);
+    const wasB2 = prevStep % 2 === 1;
+    const mv2 = pracVar.moves[mi2];
+    const idea2 = wasB2 ? (mv2.bidea||mv2.idea) : (mv2.widea||mv2.idea);
+    showPracCard('correct', '✓ Correct move!', idea2 || mv2.desc || '');
+    showPracBadge('correct');
+
+    if(pracStep >= pracMaxSteps){
+      setTimeout(() => showPracDone(), 2000);
+    } else {
+      updateStatus();
+      if(!isPlayerTurn() && pracStep < pracMaxSteps){
+        setTimeout(() => {
+          const prevStep2 = pracStep;
+          autoPlayOpponent();
+          // Show opponent's explanation
+          const mi3 = Math.floor(prevStep2 / 2);
+          const wasB3 = prevStep2 % 2 === 1;
+          const mv3 = pracVar.moves[mi3];
+          const idea3 = wasB3 ? (mv3.bidea||mv3.idea) : (mv3.widea||mv3.idea);
+          showPracCard('opp', '↩ Opponent responds', idea3 || mv3.desc || '');
+          showPracBadge('none');
+          pracLocked = false;
+          if(pracStep >= pracMaxSteps) setTimeout(() => showPracDone(), 2000);
+          else updateStatus();
+        }, 2000);
+      }
+    }
+  } else {
+    // Wrong move
+    showPracBadge('wrong');
+    setTimeout(() => showPracBadge('none'), 2000);
+    setFeedback('Not the right move for this opening. Try again.', 'wrong');
+    renderPracBoard();
+  }
+}
+
+function movesMatch(a, b){
+  // Normalize: strip check/mate symbols, captures x
+  const norm = s => s.replace(/[+#x]/g, '').trim();
+  return norm(a) === norm(b);
+}
+
+function setFeedback(msg, type){
+  const el = document.getElementById('prac-feedback');
+  if(!msg){ el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="prac-feedback-msg ${type}">${msg}</div>`;
+}
+
+function renderDots(){
+  const el = document.getElementById('prac-dots');
+  el.innerHTML = '';
+  const totalTurns = Math.ceil(pracMaxSteps / 2);
+  const currentTurn = Math.floor(pracStep / 2);
+  for(let i = 0; i < totalTurns; i++){
+    const dot = document.createElement('div');
+    dot.className = 'prac-dot' + (i < currentTurn ? ' done' : i === currentTurn ? ' current' : '');
+    el.appendChild(dot);
+  }
+}
+
+function updateStatus(){
+  const mi = Math.floor(pracStep / 2);
+  const isB = pracStep % 2 === 1;
+  const side = isB ? 'Black' : 'White';
+  const el = document.getElementById('prac-status-text');
+  if(el) el.textContent = `Move ${pracStep + 1} of ${pracMaxSteps}`;
+  // Update turn indicator
+  const turnDot = document.getElementById('prac-turn-dot');
+  const turnText = document.getElementById('prac-turn-text');
+  const playerTurn = isPlayerTurn();
+  if(turnDot){
+    turnDot.style.background = playerTurn ? 'var(--ac)' : 'var(--tx3)';
+    turnDot.style.animationPlayState = playerTurn ? 'running' : 'paused';
+  }
+  if(turnText) turnText.textContent = playerTurn ? '← Your turn to play' : 'Opponent thinking…';
+}
+
+
+/* ════════════════ THEME TOGGLE ════════════════ */
+let boardTheme = localStorage.getItem('co_theme') || 'light';
+function applyTheme(){
+  document.body.classList.toggle('light', boardTheme==='light');
+  const lbl = document.getElementById('theme-toggle-label');
+  const btn = document.getElementById('theme-toggle');
+  if(lbl){ lbl.textContent = boardTheme==='light' ? 'Light' : 'Dark'; }
+  if(btn){ btn.classList.toggle('classic', boardTheme==='light'); }
+}
+function toggleTheme(){
+  boardTheme = boardTheme==='dark' ? 'light' : 'dark';
+  localStorage.setItem('co_theme', boardTheme);
+  applyTheme();
+}
+applyTheme();
+
+/* ════════════════ SETTINGS DRAWER ════════════════ */
+function toggleSettings(){
+  const drawer = document.getElementById('settings-drawer');
+  const overlay = document.getElementById('settings-overlay');
+  const btn = document.getElementById('settings-btn');
+  const open = drawer.classList.contains('show');
+  drawer.classList.toggle('show', !open);
+  overlay.classList.toggle('show', !open);
+  btn.classList.toggle('open', !open);
+}
+
+/* ════════════════ PIECE STYLE TOGGLE ════════════════ */
+// v2 — default classic. Reset si settings d'une version précédente
+if(localStorage.getItem('co_settings_v') !== '2'){
+  localStorage.setItem('co_pieces','classic');
+  localStorage.setItem('co_settings_v','2');
+}
+let pieceStyle = localStorage.getItem('co_pieces') || 'classic';
+function applyPieceStyle(){
+  const btn = document.getElementById('piece-toggle');
+  const lbl = document.getElementById('piece-toggle-label');
+  if(pieceStyle==='classic'){
+    btn.classList.add('classic');
+    lbl.textContent='Classic';
+  } else {
+    btn.classList.remove('classic');
+    lbl.textContent='Flat';
+  }
+}
+function togglePieceStyle(){
+  pieceStyle = pieceStyle==='flat' ? 'classic' : 'flat';
+  localStorage.setItem('co_pieces', pieceStyle);
+  applyPieceStyle();
+  update();
+  // also re-render quiz board if quiz is active
+  if(quizQuestions.length && quizIdx < quizQuestions.length){
+    renderQuizBoard(quizQuestions[quizIdx]);
+  }
+}
+applyPieceStyle();
+
+/* ════════════════ EVENTS ════════════════ */
+document.getElementById('bp2').onclick=()=>{if(curH>-1){curH--;update();}};
+document.getElementById('bn').onclick=()=>{
+  if(curH<maxH()){curH++;update();}
+};
+document.getElementById('bs').onclick=()=>{curH=-1;update();};
+document.getElementById('be').onclick=()=>{curH=maxH();update();};
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'&&curH<maxH()){curH++;update();}
+  if(e.key==='ArrowLeft'&&curH>-1){curH--;update();}
+
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50){if(dx<0&&curH<maxH()){curH++;update();}else if(dx>0&&curH>0){curH--;update();}}
+},{passive:true});
+
+update();
+</script>
+
+<footer style="
+  text-align:center;
+  padding:18px 16px;
+  font-size:10px;
+  color:rgba(255,255,255,.2);
+  font-family:'Inter',sans-serif;
+  letter-spacing:.06em;
+  border-top:1px solid rgba(255,255,255,.04);
+  flex-shrink:0;
+">© 2026 William CHAUVET — ChessOpener</footer>
+</body>
+</html>
