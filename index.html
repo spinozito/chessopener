@@ -177,7 +177,7 @@ header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:c
 .onboard-btn:active{transform:scale(.97)}
 
 /* ── VARIANT DONE STATE ── */
-.vbtn.done .vn::after{content:' ✓';font-size:10px;opacity:.6}
+
 .vbtn.done{border-color:rgba(201,168,76,.25)}
 
 /* ── TABS ── */
@@ -574,20 +574,11 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
   <div class="settings-title">Settings</div>
   <div class="settings-row">
     <div class="settings-row-label">
-      <div class="settings-row-name">Piece style</div>
-      <div class="settings-row-sub">Flat minimal or Lichess Classic</div>
-    </div>
-    <button class="piece-toggle" id="piece-toggle" onclick="togglePieceStyle()">
-      <span class="piece-toggle-label" id="piece-toggle-label">Flat</span>
-    </button>
-  </div>
-  <div class="settings-row">
-    <div class="settings-row-label">
       <div class="settings-row-name">Board theme</div>
       <div class="settings-row-sub">Dark premium or Light classic</div>
     </div>
     <button class="piece-toggle" id="theme-toggle" onclick="toggleTheme()">
-      <span class="piece-toggle-label" id="theme-toggle-label">Dark</span>
+      <span class="piece-toggle-label" id="theme-toggle-label">Light</span>
     </button>
   </div>
 </div>
@@ -2594,7 +2585,7 @@ function renderVariants(){
   const list=document.getElementById('vlist'); list.innerHTML='';
   curOp.variants.forEach(v=>{
     const btn=document.createElement('button');
-    const done=seenVariants.has(curOp.id+'::'+v.id);
+    const done=false;
     btn.className='vbtn'+(v.id===curV.id?' active':'')+(done?' done':'');
     btn.innerHTML=`<span class="vn">${v.name}${done?' ✓':''}</span>`;
     btn.onclick=()=>{curV=v;curH=-1;update();};
@@ -3258,12 +3249,17 @@ function updateStatus(override){
 
 
 /* ════════════════ THEME TOGGLE ════════════════ */
-let boardTheme = localStorage.getItem('co_theme') || 'light';
+if(localStorage.getItem('co_settings_v') !== '3'){
+  localStorage.removeItem('co_pieces');
+  localStorage.removeItem('co_theme');
+  localStorage.setItem('co_settings_v','3');
+}
+let boardTheme = localStorage.getItem('co_theme') || 'dark';
 function applyTheme(){
   document.body.classList.toggle('light', boardTheme==='light');
   const lbl = document.getElementById('theme-toggle-label');
   const btn = document.getElementById('theme-toggle');
-  if(lbl){ lbl.textContent = boardTheme==='light' ? 'Light' : 'Dark'; }
+  if(lbl){ lbl.textContent = boardTheme==='light' ? 'Dark' : 'Light'; }
   if(btn){ btn.classList.toggle('classic', boardTheme==='light'); }
 }
 function toggleTheme(){
@@ -3286,31 +3282,9 @@ function toggleSettings(){
 
 /* ════════════════ PIECE STYLE TOGGLE ════════════════ */
 // v2 — default classic. Reset si settings d'une version précédente
-if(localStorage.getItem('co_settings_v') !== '2'){
-  localStorage.setItem('co_pieces','classic');
-  localStorage.setItem('co_settings_v','2');
-}
-let pieceStyle = localStorage.getItem('co_pieces') || 'classic';
-function applyPieceStyle(){
-  const btn = document.getElementById('piece-toggle');
-  const lbl = document.getElementById('piece-toggle-label');
-  if(pieceStyle==='classic'){
-    btn.classList.add('classic');
-    lbl.textContent='Classic';
-  } else {
-    btn.classList.remove('classic');
-    lbl.textContent='Flat';
-  }
-}
-function togglePieceStyle(){
-  pieceStyle = pieceStyle==='flat' ? 'classic' : 'flat';
-  localStorage.setItem('co_pieces', pieceStyle);
-  applyPieceStyle();
-  update();
-  // Re-render practice board if practice is active
-  if(pracBoard) renderPracBoard();
-}
-applyPieceStyle();
+
+const pieceStyle = 'classic';
+
 
 /* ════════════════ EVENTS ════════════════ */
 document.getElementById('bp2').onclick=()=>{if(curH>-1){curH--;update();}};
