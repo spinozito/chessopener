@@ -514,11 +514,12 @@ body.light .practice-this-btn{border-color:rgba(15,110,86,.4);color:#0f6e56}
 .ablock.hist .ablabel{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;color:rgba(100,160,220,.7)}
 .ablock.hist .abtext{font-size:15px;line-height:1.65;color:var(--tx2);font-family:'Cormorant Garamond',serif;font-style:italic}
 
-.magnus-btn{position:fixed;bottom:1.5rem;right:1.3rem;z-index:200;width:48px;height:48px;border-radius:50%;background:#5dcaa5;color:#04342C;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;touch-action:none;user-select:none;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 16px rgba(93,202,165,.3)}
-.magnus-btn.open{background:#1D9E75}
-body.light .magnus-btn{background:#0f6e56;color:#E1F5EE;box-shadow:0 2px 16px rgba(15,110,86,.25)}
-body.light .magnus-btn.open{background:#085041}
-.magnus-popup{position:fixed;bottom:5.8rem;right:1.3rem;z-index:199;width:300px;background:var(--bg2);border:1px solid var(--line2);border-radius:20px 20px 4px 20px;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(10px) scale(.96);transition:opacity .22s,transform .22s;overflow:hidden}
+.magnus-btn{position:fixed;bottom:1.5rem;left:1.3rem;z-index:200;width:auto;height:auto;background:transparent!important;border:none!important;padding:0!important;box-shadow:none!important;-webkit-tap-highlight-color:transparent;background:#5dcaa5;color:#04342C;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;touch-action:none;user-select:none;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 16px rgba(93,202,165,.3)}
+.magnus-btn.open{opacity:.85;background:none!important}
+
+body.light .magnus-btn{background:none!important}
+
+.magnus-popup{position:fixed;bottom:5.8rem;left:1.3rem;z-index:199;width:300px;background:var(--bg2);border:1px solid var(--line2);border-radius:20px 20px 4px 20px;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(10px) scale(.96);transition:opacity .22s,transform .22s;overflow:hidden}
 .magnus-popup.open{opacity:1;pointer-events:all;transform:translateY(0) scale(1)}
 .magnus-popup-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;border-bottom:1px solid var(--line)}
 .magnus-avatar{width:32px;height:32px;border-radius:50%;background:#5dcaa5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -545,6 +546,20 @@ body.light .magnus-send{background:#0f6e56;color:#E1F5EE}
 .magnus-send:disabled{opacity:.4}
 .move-commentary{position:fixed;top:4.2rem;left:50%;transform:translateX(-50%) translateY(-6px);background:var(--bg2);border:1px solid var(--line2);border-radius:20px;padding:.35rem .85rem;font-size:12px;color:var(--tx2);max-width:72vw;text-align:center;opacity:0;pointer-events:none;z-index:198;transition:opacity .2s,transform .2s}
 .move-commentary.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+
+@keyframes magnusBounceIn{
+  0%{opacity:0;transform:scale(.4) translateY(20px)}
+  60%{opacity:1;transform:scale(1.15) translateY(-4px)}
+  80%{transform:scale(.95) translateY(2px)}
+  100%{transform:scale(1) translateY(0)}
+}
+@keyframes magnusPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.1)}
+}
+.magnus-btn.magnus-intro{animation:magnusBounceIn .6s cubic-bezier(.34,1.56,.64,1) forwards}
+.magnus-btn.magnus-pulse{animation:magnusPulse .4s ease-in-out 2}
 
 </style>
 </head>
@@ -3907,7 +3922,7 @@ async function sendMagnus(){
     btn.style.left = pos.x + 'px'; btn.style.top = pos.y + 'px';
     const pop = document.getElementById('magnus-popup');
     if(pop && pop.classList.contains('open')){
-      pop.style.left = Math.max(8, pos.x - 280 + 44) + 'px';
+      pop.style.left = pos.x + 'px';
       pop.style.top = (pos.y - pop.offsetHeight - 8) + 'px';
       pop.style.right = 'auto'; pop.style.bottom = 'auto';
     }
@@ -3951,6 +3966,28 @@ async function showMoveCommentary(){
   } catch(e){ /* silent fail for commentary */ }
 }
 
+
+/* ── MAGNUS INTRO ANIMATION ── */
+(function(){
+  if(localStorage.getItem('co_magnus_seen')) return;
+  const btn = document.getElementById('magnus-btn');
+  if(!btn) return;
+  btn.style.opacity = '0';
+  setTimeout(() => {
+    btn.style.opacity = '';
+    btn.classList.add('magnus-intro');
+    btn.addEventListener('animationend', () => {
+      btn.classList.remove('magnus-intro');
+      setTimeout(() => {
+        btn.classList.add('magnus-pulse');
+        btn.addEventListener('animationend', () => {
+          btn.classList.remove('magnus-pulse');
+          localStorage.setItem('co_magnus_seen', '1');
+        }, {once: true});
+      }, 600);
+    }, {once: true});
+  }, 1500);
+})();
 </script>
 
 <footer style="
@@ -3972,11 +4009,13 @@ async function showMoveCommentary(){
   </div>
 </div>
 
-<button class="magnus-btn" id="magnus-btn" aria-label="Ask Magnus" onclick="if(!window._magnusDragMoved)toggleMagnus()">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+<div class="magnus-btn" id="magnus-btn" role="button" aria-label="Ask Magnus" onclick="if(!window._magnusDragMoved)toggleMagnus()" style="background:transparent;border:none;padding:0;margin:0;display:inline-flex;cursor:pointer;-webkit-tap-highlight-color:transparent">
+  <svg width="58" height="46" viewBox="0 0 70 54" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;background:transparent;overflow:visible" aria-hidden="true">
+    <path d="M12 1 H58 Q69 1 69 12 V30 Q69 41 58 41 H22 L7 53 L12 41 H12 Q1 41 1 30 V12 Q1 1 12 1 Z" fill="#5dcaa5"/>
+    <text x="35" y="18" text-anchor="middle" fill="#ffffff" font-size="10" font-family="Inter, sans-serif" font-weight="500" letter-spacing="0.5">Ask</text>
+    <text x="35" y="32" text-anchor="middle" fill="#ffffff" font-size="10" font-family="Inter, sans-serif" font-weight="500" letter-spacing="0.5">Magnus</text>
   </svg>
-</button>
+</div>
 <div class="magnus-popup" id="magnus-popup">
   <div class="magnus-popup-header">
     <div class="magnus-header-info">
@@ -4001,6 +4040,7 @@ async function showMoveCommentary(){
   </div>
 </div>
 <div class="move-commentary" id="move-commentary"></div>
+
 
 </body>
 </html>
