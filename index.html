@@ -122,7 +122,7 @@ header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:c
 
 /* ── VARIANTS ── */
 .slabel{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);margin-bottom:4px}
-.vlist{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.vlist{display:flex;flex-wrap:wrap;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .vlist::-webkit-scrollbar{display:none}
 .vbtn{flex-shrink:0;display:flex;align-items:center;padding:2px 7px;background:transparent;border:1px solid var(--line2);border-radius:5px;color:var(--tx3);font-size:9px;font-weight:600;font-style:italic;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .vbtn:active{transform:scale(.97)}
@@ -2884,7 +2884,7 @@ function renderOpFilter(){
     const btn = document.createElement('button');
     btn.className = 'op-btn' + (op.id === pracOp.id ? ' active' : '');
     btn.innerHTML = '<span class="on">' + op.name + '</span>';
-    btn.onclick = () => { pracOp = op; curFamily=null; pracVar = op.variants[0]; renderOpFilter(); renderFamilyBar(op,'prac-family-bar',false); renderVarFilter(); startPractice(); updateLegend(op.cx||1,op.sh||1,op.pop||'',op.side||'',op.name,false); };
+    btn.onclick = () => { pracOp = op; pracFamily=null; pracVar = op.variants[0]; renderOpFilter(); renderFamilyBar(op,'prac-family-bar',false); renderVarFilter(); startPractice(); updateLegend(pracVar.cx||1,pracVar.sh||1,pracVar.pop||'',pracVar.side||'',pracVar.name,false); };
     bar.appendChild(btn);
   });
 }
@@ -2893,17 +2893,19 @@ function renderVarFilter(){
   const _qgSeps = {"accepted": "Accepted", "slav": "Other defenses"};
   const _caroSeps = {"advance": "Advance", "caro-panov": "Panov & Others"};
   const _pracSepBefore = pracOp.id === 'queens-gambit' ? _qgSeps : pracOp.id === 'caro' ? _caroSeps : {};
+  const outerBar = document.getElementById('prac-var-bar');
   const bar = document.getElementById('prac-var-filter');
-  bar.innerHTML = '<span class="filter-label">Variation</span>';
-  getFilteredVariants(pracOp).forEach(v => {
+  if(!bar) return;
+  const variants = getFilteredVariants(pracOp, pracFamily);
+  if(outerBar) outerBar.innerHTML = '<span class="filter-label">Variation</span><div class="vlist" id="prac-var-filter"></div>';
+  const bar2 = document.getElementById('prac-var-filter');
+  if(!bar2) return;
+  variants.forEach(v => {
     const btn = document.createElement('button');
-    if(_pracSepBefore[v.id]){
-      const sep=document.createElement('span');sep.style.cssText='width:100%;height:1px;background:var(--line);opacity:.5;margin:2px 0;flex-shrink:0;display:block';bar.appendChild(sep);
-    }
-        btn.className = 'vbtn' + (v.id === pracVar.id ? ' active' : '');
+    btn.className = 'vbtn' + (v.id === pracVar.id ? ' active' : '');
     btn.innerHTML = '<span class="vn">' + v.name + '</span>';
     btn.onclick = () => { pracVar = v; renderVarFilter(); startPractice(); updateLegend(v.cx||1,v.sh||1,v.pop||'',v.side||'',v.name,false); };
-    bar.appendChild(btn);
+    bar2.appendChild(btn);
   });
 }
 
@@ -3093,6 +3095,7 @@ const VARIANT_FAMILIES = {
 };
 
 let curFamily = null; // currently selected family id
+let pracFamily = null; // practice-specific family filter
 
 
 function renderFamilyBar(op, barId, isLearn){
@@ -3108,15 +3111,14 @@ function renderFamilyBar(op, barId, isLearn){
   // Reset curFamily titleEl.style.display='';
   bar.style.display='';
   // Reset curFamily if switching opening
-  if(!fams.find(f => f.id === curFamily)) curFamily = fams[0].id;
+  if(isLearn){ if(!fams.find(f => f.id === curFamily)) curFamily = fams[0].id; } else { if(!fams.find(f => f.id === pracFamily)) pracFamily = fams[0].id; }
   fams.forEach(fam => {
     const btn = document.createElement('button');
-    btn.className = 'family-btn' + (curFamily === fam.id ? ' active' : '');
+    btn.className = 'family-btn' + ((isLearn ? curFamily : pracFamily) === fam.id ? ' active' : '');
     btn.textContent = fam.label;
     btn.onclick = () => {
-      curFamily = fam.id;
-      if(isLearn){ renderFamilyBar(op,'family-bar',true); renderVariants(); }
-      else { renderFamilyBar(op,'prac-family-bar',false); renderVarFilter(); }
+      if(isLearn){ curFamily = fam.id; renderFamilyBar(op,'family-bar',true); renderVariants(); }
+      else { pracFamily = fam.id; renderFamilyBar(op,'prac-family-bar',false); renderVarFilter(); }
     };
     bar.appendChild(btn);
   });
@@ -3124,10 +3126,11 @@ function renderFamilyBar(op, barId, isLearn){
 
 function getFamilies(op){ return VARIANT_FAMILIES[op.id] || null; }
 
-function getFilteredVariants(op){
+function getFilteredVariants(op, familyId){
+  const fid = (familyId !== undefined) ? familyId : curFamily;
   const fams = getFamilies(op);
-  if(!fams || !curFamily) return op.variants;
-  const fam = fams.find(f => f.id === curFamily);
+  if(!fams || !fid) return op.variants;
+  const fam = fams.find(f => f.id === fid);
   return fam ? op.variants.filter(v => fam.variants.includes(v.id)) : op.variants;
 }
 
