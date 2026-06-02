@@ -36,7 +36,7 @@ header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:c
 /* ── OPENING PICKER ── */
 .op-bar{flex-shrink:0;display:flex;gap:6px;padding:.5rem 1rem .4rem;overflow-x:auto;scrollbar-width:none;background:var(--bg2)}
 .op-bar::-webkit-scrollbar{display:none}
-.op-bar--var{padding:.2rem 1rem .3rem;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.op-bar--var{padding:.2rem 1rem .3rem;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
 .op-bar::-webkit-scrollbar{display:none}
 .op-btn{flex-shrink:0;display:flex;align-items:center;padding:5px 14px;background:var(--bg3);border:1px solid var(--line2);border-radius:20px;color:var(--tx3);font-size:11.5px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .op-btn:active{transform:scale(.96)}
@@ -122,7 +122,7 @@ header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:c
 
 /* ── VARIANTS ── */
 .slabel{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);margin-bottom:4px}
-.vlist{display:flex;flex-wrap:wrap;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.vlist{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;-webkit-overflow-scrolling:touch}
 .vlist::-webkit-scrollbar{display:none}
 .vbtn{flex-shrink:0;display:flex;align-items:center;padding:2px 7px;background:transparent;border:1px solid var(--line2);border-radius:5px;color:var(--tx3);font-size:9px;font-weight:600;font-style:italic;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .vbtn:active{transform:scale(.97)}
@@ -161,10 +161,10 @@ header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:c
 
 /* ── PROGRESS BAR ── */
 .move-dots{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0 2px;flex-wrap:wrap}
-.move-dot{width:7px;height:7px;border-radius:50%;background:transparent;border:0.5px solid rgba(255,255,255,.25);cursor:pointer;transition:all .15s;flex-shrink:0}
+.move-dot{width:7px;height:7px;border-radius:50%;background:rgba(26,18,0,.12);border:0.5px solid rgba(26,18,0,.25);cursor:pointer;transition:all .15s;flex-shrink:0}
 .move-dot.played{background:rgba(201,168,76,.5);border-color:rgba(201,168,76,.4)}
 .move-dot.current{background:#c9a84c;border-color:#c9a84c;transform:scale(1.3)}
-body.light .move-dot{background:transparent;border:0.5px solid rgba(26,18,0,.3)}
+body.dark .move-dot{background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.3)}
 body.light .move-dot.played{background:rgba(138,104,32,.4);border-color:rgba(138,104,32,.3)}
 body.light .move-dot.current{background:#8a6820;border-color:#8a6820}
 
@@ -335,14 +335,15 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 .prac-feedback-msg.info{background:rgba(201,168,76,.08);color:var(--ac);border:1px solid rgba(201,168,76,.2)}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .prac-dots{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0 2px;flex-wrap:wrap}
-.prac-dot{width:7px;height:7px;border-radius:50%;background:transparent;border:0.5px solid rgba(255,255,255,.25);transition:all .15s;flex-shrink:0}
-body.light .prac-dot{background:transparent;border:0.5px solid rgba(26,18,0,.3)}
+.prac-dot{width:7px;height:7px;border-radius:50%;background:rgba(26,18,0,.12);border:0.5px solid rgba(26,18,0,.25);transition:all .15s;flex-shrink:0}
+body.dark .prac-dot{background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.3)}
 .prac-dot.done{background:rgba(201,168,76,.5);border-color:rgba(201,168,76,.4)}
 body.light .prac-dot.done{background:rgba(138,104,32,.4);border-color:rgba(138,104,32,.3)}
 .prac-dot.current{background:#c9a84c;border-color:#c9a84c;transform:scale(1.3)}
 body.light .prac-dot.current{background:#8a6820;border-color:#8a6820}
 .prac-status{padding:.3rem 1rem;text-align:center}
-.prac-status-text{font-size:13px;color:var(--tx3);font-family:'Inter',sans-serif}
+.prac-status-text{font-size:13px;color:#5dcaa5;font-family:'Inter',sans-serif}
+body.light .prac-status-text{color:#0f6e56}
 .prac-done{display:flex;flex-direction:column;align-items:center;gap:10px;padding:1.5rem 1rem;text-align:center}
 .prac-done-icon{font-size:44px;color:var(--ac)}
 .prac-done-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--ac)}
@@ -359,7 +360,8 @@ body.light .prac-dot.current{background:#8a6820;border-color:#8a6820}
 
 /* ── PRACTICE TOP BAR ── */
 .prac-top-bar{display:flex;align-items:center;justify-content:space-between;padding:.15rem .8rem .05rem}
-.prac-status-text{font-size:11px;color:var(--tx3);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.prac-status-text{font-size:11px;color:#5dcaa5;font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+body.light .prac-status-text{color:#0f6e56}
 
 /* ── PRACTICE FEEDBACK CARD ── */
 .prac-card{margin:3px .8rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--line2);background:var(--bg2)}
@@ -419,7 +421,8 @@ body.light .prac-dot.current{background:#8a6820;border-color:#8a6820}
 .prac-done-btn{width:75%;padding:10px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.35);border-radius:20px;color:var(--ac);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.04em;margin:4px auto 0;display:block;transition:all .15s}
 .prac-done-btn--secondary{background:transparent;border-color:var(--line2);color:var(--tx3);font-size:11px;font-weight:600}
 .prac-done-msg strong{color:var(--ac)}
-.prac-hint-first{text-align:center;font-size:13px;color:var(--tx3);padding:.1rem 1rem 0;opacity:.7;font-family:'Inter',sans-serif;font-style:italic}
+.prac-hint-first{text-align:center;font-size:13px;color:#5dcaa5;padding:.1rem 1rem 0;font-family:'Inter',sans-serif;font-style:italic}
+body.light .prac-hint-first{color:#0f6e56}
 .prac-hint-btn{font-size:10px;font-weight:600;color:var(--tx3);background:transparent;border:none;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.04em;text-decoration:underline;opacity:.6;padding:0;-webkit-tap-highlight-color:transparent}
 .prac-hint-btn:active{opacity:1}
 
@@ -3971,14 +3974,14 @@ async function showMoveCommentary(){
 
 <button class="magnus-btn" id="magnus-btn" aria-label="Ask Magnus" onclick="if(!window._magnusDragMoved)toggleMagnus()">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
   </svg>
 </button>
 <div class="magnus-popup" id="magnus-popup">
   <div class="magnus-popup-header">
     <div class="magnus-header-info">
       <div class="magnus-avatar">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#04342C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#04342C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       </div>
       <div>
         <div class="magnus-popup-name">Magnus</div>
