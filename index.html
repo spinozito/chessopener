@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" style="background:#f5f0e8!important">
 <head>
+<style>:root,html,body{background:#f5f0e8!important}body.dark,body.dark *+*{--force:1}html:has(body.dark){background:#070500!important}body.dark{background:#070500!important}</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>ChessOpener</title>
@@ -14,20 +15,18 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%}
 :root{
-  --bg:#070500;--bg2:#0f0c02;--bg3:#1a1305;--bg4:#221a08;
-  --line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.14);
-  --tx:#f0ece0;--tx2:rgba(240,236,224,.85);--tx3:rgba(240,236,224,.58);
-  --ac:#c9a84c;--ac2:#e8c84a;--glow:rgba(201,168,76,.2);
-  --green:#c9a84c;--gbg:rgba(201,168,76,.06);
-  --blue:#8ab4d0;--bbg:rgba(138,180,208,.06);
-  --sl:#e8d5a0;--sd:#2a1e08;--board-shadow:0 0 0 1px rgba(201,168,76,.4),0 0 0 4px rgba(201,168,76,.07),0 12px 40px rgba(0,0,0,.9);
-  --hl-from:rgba(93,202,165,.0);--hl-to:rgba(93,202,165,.0);
+  --bg:#f5f0e8;--bg2:#ffffff;--bg3:#ede6d8;--bg4:#e0d8c8;
+  --tx:#1a1200;--tx2:rgba(26,18,0,.75);--tx3:rgba(26,18,0,.4);
+  --line:rgba(26,18,0,.1);--line2:rgba(26,18,0,.12);
+  --ac:#8a6820;--ac2:#c9a84c;--blue:#4a7090;--glow:rgba(138,104,32,.2);
+
+  --sl:#f0d9b5;--sd:#b58863;--board-shadow:0 0 0 1px rgba(138,104,32,.25),0 4px 16px rgba(0,0,0,.12);
 }
-html{background:var(--bg)}
+html,body{background:#f5f0e8}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-height:100dvh;display:flex;flex-direction:column}
 
 /* ── HEADER ── */
-header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:.4rem .75rem;background:rgba(6,4,0,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.15)}
+header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:.4rem .75rem;background:rgba(245,240,232,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(138,104,32,.12)}
 .logo{display:flex;align-items:center;gap:.5rem}
 .logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#c9a84c,#8a6820);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 10px var(--glow)}
 .logo-title{font-size:clamp(.95rem,4vw,1.25rem);font-weight:600;letter-spacing:.06em;font-family:'Cormorant Garamond',serif;color:var(--ac);white-space:nowrap}
@@ -162,10 +161,10 @@ header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:c
 
 /* ── PROGRESS BAR ── */
 .move-dots{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0 2px;flex-wrap:wrap}
-.move-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:all .15s;flex-shrink:0}
+.move-dot{width:7px;height:7px;border-radius:50%;background:transparent;border:0.5px solid rgba(255,255,255,.25);cursor:pointer;transition:all .15s;flex-shrink:0}
 .move-dot.played{background:rgba(201,168,76,.5);border-color:rgba(201,168,76,.4)}
 .move-dot.current{background:#c9a84c;border-color:#c9a84c;transform:scale(1.3)}
-body.light .move-dot{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.1)}
+body.light .move-dot{background:transparent;border:0.5px solid rgba(26,18,0,.3)}
 body.light .move-dot.played{background:rgba(138,104,32,.4);border-color:rgba(138,104,32,.3)}
 body.light .move-dot.current{background:#8a6820;border-color:#8a6820}
 
@@ -186,7 +185,7 @@ body.light .move-dot.current{background:#8a6820;border-color:#8a6820}
 .vbtn.done{border-color:rgba(201,168,76,.25)}
 
 /* ── TABS ── */
-.tabs{display:flex;gap:4px;margin-left:auto}
+.tabs{display:flex;gap:4px;margin-left:auto;margin-right:.6rem}
 .tab-btn{padding:6px 16px;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--tx3);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;border-bottom-width:2px}
 .tab-btn:active{transform:scale(.97)}
 #tab-learn.active{background:rgba(201,168,76,.1);border-color:transparent;border-bottom-color:rgba(201,168,76,.8);color:var(--ac)}
@@ -258,10 +257,10 @@ body.light .move-dot.current{background:#8a6820;border-color:#8a6820}
 
 /* ── SETTINGS BUTTON ── */
 .theme-toggle-btn{padding:0;background:transparent;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center}
-.toggle-track{display:block;width:36px;height:20px;border-radius:10px;background:var(--line2);position:relative;transition:background .2s}
-.toggle-thumb{display:block;width:16px;height:16px;border-radius:50%;background:var(--tx3);position:absolute;top:2px;left:2px;transition:transform .2s, background .2s}
-body.light .toggle-track{background:rgba(201,168,76,.4)}
-body.light .toggle-thumb{transform:translateX(16px);background:#c9a84c}
+.toggle-track{display:block;width:36px;height:20px;border-radius:10px;background:rgba(201,168,76,.35);position:relative;transition:background .2s}
+.toggle-thumb{display:block;width:16px;height:16px;border-radius:50%;background:#c9a84c;position:absolute;top:2px;left:2px;transform:translateX(16px);transition:transform .2s,background .2s}
+body.dark .toggle-track{background:var(--line2)}
+body.dark .toggle-thumb{transform:translateX(0);background:rgba(240,236,224,.35)}
 .settings-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;font-size:18px;color:var(--tx3);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s}
 .settings-btn:active{transform:scale(.9)}
 .settings-btn.open{color:var(--ac)}
@@ -283,16 +282,22 @@ body.light .toggle-thumb{transform:translateX(16px);background:#c9a84c}
 
 
 /* ── LIGHT THEME ── */
-body.light{
-  --bg:#f5f0e8;--bg2:#ffffff;--bg3:#ede6d8;--bg4:#e0d8c8;
-  --tx:#1a1200;--tx2:rgba(26,18,0,.75);--tx3:rgba(26,18,0,.4);
-  --line:rgba(26,18,0,.1);--line2:rgba(26,18,0,.12);
-  --ac:#8a6820;--ac2:#c9a84c;--blue:#4a7090;--glow:rgba(138,104,32,.2);
+body.dark{
+  --bg:#070500;--bg2:#0f0c02;--bg3:#1a1305;--bg4:#221a08;
+  --line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.14);
+  --tx:#f0ece0;--tx2:rgba(240,236,224,.85);--tx3:rgba(240,236,224,.58);
+  --ac:#c9a84c;--ac2:#e8c84a;--glow:rgba(201,168,76,.2);
+  --green:#c9a84c;--gbg:rgba(201,168,76,.06);
+  --blue:#8ab4d0;--bbg:rgba(138,180,208,.06);
+  --sl:#e8d5a0;--sd:#2a1e08;--board-shadow:0 0 0 1px rgba(201,168,76,.4),0 0 0 4px rgba(201,168,76,.07),0 12px 40px rgba(0,0,0,.9);
+  --hl-from:rgba(93,202,165,.0);--hl-to:rgba(93,202,165,.0);
+
+  --sl:#e8d5a0;--sd:#2a1e08;--board-shadow:0 0 0 1px rgba(201,168,76,.4),0 0 0 4px rgba(201,168,76,.07),0 12px 40px rgba(0,0,0,.9);
 }
-body.light{--sl:#f0d9b5;--sd:#b58863;--board-shadow:0 0 0 1px rgba(138,104,32,.25),0 4px 16px rgba(0,0,0,.12);}
-body.light header{background:rgba(245,240,232,.95)}
-body.light .op-btn.active .on{color:#8a6820}
-body.light .vbtn.active .vn{color:#8a6820}
+
+body.dark header{background:rgba(6,4,0,.92)}
+
+
 body.light .nav-move.w,body.light .nav-move.b{color:#8a6820}
 body.light .nav-next{background:linear-gradient(135deg,#8a6820,#5a4010);color:#f5f0e8}
 body.light .acard::before{background:linear-gradient(90deg,transparent,#c9a84c,transparent)}
@@ -321,7 +326,7 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 
 .prac-chip{flex-shrink:0;display:flex;align-items:center;padding:5px 14px;background:var(--bg3);border:1px solid var(--line2);border-radius:20px;color:var(--tx3);font-size:11.5px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .prac-chip.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.4);color:var(--ac)}
-.prac-board-section{display:flex;justify-content:center;padding:.7rem 0 0}
+.prac-board-section{display:flex;flex-direction:column;align-items:center;padding:.7rem 0 0}
 .prac-feedback{min-height:36px;display:flex;align-items:center;justify-content:center;padding:0 .8rem;text-align:center;margin-top:0}
 .prac-card{margin:3px .8rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--line2);background:var(--bg2)}
 .prac-feedback-msg{font-size:14px;font-weight:600;padding:8px 18px;border-radius:10px;transition:opacity .4s ease}
@@ -329,10 +334,13 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 .prac-feedback-msg.wrong{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);animation:shake .3s ease}
 .prac-feedback-msg.info{background:rgba(201,168,76,.08);color:var(--ac);border:1px solid rgba(201,168,76,.2)}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.prac-dots{display:flex;gap:6px;justify-content:center;padding:.2rem 0 .1rem}
-.prac-dot{width:10px;height:10px;border-radius:50%;background:var(--bg3);border:1px solid var(--line2);transition:all .2s}
-.prac-dot.done{background:var(--ac);border-color:var(--ac)}
-.prac-dot.current{background:transparent;border-color:var(--ac);box-shadow:0 0 0 2px rgba(201,168,76,.2)}
+.prac-dots{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0 2px;flex-wrap:wrap}
+.prac-dot{width:7px;height:7px;border-radius:50%;background:transparent;border:0.5px solid rgba(255,255,255,.25);transition:all .15s;flex-shrink:0}
+body.light .prac-dot{background:transparent;border:0.5px solid rgba(26,18,0,.3)}
+.prac-dot.done{background:rgba(201,168,76,.5);border-color:rgba(201,168,76,.4)}
+body.light .prac-dot.done{background:rgba(138,104,32,.4);border-color:rgba(138,104,32,.3)}
+.prac-dot.current{background:#c9a84c;border-color:#c9a84c;transform:scale(1.3)}
+body.light .prac-dot.current{background:#8a6820;border-color:#8a6820}
 .prac-status{padding:.3rem 1rem;text-align:center}
 .prac-status-text{font-size:13px;color:var(--tx3);font-family:'Inter',sans-serif}
 .prac-done{display:flex;flex-direction:column;align-items:center;gap:10px;padding:1.5rem 1rem;text-align:center}
@@ -411,7 +419,7 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 .prac-done-btn{width:75%;padding:10px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.35);border-radius:20px;color:var(--ac);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.04em;margin:4px auto 0;display:block;transition:all .15s}
 .prac-done-btn--secondary{background:transparent;border-color:var(--line2);color:var(--tx3);font-size:11px;font-weight:600}
 .prac-done-msg strong{color:var(--ac)}
-.prac-hint-first{text-align:center;font-size:10px;color:var(--tx3);padding:.1rem 1rem 0;opacity:.7;font-family:'Inter',sans-serif;font-style:italic}
+.prac-hint-first{text-align:center;font-size:13px;color:var(--tx3);padding:.1rem 1rem 0;opacity:.7;font-family:'Inter',sans-serif;font-style:italic}
 .prac-hint-btn{font-size:10px;font-weight:600;color:var(--tx3);background:transparent;border:none;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.04em;text-decoration:underline;opacity:.6;padding:0;-webkit-tap-highlight-color:transparent}
 .prac-hint-btn:active{opacity:1}
 
@@ -427,7 +435,6 @@ body.light .piece-toggle.classic{background:rgba(138,104,32,.12);border-color:rg
 .op-btn.active .op-stars{color:rgba(201,168,76,.8)}
 body.light .op-stars{color:rgba(138,104,32,.4)}
 body.light .op-btn.active .op-stars{color:rgba(138,104,32,.7)}
-body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.12)}
 
 .var-status{font-size:9px;margin-left:4px;opacity:.7}
 .prac-chip--var .var-status{font-size:9px;margin-left:3px}
@@ -437,7 +444,7 @@ body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.
   text-transform:uppercase;color:var(--ac);background:rgba(201,168,76,.1);
   border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:1px 7px;
   margin-left:6px;vertical-align:middle;animation:badge-pop .3s ease}
-.gamif-legend{display:flex;align-items:flex-start;padding:.15rem 1rem .3rem;font-size:9px;color:var(--tx3);font-family:'Inter',sans-serif;opacity:.7;gap:4px}
+.gamif-legend{display:flex;flex-direction:column;padding:.15rem 1rem .4rem;font-size:9px;color:var(--tx3);font-family:'Inter',sans-serif;gap:4px}
 
 /* ── RATINGS TOOLTIP ── */
 .chip-tooltip{
@@ -463,7 +470,8 @@ body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.
 .rating-bar-row{display:flex;align-items:center;gap:6px}
 .rating-bar-label{font-size:10px;font-weight:600;color:var(--tx2);width:90px;flex-shrink:0;letter-spacing:.02em}
 .rating-bar-desc{font-size:9px;color:var(--tx3);margin-left:8px;font-style:italic}
-.rating-bar-track{width:72px;height:5px;border-radius:2px;background:linear-gradient(to right, rgba(255,255,255,.04) 33%, transparent 33%, transparent 34%, rgba(255,255,255,.04) 34%, rgba(255,255,255,.04) 66%, transparent 66%, transparent 67%, rgba(255,255,255,.04) 67%),rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);overflow:hidden;flex-shrink:0;box-sizing:border-box}
+.rating-bar-track{width:72px;height:5px;border-radius:2px;background:transparent;border:0.5px solid rgba(26,18,0,.28);overflow:hidden;flex-shrink:0;box-sizing:border-box}
+body.dark .rating-bar-track{background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.18)}
 
 
 .rating-name{font-size:10px;color:var(--tx2);font-weight:600;margin-right:10px;flex-shrink:0}
@@ -496,11 +504,45 @@ body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.
 .rating-tag{font-size:9px;font-weight:600;letter-spacing:.04em;padding:2px 7px;border-radius:10px;
   color:rgba(201,168,76,.9);border:1px solid rgba(201,168,76,.3);background:rgba(201,168,76,.07)}
 .learn-start-hint{font-size:12px;color:var(--tx3);font-family:'Inter',sans-serif;font-style:italic;text-align:center;padding:.5rem 0;opacity:.6}
-.practice-this-btn{font-size:11px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.04em;opacity:.7;padding:0;-webkit-tap-highlight-color:transparent;text-decoration:underline;background:transparent;border:none;color:var(--ac)}
-.practice-this-btn:active{opacity:1}
+.practice-this-btn{display:inline-flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;-webkit-tap-highlight-color:transparent;text-decoration:none;background:transparent;border:1px solid rgba(93,202,165,.5);border-radius:5px;color:#5dcaa5;transition:all .15s;line-height:1.4;text-align:center;flex-shrink:0}
+body.light .practice-this-btn{border-color:rgba(15,110,86,.4);color:#0f6e56}
+.practice-this-btn:active{opacity:.7}
 .ablock.hist{background:rgba(100,160,220,.04);border:1px solid rgba(100,160,220,.1);border-radius:10px;padding:11px 13px}
 .ablock.hist .ablabel{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;color:rgba(100,160,220,.7)}
 .ablock.hist .abtext{font-size:15px;line-height:1.65;color:var(--tx2);font-family:'Cormorant Garamond',serif;font-style:italic}
+
+.magnus-btn{position:fixed;bottom:1.5rem;right:1.3rem;z-index:200;width:48px;height:48px;border-radius:50%;background:#5dcaa5;color:#04342C;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;touch-action:none;user-select:none;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 16px rgba(93,202,165,.3)}
+.magnus-btn.open{background:#1D9E75}
+body.light .magnus-btn{background:#0f6e56;color:#E1F5EE;box-shadow:0 2px 16px rgba(15,110,86,.25)}
+body.light .magnus-btn.open{background:#085041}
+.magnus-popup{position:fixed;bottom:5.8rem;right:1.3rem;z-index:199;width:300px;background:var(--bg2);border:1px solid var(--line2);border-radius:20px 20px 4px 20px;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(10px) scale(.96);transition:opacity .22s,transform .22s;overflow:hidden}
+.magnus-popup.open{opacity:1;pointer-events:all;transform:translateY(0) scale(1)}
+.magnus-popup-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;border-bottom:1px solid var(--line)}
+.magnus-avatar{width:32px;height:32px;border-radius:50%;background:#5dcaa5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+body.light .magnus-avatar{background:#0f6e56}
+.magnus-avatar svg{display:block}
+.magnus-header-info{display:flex;align-items:center;gap:10px}
+.magnus-popup-name{font-size:13px;font-weight:600;color:var(--tx);line-height:1.2;font-family:'Inter',sans-serif}
+.magnus-popup-sub{font-size:11px;color:var(--tx3);line-height:1.2}
+.magnus-popup-close{width:24px;height:24px;border-radius:50%;background:var(--bg3);border:none;color:var(--tx3);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0;font-size:11px}
+.magnus-msgs{overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;max-height:220px}
+.magnus-msg-ai{font-size:13px;line-height:1.5;padding:9px 12px;border-radius:4px 14px 14px 14px;background:var(--bg3);color:var(--tx2);align-self:flex-start;max-width:88%}
+.magnus-msg-user{font-size:13px;line-height:1.5;padding:9px 12px;border-radius:14px 4px 14px 14px;background:rgba(93,202,165,.12);color:var(--tx);align-self:flex-end;max-width:88%}
+body.light .magnus-msg-user{background:rgba(15,110,86,.1)}
+.magnus-msg-typing{display:flex;align-items:center;gap:5px;padding:10px 14px;align-self:flex-start;background:var(--bg3);border-radius:4px 14px 14px 14px}
+.magnus-dot{width:7px;height:7px;border-radius:50%;background:var(--tx3);animation:magnusBounce 1.2s ease-in-out infinite}
+.magnus-dot:nth-child(2){animation-delay:.2s}
+.magnus-dot:nth-child(3){animation-delay:.4s}
+@keyframes magnusBounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+.magnus-input-row{display:flex;gap:8px;padding:10px 12px 12px;border-top:1px solid var(--line);align-items:center}
+.magnus-input{flex:1;background:var(--bg3);border:none;border-radius:20px;padding:8px 14px;font-size:13px;color:var(--tx);font-family:'Inter',sans-serif;outline:none}
+.magnus-input::placeholder{color:var(--tx3)}
+.magnus-send{width:32px;height:32px;border-radius:50%;background:#5dcaa5;border:none;color:#04342C;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+body.light .magnus-send{background:#0f6e56;color:#E1F5EE}
+.magnus-send:disabled{opacity:.4}
+.move-commentary{position:fixed;top:4.2rem;left:50%;transform:translateX(-50%) translateY(-6px);background:var(--bg2);border:1px solid var(--line2);border-radius:20px;padding:.35rem .85rem;font-size:12px;color:var(--tx2);max-width:72vw;text-align:center;opacity:0;pointer-events:none;z-index:198;transition:opacity .2s,transform .2s}
+.move-commentary.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
 </style>
 </head>
 <body>
@@ -554,20 +596,23 @@ body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.
 <div class="family-bar" id="family-bar"></div>
 <div class="op-bar op-bar--var" id="var-bar"><div class="vlist" id="vlist"></div></div>
 <div class="gamif-legend" id="gamif-legend">
-  <span class="gamif-legend-placeholder" id="gamif-legend-placeholder">Select an opening to see its profile</span>
+  <span class="gamif-legend-placeholder" id="gamif-legend-placeholder" style="display:none">Select an opening to see its profile</span>
   <span class="rating-name" id="gamif-legend-name" style="display:none"></span>
   <div class="rating-bars" id="gamif-legend-bars" style="display:none">
-    <div class="rating-bars-grid">
-      <div class="rating-bar-row">
-        <span class="rating-bar-label">Complexity</span>
-        <div class="rating-bar-track"><div class="rating-bar-fill-diff" id="gamif-bar-diff"></div></div>
-        <span class="rating-bar-desc" id="gamif-desc-diff"></span>
+    <div style="display:flex;align-items:center;gap:20px">
+      <div class="rating-bars-grid">
+        <div class="rating-bar-row">
+          <span class="rating-bar-label">Complexity</span>
+          <div class="rating-bar-track"><div class="rating-bar-fill-diff" id="gamif-bar-diff"></div></div>
+          <span class="rating-bar-desc" id="gamif-desc-diff"></span>
+        </div>
+        <div class="rating-bar-row">
+          <span class="rating-bar-label">Sharpness</span>
+          <div class="rating-bar-track"><div class="rating-bar-fill-attack" id="gamif-bar-attack"></div></div>
+          <span class="rating-bar-desc" id="gamif-desc-attack"></span>
+        </div>
       </div>
-      <div class="rating-bar-row">
-        <span class="rating-bar-label">Sharpness</span>
-        <div class="rating-bar-track"><div class="rating-bar-fill-attack" id="gamif-bar-attack"></div></div>
-        <span class="rating-bar-desc" id="gamif-desc-attack"></span>
-      </div>
+      <button class="practice-this-btn" id="practice-this-main" onclick="practiceThis()">Practice<br>this variation</button>
     </div>
     <div class="rating-tags" id="gamif-tags"></div>
   </div>
@@ -587,9 +632,6 @@ body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.
     <div class="nav-buttons">
       <button class="nav-back" id="bp2">← Back</button>
       <button class="nav-next" id="bn">Next →</button>
-    </div>
-    <div style="display:flex;justify-content:center;padding:.2rem 0 0">
-      <button class="practice-this-btn" onclick="practiceThis()">Practice this variation</button>
     </div>
   </div>
   <div class="right-col">
@@ -618,17 +660,20 @@ body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.
   <span class="gamif-legend-placeholder" id="prac-gamif-legend-placeholder" style="display:none">Select an opening to see its profile</span>
   <span class="rating-name" id="prac-gamif-legend-name" style="display:none"></span>
   <div class="rating-bars" id="prac-gamif-legend-bars" style="display:none">
-    <div class="rating-bars-grid">
-      <div class="rating-bar-row">
-        <span class="rating-bar-label">Complexity</span>
-        <div class="rating-bar-track"><div class="rating-bar-fill-diff" id="prac-gamif-bar-diff"></div></div>
-        <span class="rating-bar-desc" id="prac-gamif-desc-diff"></span>
+    <div style="display:flex;align-items:center;gap:20px">
+      <div class="rating-bars-grid">
+        <div class="rating-bar-row">
+          <span class="rating-bar-label">Complexity</span>
+          <div class="rating-bar-track"><div class="rating-bar-fill-diff" id="prac-gamif-bar-diff"></div></div>
+          <span class="rating-bar-desc" id="prac-gamif-desc-diff"></span>
+        </div>
+        <div class="rating-bar-row">
+          <span class="rating-bar-label">Sharpness</span>
+          <div class="rating-bar-track"><div class="rating-bar-fill-attack" id="prac-gamif-bar-attack"></div></div>
+          <span class="rating-bar-desc" id="prac-gamif-desc-attack"></span>
+        </div>
       </div>
-      <div class="rating-bar-row">
-        <span class="rating-bar-label">Sharpness</span>
-        <div class="rating-bar-track"><div class="rating-bar-fill-attack" id="prac-gamif-bar-attack"></div></div>
-        <span class="rating-bar-desc" id="prac-gamif-desc-attack"></span>
-      </div>
+      <button class="practice-this-btn" style="visibility:hidden;pointer-events:none" aria-hidden="true">Practice<br>this variation</button>
     </div>
     <div class="rating-tags" id="prac-gamif-tags"></div>
   </div>
@@ -640,6 +685,7 @@ body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.
       <div class="bwr"><div class="rc" id="quiz-rc"></div><div class="quiz-board" id="quiz-board"></div></div>
       <div class="fr" id="quiz-fr"></div>
     </div>
+    <div class="prac-dots" id="prac-dots"></div>
   </div>
 
   <!-- First move hint -->
@@ -668,7 +714,6 @@ body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.
 
   <!-- Progress + Status -->
   <div class="prac-top-bar" id="prac-top-bar">
-    <div class="prac-dots" id="prac-dots"></div>
     <div class="prac-status-text" id="prac-status-text"></div>
   </div>
 
@@ -712,6 +757,11 @@ body.light .rating-bar-track{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.
 </div>
 
 <script>
+
+window._magnusDragMoved = false;
+/* Force light background immediately */
+try{document.documentElement.style.setProperty('background','#f5f0e8','important');}catch(e){}
+try{document.body.style.setProperty('background','#f5f0e8','important');}catch(e){}
 /* ════════════════ SVG PIECES (Lichess cburnett style) ════════════════ */
 function pieceSVG(type){
   const w = type===type.toUpperCase();
@@ -3562,12 +3612,11 @@ function setFeedback(msg, type){
 
 function renderDots(){
   const el = document.getElementById('prac-dots');
+  if(!el) return;
   el.innerHTML = '';
-  const totalTurns = Math.ceil(pracMaxSteps / 2);
-  const currentTurn = Math.floor(pracStep / 2);
-  for(let i = 0; i < totalTurns; i++){
+  for(let i = 0; i < pracMaxSteps; i++){
     const dot = document.createElement('div');
-    dot.className = 'prac-dot' + (i < currentTurn ? ' done' : i === currentTurn ? ' current' : '');
+    dot.className = 'prac-dot' + (i < pracStep ? ' done' : i === pracStep ? ' current' : '');
     el.appendChild(dot);
   }
 }
@@ -3602,14 +3651,17 @@ function updateStatus(override){
 
 
 /* ════════════════ THEME TOGGLE ════════════════ */
-if(localStorage.getItem('co_settings_v') !== '4'){
+if(localStorage.getItem('co_settings_v') !== '7'){
   localStorage.removeItem('co_pieces');
   localStorage.removeItem('co_theme');
-  localStorage.setItem('co_settings_v','4');
+  localStorage.setItem('co_settings_v','7');
 }
-let boardTheme = localStorage.getItem('co_theme') || 'light';
+let boardTheme = 'light';
 function applyTheme(){
-  document.body.classList.toggle('light', boardTheme==='light');
+  document.body.classList.toggle('dark', boardTheme==='dark');
+  const bg = boardTheme==='dark' ? '#070500' : '#f5f0e8';
+  try{document.documentElement.style.setProperty('background',bg,'important');}catch(e){}
+  try{document.body.style.setProperty('background',bg,'important');}catch(e){}
   // Old settings drawer button
   const lbl = document.getElementById('theme-toggle-label');
   const btn = document.getElementById('theme-toggle');
@@ -3646,7 +3698,7 @@ const pieceStyle = 'classic';
 /* ════════════════ EVENTS ════════════════ */
 document.getElementById('bp2').onclick=()=>{if(curH>-1){curH--;update();}};
 document.getElementById('bn').onclick=()=>{
-  if(curH<maxH()){curH++;update();}
+  if(curH<maxH()){curH++;update();showMoveCommentary();}
 };
 const _bs=document.getElementById('bs'); if(_bs) _bs.onclick=()=>{curH=-1;update();};
 const _be=document.getElementById('be'); if(_be) _be.onclick=()=>{curH=maxH();update();};
@@ -3713,6 +3765,186 @@ window.addEventListener('beforeinstallprompt', e => {
   }, 30000);
 });
 
+
+/* ═══ MAGNUS CHATBOT ═══ */
+let magnusOpen = false, magnusHistory = [];
+const MAGNUS_SYS = 'You are Magnus, a chess grandmaster with wit. STRICT RULES: max 2 sentences, never more. Plain English only — zero chess notation. Be punchy, occasionally funny. If you write more than 2 sentences you have failed.';
+
+function toggleMagnus(){
+  magnusOpen = !magnusOpen;
+  const btn = document.getElementById('magnus-btn');
+  const popup = document.getElementById('magnus-popup');
+  if(!btn || !popup) return;
+  btn.classList.toggle('open', magnusOpen);
+  popup.classList.toggle('open', magnusOpen);
+  if(magnusOpen && magnusHistory.length === 0 && typeof curOp !== 'undefined' && curOp && typeof curV !== 'undefined' && curV){
+    const first = document.querySelector('.magnus-msg-ai');
+    if(first) first.textContent = 'You are studying the ' + curV.name + ' — ' + curOp.name + '. Ask me anything! 🏆';
+  }
+  if(magnusOpen) setTimeout(()=>{ const inp=document.getElementById('magnus-input'); if(inp) inp.focus(); }, 150);
+}
+
+function closeMagnus(){
+  magnusOpen = false;
+  const btn = document.getElementById('magnus-btn');
+  const popup = document.getElementById('magnus-popup');
+  if(btn) btn.classList.remove('open');
+  if(popup) popup.classList.remove('open');
+}
+
+function addMagnusMsg(type, text){
+  const msgs = document.getElementById('magnus-msgs');
+  if(!msgs) return null;
+  const div = document.createElement('div');
+  div.className = type === 'user' ? 'magnus-msg-user' : 'magnus-msg-ai';
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendMagnus(){
+  const input = document.getElementById('magnus-input');
+  const sendBtn = document.getElementById('magnus-send');
+  if(!input || !sendBtn) return;
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  sendBtn.disabled = true;
+  addMagnusMsg('user', text);
+  const ctx = (typeof curOp !== 'undefined' && curOp && typeof curV !== 'undefined' && curV)
+    ? '[Context: ' + curOp.name + ' — ' + curV.name + '] ' : '';
+  magnusHistory.push({role:'user', content: ctx + text});
+  const msgs = document.getElementById('magnus-msgs');
+  const typing = document.createElement('div');
+  typing.className = 'magnus-msg-typing';
+  typing.innerHTML = '<span class="magnus-dot"></span><span class="magnus-dot"></span><span class="magnus-dot"></span>';
+  if(msgs){ msgs.appendChild(typing); msgs.scrollTop = msgs.scrollHeight; }
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:120, system:MAGNUS_SYS, messages:magnusHistory, stream:true})
+    });
+    if(!res.ok){ throw new Error('HTTP ' + res.status); }
+    if(typing) typing.remove();
+    const bubble = addMagnusMsg('ai', '');
+    let fullText = '';
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      const chunk = decoder.decode(value, {stream:true});
+      for(const line of chunk.split('\n')){
+        if(!line.startsWith('data:')) continue;
+        const data = line.slice(5).trim();
+        if(data === '[DONE]') break;
+        try{
+          const json = JSON.parse(data);
+          const delta = json.delta?.text || json.choices?.[0]?.delta?.content || '';
+          if(delta){ fullText += delta; bubble.textContent = fullText; const msgs=document.getElementById('magnus-msgs'); if(msgs) msgs.scrollTop=msgs.scrollHeight; }
+        }catch(e){}
+      }
+    }
+    if(!fullText) fullText = 'Even I am stumped — try again!';
+    magnusHistory.push({role:'assistant', content:fullText});
+    if(magnusHistory.length > 16) magnusHistory = magnusHistory.slice(-14);
+  } catch(e){
+    if(typing) typing.remove();
+    const errMsg = e.message && e.message.includes('HTTP') ? 'API error: ' + e.message : 'This feature works when the file is open in Claude.ai — not as a local file.';
+    addMagnusMsg('ai', errMsg);
+  }
+  sendBtn.disabled = false;
+}
+
+/* ── Wire send button and keyboard ── */
+(function(){
+  const sendB = document.getElementById('magnus-send');
+  if(sendB) sendB.addEventListener('click', sendMagnus);
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && document.activeElement && document.activeElement.id === 'magnus-input') sendMagnus();
+    if(e.key === 'Escape' && magnusOpen) closeMagnus();
+  });
+})();
+
+/* ── DRAG ── */
+(function(){
+  const btn = document.getElementById('magnus-btn');
+  if(!btn) return;
+  let dragging = false, moved = false, startX=0, startY=0, startL=0, startT=0;
+  window._magnusDragMoved = false;
+
+  function snapPos(x, y){
+    const bw = btn.offsetWidth || 44, bh = btn.offsetHeight || 44;
+    return { x: Math.max(8, Math.min(window.innerWidth - bw - 8, x)),
+             y: Math.max(8, Math.min(window.innerHeight - bh - 8, y)) };
+  }
+
+  function startDrag(cx, cy){
+    if(!btn.style.left){
+      const r = btn.getBoundingClientRect();
+      btn.style.left = r.left + 'px'; btn.style.top = r.top + 'px';
+      btn.style.right = 'auto'; btn.style.bottom = 'auto';
+    }
+    dragging = true; moved = false;
+    startX = cx; startY = cy;
+    startL = parseFloat(btn.style.left)||0; startT = parseFloat(btn.style.top)||0;
+    btn.style.transition = 'none';
+  }
+
+  function doDrag(cx, cy){
+    if(!dragging) return;
+    const dx = cx - startX, dy = cy - startY;
+    if(Math.abs(dx) > 5 || Math.abs(dy) > 5){ moved = true; window._magnusDragMoved = true; }
+    if(!moved) return;
+    const pos = snapPos(startL + dx, startT + dy);
+    btn.style.left = pos.x + 'px'; btn.style.top = pos.y + 'px';
+    const pop = document.getElementById('magnus-popup');
+    if(pop && pop.classList.contains('open')){
+      pop.style.left = Math.max(8, pos.x - 280 + 44) + 'px';
+      pop.style.top = (pos.y - pop.offsetHeight - 8) + 'px';
+      pop.style.right = 'auto'; pop.style.bottom = 'auto';
+    }
+  }
+
+  function endDrag(){ dragging = false; btn.style.transition = ''; setTimeout(()=>{ window._magnusDragMoved = false; }, 100); }
+
+  btn.addEventListener('mousedown', e=>{ startDrag(e.clientX, e.clientY); });
+  document.addEventListener('mousemove', e=>doDrag(e.clientX, e.clientY));
+  document.addEventListener('mouseup', endDrag);
+  btn.addEventListener('touchstart', e=>{ startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+  btn.addEventListener('touchmove', e=>{ if(dragging){ e.preventDefault(); doDrag(e.touches[0].clientX, e.touches[0].clientY); }}, {passive:false});
+  btn.addEventListener('touchend', endDrag, {passive:false});
+})();
+
+/* ── MOVE COMMENTARY ── */
+let _comTimeout = null;
+async function showMoveCommentary(){
+  if(typeof curOp === 'undefined' || !curOp || typeof curV === 'undefined' || !curV || typeof curH === 'undefined' || curH < 0) return;
+  const mi = Math.floor(curH/2), isB = curH%2===1;
+  const mv = curV.moves[mi];
+  if(!mv) return;
+  const idea = (isB ? (mv.bidea||mv.idea) : (mv.widea||mv.idea)) || 'development';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:50,
+        system:'One witty sentence, max 10 words. No chess notation.',
+        messages:[{role:'user', content:'Comment: ' + (isB?'Black':'White') + ' in ' + curOp.name + '. Idea: ' + idea.slice(0,80)}]})
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text?.trim();
+    if(text){
+      const el = document.getElementById('move-commentary');
+      if(!el) return;
+      el.textContent = '💬 ' + text;
+      el.classList.add('show');
+      if(_comTimeout) clearTimeout(_comTimeout);
+      _comTimeout = setTimeout(()=>el.classList.remove('show'), 4000);
+    }
+  } catch(e){ /* silent fail for commentary */ }
+}
+
 </script>
 
 <footer style="
@@ -3733,5 +3965,36 @@ window.addEventListener('beforeinstallprompt', e => {
     <button onclick="document.getElementById('a2hs-bar').style.display='none';localStorage.setItem('co_a2hs','1')" style="padding:6px 10px;background:transparent;border:none;color:var(--tx3);font-size:16px;cursor:pointer">×</button>
   </div>
 </div>
+
+<button class="magnus-btn" id="magnus-btn" aria-label="Ask Magnus" onclick="if(!window._magnusDragMoved)toggleMagnus()">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+  </svg>
+</button>
+<div class="magnus-popup" id="magnus-popup">
+  <div class="magnus-popup-header">
+    <div class="magnus-header-info">
+      <div class="magnus-avatar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#04342C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+      <div>
+        <div class="magnus-popup-name">Magnus</div>
+        <div class="magnus-popup-sub">Chess Expert</div>
+      </div>
+    </div>
+    <button class="magnus-popup-close" onclick="closeMagnus()" aria-label="Close">✕</button>
+  </div>
+  <div class="magnus-msgs" id="magnus-msgs">
+    <div class="magnus-msg-ai">Hello! Ask me anything about chess. 🏆</div>
+  </div>
+  <div class="magnus-input-row">
+    <input class="magnus-input" id="magnus-input" placeholder="Ask Magnus..." autocomplete="off"/>
+    <button class="magnus-send" id="magnus-send" aria-label="Send" onclick="sendMagnus()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    </button>
+  </div>
+</div>
+<div class="move-commentary" id="move-commentary"></div>
+
 </body>
 </html>
