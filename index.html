@@ -170,7 +170,7 @@ body.light .move-dot.played{background:rgba(138,104,32,.4);border-color:rgba(138
 body.light .move-dot.current{background:#8a6820;border-color:#8a6820}
 
 /* ── ONBOARDING OVERLAY ── */
-.onboard{position:fixed;inset:0;z-index:998;background:rgba(6,4,0,.92);pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;backdrop-filter:blur(8px)}
+.onboard{position:fixed;inset:0;z-index:998;background:rgba(6,4,0,.92);pointer-events:all;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;backdrop-filter:blur(8px)}
 .onboard-icon{font-size:52px}
 .onboard-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:#e8c84a;text-align:center;letter-spacing:1px}
 .onboard-text{font-size:15px;color:rgba(255,255,255,.75);text-align:center;line-height:1.7;max-width:300px}
@@ -2813,7 +2813,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if(localStorage.getItem('co_seen')) ob.style.display='none';
   document.getElementById('onboard-btn').onclick=()=>{
     ob.style.opacity='0';ob.style.transition='opacity .4s';
-    setTimeout(()=>ob.style.display='none',400);
+    ob.style.pointerEvents='none'; setTimeout(()=>ob.style.display='none',400);
     localStorage.setItem('co_seen','1'); var mb=document.getElementById('magnus-btn'); if(mb) mb.style.display='flex';
   };
 });
