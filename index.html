@@ -342,7 +342,7 @@ body.dark .prac-dot{background:rgba(255,255,255,.12);border:0.5px solid rgba(255
 body.light .prac-dot.done{background:rgba(138,104,32,.4);border-color:rgba(138,104,32,.3)}
 .prac-dot.current{background:#c9a84c;border-color:#c9a84c;transform:scale(1.3)}
 body.light .prac-dot.current{background:#8a6820;border-color:#8a6820}
-.prac-status{display:none!important;display:none!important}
+.prac-status{display:none!important}
 .prac-status-text{display:none!important;font-size:13px;color:#5dcaa5;font-family:'Inter',sans-serif}
 body.light .prac-status-text{display:none!important;color:#0f6e56}
 .prac-done{display:flex;flex-direction:column;align-items:center;gap:10px;padding:1.5rem 1rem;text-align:center}
@@ -385,7 +385,7 @@ body.light .prac-status-text{display:none!important;color:#0f6e56}
 .prac-filter-label--var{color:rgba(201,168,76,.5)}
 
 /* ── YOUR TURN INDICATOR ── */
-.prac-turn{display:flex;align-items:center;justify-content:center;gap:7px;padding:.1rem .8rem .1rem;min-height:24px}
+.prac-turn{display:none!important}
 .prac-turn-dot{display:none!important}
 .prac-turn-text{display:none!important}
 @keyframes pulse-turn{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
@@ -424,7 +424,7 @@ body.light .prac-status-text{display:none!important;color:#0f6e56}
 .prac-done-msg strong{color:var(--ac)}
 .prac-hint-first{display:none!important}
 body.light .prac-hint-first{display:none!important}
-.prac-hint-btn{font-size:10px;font-weight:600;color:#0f6e56;background:transparent;border:1px solid rgba(93,202,165,.5);border-radius:14px;padding:4px 14px;cursor:pointer;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;letter-spacing:.02em}
+
 .prac-hint-btn:active{opacity:1}
 
 /* ── PIECE HINT HIGHLIGHT ── */
@@ -448,7 +448,7 @@ body.light .op-btn.active .op-stars{color:rgba(138,104,32,.7)}
   text-transform:uppercase;color:var(--ac);background:rgba(201,168,76,.1);
   border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:1px 7px;
   margin-left:6px;vertical-align:middle;animation:badge-pop .3s ease}
-.gamif-legend{display:flex;flex-direction:column;padding:.1rem 1rem .3rem;font-size:9px;color:var(--tx3);font-family:'Inter',sans-serif;gap:4px}
+.gamif-legend{display:flex;flex-direction:column;padding:.1rem 1rem .3rem;font-size:9px;color:var(--tx3);font-family:'Inter',sans-serif;gap:4px;min-height:3rem}
 
 /* ── RATINGS TOOLTIP ── */
 .chip-tooltip{
@@ -515,7 +515,7 @@ body.light .practice-this-btn{border-color:rgba(15,110,86,.4);color:#0f6e56}
 .ablock.hist .ablabel{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;color:rgba(100,160,220,.7)}
 .ablock.hist .abtext{font-size:15px;line-height:1.6;color:var(--tx2);font-family:'Cormorant Garamond',serif;font-style:italic}
 
-.magnus-btn{position:fixed!important;z-index:1000;display:none;background:#ffffff;width:46px;height:46px;border-radius:50%;border:none;box-shadow:0 3px 14px rgba(0,0,0,.18);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:none;user-select:none;align-items:center;justify-content:center;padding:0}
+.magnus-btn{position:fixed!important;z-index:1000;display:none;background:#ffffff;width:52px;height:52px;border-radius:50%;border:none;box-shadow:0 3px 14px rgba(0,0,0,.18);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:none;user-select:none;align-items:center;justify-content:center;padding:0}
 body.dark .magnus-btn{background:#1a1a1a;box-shadow:0 3px 14px rgba(0,0,0,.4)}
 .magnus-btn.open{opacity:.85;background:none!important}
 
@@ -601,6 +601,31 @@ body.light
 }
 #prac-hint-bubble.state-turn{
   animation:pracBubbleFloat 2.5s ease-in-out infinite;
+}
+
+
+.prac-hint-btn{
+  font-size:10px;font-weight:600;color:#0f6e56;
+  background:transparent;border:1px solid rgba(93,202,165,.5);
+  border-radius:14px;padding:4px 14px;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  -webkit-tap-highlight-color:transparent;letter-spacing:.02em;
+  min-width:60px;text-align:center;
+}
+.prac-hint-btn.hint-stage2{
+  border-color:rgba(93,202,165,.8);
+  color:#5dcaa5;
+}
+body.light .prac-hint-btn{color:#0f6e56;border-color:rgba(15,110,86,.35)}
+body.light .prac-hint-btn.hint-stage2{color:#0a5040;border-color:rgba(15,110,86,.7)}
+
+
+@keyframes pracBubblePulse{
+  0%,100%{opacity:.8;transform:translate(-50%,-50%) scale(1)}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.02)}
+}
+#prac-hint-bubble.state-continue{
+  animation:pracBubblePulse 3s ease-in-out infinite;
 }
 
 </style>
@@ -749,8 +774,8 @@ body.light
       <div class="fr" id="quiz-fr"></div>
     </div>
     <div class="prac-dots" id="prac-dots"></div>
-  <div style="display:flex;justify-content:center;padding:4px 0 0">
-    <button class="prac-hint-btn" id="prac-hint-btn" onclick="showHint()">💡 Hint</button>
+  <div style="display:flex;justify-content:center;align-items:center;height:44px">
+    <button class="prac-hint-btn" id="prac-hint-btn" onclick="showHint()">💡 Hint ?</button>
   </div>
   </div>
 
@@ -761,11 +786,11 @@ body.light
   <div class="prac-turn" id="prac-turn">
     <span class="prac-turn-dot" id="prac-turn-dot"></span>
     <span class="prac-turn-text" id="prac-turn-text">Your turn to play</span>
-    <span class="prac-wrong-badge" id="prac-wrong-badge" style="display:inline;visibility:hidden">✗ Wrong</span>
+    <span class="prac-wrong-badge" id="prac-wrong-badge" style="display:none">✗ Wrong</span>
 
   </div>
 
-  <div class="nav-buttons" id="prac-nav-buttons" style="padding:0 1rem">
+  <div class="nav-buttons" id="prac-nav-buttons" style="padding:0 1rem;margin-top:4px">
     <button class="nav-back" id="prac-bp" onclick="pracGoBack()">← Back</button>
     <button class="nav-next" id="prac-bf" onclick="pracGoForward()" disabled>Forward →</button>
   </div>
@@ -3231,7 +3256,7 @@ function showHint(){
   if(!pracHintUsed){
     // STAGE 1: highlight the piece to move
     pracHintUsed = true;
-    if(hintBtn) hintBtn.textContent = 'Show →';
+    if(hintBtn){ hintBtn.classList.add('hint-stage2'); hintBtn.textContent='💡 Hint ?'; }
 
     // Find which piece to highlight
     const expected = expectedMove();
@@ -3269,7 +3294,7 @@ function showHint(){
 
   // STAGE 2: reveal the full move
   pracHintUsed = false;
-  if(hintBtn) hintBtn.textContent = 'Hint ?';
+  if(hintBtn){ hintBtn.classList.remove('hint-stage2'); hintBtn.textContent='💡 Hint ?'; }
 
   const expected = expectedMove();
   const mi = Math.floor(pracStep / 2);
@@ -3629,7 +3654,7 @@ function handlePracClick(r, c){
     pracLocked = true;
     pracHintUsed = false;
     const hb = document.getElementById('prac-hint-btn');
-    if(hb){ hb.textContent='Hint ?'; }
+    if(hb){ hb.textContent='💡 Hint ?'; hb.style.opacity='0'; hb.style.pointerEvents='none'; hb.classList.remove('hint-stage2'); }
     // Show pedagogical feedback for this move
     const mi2 = Math.floor(prevStep / 2);
     const wasB2 = prevStep % 2 === 1;
@@ -3716,6 +3741,12 @@ function showFirstMoveHint(){
 }
 
 function updateStatus(override){
+  var hb = document.getElementById('prac-hint-btn');
+  if(hb){
+    var show = pracStep < pracMaxSteps && (typeof isPlayerTurn === 'function' ? isPlayerTurn() : true) && !pracLocked;
+    hb.style.opacity = show ? '1' : '0';
+    hb.style.pointerEvents = show ? '' : 'none';
+  }
   const el = document.getElementById('prac-status-text');
   if(el) el.textContent = `Move ${pracStep + 1} of ${pracMaxSteps}`;
   const turnDot = document.getElementById('prac-turn-dot');
@@ -4138,7 +4169,7 @@ setTimeout(function(){
   var STATES = {
     'turn':     { bg:'#0f6e56', icon:'♟',  text:'Your turn to play',      textColor:'#fff',                    fw:'700', fs:'13px', shadow:'0 4px 16px rgba(15,110,86,.3)',  cls:'state-turn' },
     'thinking': { bg:'#3d3560', icon:'⏳', text:'Opponent is thinking…',   textColor:'rgba(255,255,255,.85)',   fw:'500', fs:'12px', shadow:'0 4px 16px rgba(61,53,96,.3)',   cls:'' },
-    'continue': { bg:'#3a3a3a', icon:'👆', text:'Tap when ready',          textColor:'rgba(255,255,255,.8)',    fw:'500', fs:'12px', shadow:'0 4px 12px rgba(0,0,0,.2)',     cls:'' }
+    'continue': { bg:'#3a3a3a', icon:'👆', text:'Tap when ready',          textColor:'rgba(255,255,255,.8)',    fw:'500', fs:'12px', shadow:'0 4px 12px rgba(0,0,0,.2)',     cls:'state-continue' }
   };
 
   function setBubble(state){
@@ -4172,12 +4203,31 @@ setTimeout(function(){
       _thinkTimer = setTimeout(function(){
         window._pracThinking = false;
         window.pracBubble.showTurn();
-      }, 1400);
+      }, 1500);
     },
     showContinue: function(){ setBubble('continue'); },
     hide: hideBubble
   };
 })();
+
+
+/* ── TAP ANYWHERE TO CONTINUE ── */
+document.addEventListener('DOMContentLoaded', function(){
+  var qv = document.getElementById('quiz-view');
+  if(!qv) return;
+  qv.addEventListener('click', function(e){
+    if(window._pracContinueCb && pracLocked){
+      // Don't intercept clicks on board squares (handlePracClick handles those)
+      if(e.target.classList.contains('sq') || e.target.closest('.sq')) return;
+      // Don't intercept Back/Forward/Hint buttons
+      if(e.target.closest('.nav-buttons') || e.target.closest('.prac-hint-btn')) return;
+      var cb = window._pracContinueCb;
+      window._pracContinueCb = null;
+      if(window.pracBubble) window.pracBubble.showThinking();
+      setTimeout(cb, 600);
+    }
+  });
+});
 
 </script>
 
@@ -4201,7 +4251,7 @@ setTimeout(function(){
 </div>
 
 <button class="magnus-btn" id="magnus-btn" aria-label="Ask Magnus" onclick="if(!window._magnusDragMoved)toggleMagnus()">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
 </button>
 </div>
 </div>
