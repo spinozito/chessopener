@@ -3100,17 +3100,18 @@ let pracHistory = []; // past states
 let pracFuture = []; // future states (after going back)
 
 function pracSaveHistory(){
-  pracHistory.push({board: cloneB(pracBoard), step: pracStep});
+  pracHistory.push({board: cloneB(pracBoard), step: pracStep, prevBoard: pracPrevBoard ? cloneB(pracPrevBoard) : null});
   pracFuture = []; // clear future when a new move is played
   updatePracNav();
 }
 
 function pracGoBack(){
   if(pracHistory.length === 0) return;
-  pracFuture.push({board: cloneB(pracBoard), step: pracStep});
+  pracFuture.push({board: cloneB(pracBoard), step: pracStep, prevBoard: pracPrevBoard ? cloneB(pracPrevBoard) : null});
   const prev = pracHistory.pop();
   pracBoard = prev.board;
   pracStep = prev.step;
+  pracPrevBoard = prev.prevBoard ? cloneB(prev.prevBoard) : null;
   pracSelected = null;
   pracLocked = false;
   pracHintUsed = false;
@@ -3130,10 +3131,11 @@ function pracGoBack(){
 
 function pracGoForward(){
   if(pracFuture.length === 0) return;
-  pracHistory.push({board: cloneB(pracBoard), step: pracStep});
+  pracHistory.push({board: cloneB(pracBoard), step: pracStep, prevBoard: pracPrevBoard ? cloneB(pracPrevBoard) : null});
   const next = pracFuture.pop();
   pracBoard = next.board;
   pracStep = next.step;
+  pracPrevBoard = next.prevBoard ? cloneB(next.prevBoard) : null;
   pracSelected = null;
   pracLocked = false;
   const card = document.getElementById('prac-card');
