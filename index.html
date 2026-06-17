@@ -85,6 +85,8 @@ header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:c
 .sq.d::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,transparent 60%);pointer-events:none}
 .sq.hf{outline:2px dashed rgba(93,202,165,.95);outline-offset:-2px;background-color:rgba(93,202,165,.18)}
 .sq.ht{box-shadow:inset 0 0 0 2px rgba(93,202,165,.9);background-color:rgba(93,202,165,.1)}
+.sq.hf-opp{outline:2px dashed rgba(180,90,60,.95);outline-offset:-2px;background-color:rgba(180,90,60,.32)}
+.sq.ht-opp{box-shadow:inset 0 0 0 2px rgba(180,90,60,.95);background-color:rgba(180,90,60,.24)}
 .sq svg{width:calc(var(--sq)*.86);height:calc(var(--sq)*.86);display:block}
 .fr{display:flex;flex-direction:row;margin-left:20px;padding-top:3px}
 #quiz-fr{padding-top:2px;margin-top:0}
@@ -220,6 +222,8 @@ body.light .move-dot.current{background:#8a6820;border-color:#8a6820}
 .quiz-board .sq.l{background:var(--sl)}.quiz-board .sq.d{background:var(--sd)}
 .quiz-board .sq.ht{box-shadow:inset 0 0 0 2px rgba(93,202,165,.9);background-color:rgba(93,202,165,.1)}
 .quiz-board .sq.hf{outline:2px dashed rgba(93,202,165,.95);outline-offset:-2px;background-color:rgba(93,202,165,.18)}
+.quiz-board .sq.ht-opp{box-shadow:inset 0 0 0 2px rgba(180,90,60,.95);background-color:rgba(180,90,60,.24)}
+.quiz-board .sq.hf-opp{outline:2px dashed rgba(180,90,60,.95);outline-offset:-2px;background-color:rgba(180,90,60,.32)}
 .quiz-side-info{font-size:11px;color:var(--tx3);font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
 .quiz-question{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;padding:14px;position:relative}
 .quiz-question::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--ac),transparent);border-radius:14px 14px 0 0}
@@ -2665,7 +2669,13 @@ function renderBoard(){
   const boardEl=document.getElementById('board');
   boardEl.innerHTML='';
   const cur=curH<0?initBoard():boardAt(curV,curH);
-  const prev=curH>0?boardAt(curV,curH-1):(curH===0?initBoard():null);
+  // On Black's half-move (curH odd), compare against the state BEFORE White's half of the
+  // same pair, so both halves of the pair stay highlighted together. On White's half-move
+  // (curH even), compare against the immediately preceding state as before.
+  const isOnBlackHalf = curH>=0 && curH%2===1;
+  const prev = curH<0 ? null
+    : isOnBlackHalf ? (curH>=2 ? boardAt(curV,curH-2) : initBoard())
+    : (curH>0 ? boardAt(curV,curH-1) : initBoard());
   const flip=curOp.flip;
   for(let dispRow=0;dispRow<8;dispRow++){
     const r=flip?(7-dispRow):dispRow;
@@ -2675,8 +2685,15 @@ function renderBoard(){
       sq.className='sq '+((r+co)%2===0?'l':'d');
       if(prev){const was=prev[r][co],is=cur[r][co];
         if(was!==is){
-          if(was&&!is) sq.classList.add('hf');
-          else if(is) sq.classList.add('ht');
+          // Determine which side made this particular change: White's half of the pair
+          // is the "player" color when curOp.flip is false (you play White), and the
+          // "opponent" color when curOp.flip is true (you play Black) — and vice versa
+          // for Black's half. This mirrors the player/opponent distinction in Practice.
+          const movedPieceColor = was ? (was===was.toUpperCase() ? 'w' : 'b') : (is===is.toUpperCase() ? 'w' : 'b');
+          const isPlayerMove = flip ? movedPieceColor==='b' : movedPieceColor==='w';
+          const suffix = isPlayerMove ? '' : '-opp';
+          if(was&&!is) sq.classList.add('hf'+suffix);
+          else if(is) sq.classList.add('ht'+suffix);
         }
       }
       const piece=cur[r][co];
@@ -3020,6 +3037,7 @@ let pracFlip = false;
 let reverseMode = false;
 let pracLocked = false;
 let pracPrevBoard = null;
+let pracLastMoveByOpponent = false;
 let pracHintUsed = false; // true after hint, shows "Show me" next
 
 function initPractice(){
@@ -3183,6 +3201,7 @@ function pracGoBack(){
   pracBoard = prev.board;
   pracStep = prev.step;
   pracPrevBoard = prev.prevBoard ? cloneB(prev.prevBoard) : null;
+  pracLastMoveByOpponent = false;
   pracSelected = null;
   pracLocked = false;
   pracHintUsed = false;
@@ -3208,6 +3227,7 @@ function pracGoForward(){
   pracBoard = next.board;
   pracStep = next.step;
   pracPrevBoard = next.prevBoard ? cloneB(next.prevBoard) : null;
+  pracLastMoveByOpponent = false;
   pracSelected = null;
   pracLocked = false;
   pracHintUsed = false;
@@ -3392,6 +3412,7 @@ function showHint(){
   pracSaveHistory();
   pracBoard = applyMove(pracBoard, expected, isWhiteTurn());
   pracStep++;
+  pracLastMoveByOpponent = false;
   try{localStorage.setItem('co_prac_step', pracStep);}catch(e){}
   updatePracNav();
   pracSelected = null;
@@ -3496,6 +3517,7 @@ function startPractice(){
   pracSelected = null;
   pracLocked = false;
   pracPrevBoard = null;
+  pracLastMoveByOpponent = false;
   pracHintUsed = false;
   pracHistory = [];
   pracFuture = [];
@@ -3559,6 +3581,7 @@ function autoPlayOpponent(){
   pracPrevBoard = cloneB(pracBoard);
   pracBoard = applyMove(pracBoard, opMove, !isB);
   pracStep++;
+  pracLastMoveByOpponent = true;
   renderPracBoard();
   renderDots();
   updateStatus();
@@ -3641,12 +3664,13 @@ function renderPracBoard(){
       const isLight = (r + c2) % 2 === 0;
       sq.className = 'sq ' + (isLight ? 'l' : 'd');
 
-      // Last move highlight (hf=from, ht=to)
+      // Last move highlight (hf=from, ht=to) — color differs for opponent vs player moves
       if(pracPrevBoard){
         const was = pracPrevBoard[r][c2], is = pracBoard[r][c2];
         if(was !== is){
-          if(was && !is) sq.classList.add('hf');
-          else if(is && !was) sq.classList.add('ht');
+          const suffix = pracLastMoveByOpponent ? '-opp' : '';
+          if(was && !is) sq.classList.add('hf' + suffix);
+          else if(is && !was) sq.classList.add('ht' + suffix);
         }
       }
 
@@ -3745,6 +3769,7 @@ function handlePracClick(r, c){
     pracPrevBoard = cloneB(pracBoard);
     pracBoard = applyMove(pracBoard, expected, isWhiteTurn());
     pracStep++;
+    pracLastMoveByOpponent = false;
     pracSelected = null;
     renderPracBoard();
     renderDots();
