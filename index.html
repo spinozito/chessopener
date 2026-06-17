@@ -161,11 +161,18 @@ body.light .ablock.b .ablabel{color:#b5621e}
 @media(min-width:900px){.board-wrap{--sq:56px}}
 
 /* ── PROGRESS BAR ── */
-.move-dots{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0 2px;flex-wrap:wrap}
+.move-dots{display:flex;align-items:center;justify-content:center;gap:3px;padding:6px 0 2px;flex-wrap:wrap}
+.move-pair{display:flex;align-items:center;gap:3px;margin-right:4px}
 .move-dot{width:7px;height:7px;border-radius:50%;background:rgba(26,18,0,.12);border:0.5px solid rgba(26,18,0,.25);cursor:pointer;transition:all .15s;flex-shrink:0}
+.move-dot.dot-w{background:rgba(255,255,255,.9);border:1px solid rgba(26,18,0,.35)}
+.move-dot.dot-b{background:rgba(26,18,0,.55);border:1px solid rgba(26,18,0,.35)}
 .move-dot.played{background:rgba(201,168,76,.5);border-color:rgba(201,168,76,.4)}
 .move-dot.current{background:#c9a84c;border-color:#c9a84c;transform:scale(1.3)}
 body.dark .move-dot{background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.3)}
+body.dark .move-dot.dot-w{background:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.4)}
+body.dark .move-dot.dot-b{background:rgba(90,90,100,.55);border:1.5px solid rgba(255,255,255,.55)}
+body.dark .move-dot.played{background:rgba(201,168,76,.6);border-color:rgba(201,168,76,.5)}
+body.dark .move-dot.current{background:#e6c668;border-color:#e6c668}
 body.light .move-dot.played{background:rgba(138,104,32,.4);border-color:rgba(138,104,32,.3)}
 body.light .move-dot.current{background:#8a6820;border-color:#8a6820}
 
@@ -3303,16 +3310,26 @@ function renderMoveDots(){
   const container = document.getElementById('move-dots');
   if(!container) return;
   container.innerHTML = '';
-  const total = maxH() + 1; // 0 to maxH = total steps including start
-  for(let i = -1; i <= maxH(); i++){
+
+  // Half-moves are grouped visually in White/Black pairs
+  const total = maxH() + 1;
+  let pairWrap = null;
+  for(let i = 0; i <= maxH(); i++){
+    const isB = i % 2 === 1;
+    const moveNum = Math.floor(i / 2) + 1;
+    if(!isB){
+      pairWrap = document.createElement('span');
+      pairWrap.className = 'move-pair';
+      container.appendChild(pairWrap);
+    }
     const dot = document.createElement('span');
-    dot.className = 'move-dot';
+    dot.className = 'move-dot ' + (isB ? 'dot-b' : 'dot-w');
     if(i < curH) dot.classList.add('played');
     if(i === curH) dot.classList.add('current');
     const step = i;
     dot.onclick = () => { curH = step; update(); };
-    dot.title = i === -1 ? 'Start' : 'Move ' + (i+1);
-    container.appendChild(dot);
+    dot.title = moveNum + '.' + (isB ? '..' : '') + ' ' + (isB ? 'Black' : 'White');
+    (pairWrap || container).appendChild(dot);
   }
 }
 
