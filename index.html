@@ -260,6 +260,9 @@ body.light .move-dot.current{background:#8a6820;border-color:#8a6820}
 
 /* ── SETTINGS BUTTON ── */
 .theme-toggle-btn{padding:0;background:transparent;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center}
+.voice-toggle-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;font-size:18px;color:var(--tx3);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s,opacity .15s;flex-shrink:0;opacity:.55}
+.voice-toggle-btn.active{color:var(--ac);opacity:1}
+.voice-toggle-btn:active{transform:scale(.9)}
 .toggle-track{display:block;width:36px;height:20px;border-radius:10px;background:rgba(201,168,76,.35);position:relative;transition:background .2s}
 .toggle-thumb{display:block;width:16px;height:16px;border-radius:50%;background:#c9a84c;position:absolute;top:2px;left:2px;transform:translateX(16px);transition:transform .2s,background .2s}
 body.dark .toggle-track{background:var(--line2)}
@@ -701,6 +704,7 @@ body.light .reverse-toggle-btn.active{color:#0a5040;border-color:rgba(15,110,86,
     <button class="tab-btn active" id="tab-learn" onclick="switchTab('learn')">Learn</button>
     <button class="tab-btn" id="tab-quiz" onclick="switchTab('quiz')">Practice</button>
   </div>
+  <button class="voice-toggle-btn" id="voice-toggle-btn" onclick="toggleVoice()" aria-label="Toggle voice narration">🔊</button>
   <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span class="toggle-track"><span class="toggle-thumb"></span></span></button>
 </header>
 
@@ -959,7 +963,7 @@ const OPENINGS = [
     {w:'c4',b:'e6',e:50,desc:"White offers the gambit pawn. Black declines — and keeps a solid center.",idea:"Accepting the gambit pawn is tempting but dangerous. Black's refusal is not passive — it's a strategic statement: 'I will build a fortress you cannot break.' The QGD structure has frustrated attacking players for generations. Petrosian, Karpov, Kramnik all relied on it at the highest level.",next:"Solid foundations beat temporary material gains. The pawn isn't worth the structural damage."},
     {w:'Nc3',b:'Nf6',e:50,desc:"Both sides develop knights to their most natural squares.",idea:"Natural development — both players following the same principle: put every piece on its best square before starting a fight. The knights point toward the center, where they'll be most powerful. There's no mystery here, just good chess principles executed correctly.",next:"Keep developing. The real decisions come after all pieces are ready."},
     {w:'Bg5',b:'Be7',e:50,desc:"White pins the knight. Black breaks the pin calmly.",idea:"White applies pressure with the pin, but Black has a straightforward solution. This is the QGD's great lesson: don't panic under pressure. Every threat has an answer. Stay calm, find the principled response, and maintain the solid structure that defines this opening.",next:"Maintain the structure. The position is comfortable — there's no need to complicate things."},
-    {w:'e3',b:'O-O',e:50,desc:"White solidifies. Black castles.",idea:"Castle first — king safety is the priority.",next:"White completes development with ."},
+    {w:'e3',b:'O-O',e:50,desc:"White solidifies. Black castles.",idea:"Castle first — king safety is the priority.",next:"White completes development with O-O."},
     {w:'Nf3',b:'b6',e:51,desc:"White completes development. Black plays b6 — the Tartakower!",idea:"prepares — the most popular and modern QGD setup. Black solves the problem bishop and prepares active counterplay.",next:"White should exchange on to test Black's setup."},
     {w:'cxd5',b:'exd5',e:51,desc:"White captures. Black recaptures with the e-pawn.",idea:"This is the Tartakower recapture — Black opens the e-file and activates pieces. The bishop will come to powerfully.",next:"White develops the bishop."},
     {w:'Bd3',b:'Bb7',e:51,desc:"White develops the bishop. Black activates the problem bishop!",idea:"This is the point of the Tartakower — the bishop finally finds its best diagonal. It will put pressure on the center.",next:"Both sides continue developing."},
@@ -971,11 +975,11 @@ const OPENINGS = [
   {id:'qgd-lasker',cx:1,sh:1,pop:'Club favorite',side:'Simplifies to equality',hist:["Invented by World Champion Emanuel Lasker specifically to unsettle Capablanca in their 1921 match. Lasker understood that psychologically unexpected simplifications could be devastating.", "Lasker held the World Championship for 27 years \u2014 a record that still stands. He won many games not through brilliance but through deep psychological insight.", "The Lasker Defense became fashionable again after Carlsen used it. Its reputation as a 'drawish' system turned out to be an asset rather than a flaw."],name:'Lasker Defense',tag:"7...Ne4 — trade to equality",moves:[
     {w:'d4',b:'d5',e:50,desc:"Both sides occupy the center.",idea:"The Queen's Gambit begins. The Lasker Defense is a classical choice — Black will simplify the position deliberately, trading pieces to reach a comfortable endgame.",next:"White will push to challenge."},
     {w:'c4',b:'e6',e:50,desc:"White challenges the center. Black declines.",idea:"supports and prepares the bishop's development.",next:"Both sides develop their knights."},
-    {w:'Nc3',b:'Nf6',e:50,desc:"Both sides develop knights.",idea:"Natural development — fight for the center.",next:"White pins the knight with ."},
+    {w:'Nc3',b:'Nf6',e:50,desc:"Both sides develop knights.",idea:"Natural development — fight for the center.",next:"White pins the knight with Bg5."},
     {w:'Bg5',b:'Be7',e:50,desc:"White pins the knight. Black breaks the pin calmly.",idea:"This is the solid response — prepare to castle safely before doing anything else.",next:"White plays to solidify."},
-    {w:'e3',b:'O-O',e:50,desc:"White solidifies. Black castles.",idea:"Castle first. The king must be safe before any counterplay.",next:"White finishes development with ."},
+    {w:'e3',b:'O-O',e:50,desc:"White solidifies. Black castles.",idea:"Castle first. The king must be safe before any counterplay.",next:"White finishes development with O-O."},
     {w:'Nf3',b:'Ne4',e:51,desc:"White develops. Black plays the Lasker — the knight leaps to e4!",idea:"This is the Lasker Defense — Black immediately simplifies by forcing exchanges. The goal is a comfortable equal position with no weaknesses.",next:"White must decide how to handle the active knight."},
-    {w:'Bxe7',b:'Qxe7',e:51,desc:"White exchanges bishops. Black recaptures with the queen, centralizing.",idea:"The queen on is well-placed — it supports the knight and eyes the e-file.",next:"White attacks the knight on ."},
+    {w:'Bxe7',b:'Qxe7',e:51,desc:"White exchanges bishops. Black recaptures with the queen, centralizing.",idea:"The queen on is well-placed — it supports the knight and eyes the e-file.",next:"White attacks the knight on c6."},
     {w:'cxd5',b:'Nxc3',e:51,desc:"White captures in the center. Black trades the knight.",idea:"Black creates doubled pawns on White's queenside — a long-term structural advantage.",next:"White recaptures and the position simplifies."},
     {w:'bxc3',b:'exd5',e:51,desc:"White recaptures with the pawn. Black recaptures in the center.",idea:"The position is now symmetrical and solid. Black has achieved the Lasker goal — equality without risk.",next:"The position is simplified and balanced. Accurate play from both sides leads to equality."},
     {w:'Bd3',b:'Nd7',e:51,desc:"White develops the bishop. Black develops the knight.",idea:"supports the center and prepares - if needed. Black's position is solid and comfortable.",next:"Both sides complete development and prepare the endgame."},
@@ -983,93 +987,93 @@ const OPENINGS = [
     {w:'O-O',b:'c5',e:51,desc:"White castles. Black strikes the center!",idea:"This is the thematic break — Black attacks the isolated pawn and seeks active counterplay.",next:"The game is balanced. Both sides must play precisely."}
   ]},
   {id:'qgd-cambridge',cx:2,sh:2,pop:'Surprise weapon',side:'Black attacks queenside',hist:["Invented at the 1904 Cambridge Springs tournament in Pennsylvania. Several players simultaneously discovered the idea, making it one of chess's first 'collective inventions'.", "The Cambridge Springs was considered nearly refuted for 40 years. When computers analyzed it they found Black's position was actually quite sound \u2014 a historic reversal."],name:'Cambridge Springs',tag:"6...Qa5 — attack the knight",moves:[
-    {w:'d4',b:'d5',e:50,desc:"Both sides occupy the center.",idea:"White opens with the Queen's Gambit. The Cambridge Springs is a classic trap-laden defense — Black creates threats early and challenges White to navigate carefully.",next:"White plays ."},
+    {w:'d4',b:'d5',e:50,desc:"Both sides occupy the center.",idea:"White opens with the Queen's Gambit. The Cambridge Springs is a classic trap-laden defense — Black creates threats early and challenges White to navigate carefully.",next:"White plays c4."},
     {w:'c4',b:'e6',e:50,desc:"White challenges. Black declines.",idea:"This move is solid and prepares development.",next:"Both develop knights."},
-    {w:'Nc3',b:'Nf6',e:50,desc:"Both develop knights.",idea:"Natural, principled development.",next:"White pins with ."},
-    {w:'Bg5',b:'Nbd7',e:50,desc:"White pins. Black develops the other knight.",idea:"Nbd7 is the Cambridge Springs setup — Black prepares the queen sortie to .",next:"White plays ."},
+    {w:'Nc3',b:'Nf6',e:50,desc:"Both develop knights.",idea:"Natural, principled development.",next:"White pins with Bg5."},
+    {w:'Bg5',b:'Nbd7',e:50,desc:"White pins. Black develops the other knight.",idea:"Nbd7 is the Cambridge Springs setup — Black prepares the queen sortie to a5.",next:"White plays e3."},
     {w:'e3',b:'c6',e:50,desc:"White solidifies. Black prepares the Cambridge Springs.",idea:"supports and makes the idea even stronger — it threatens to win a piece.",next:"White plays to complete development."},
-    {w:'Nf3',b:'Qa5',e:51,desc:"White develops. Black unleashes the Cambridge Springs with Qa5!",idea:"This is the Cambridge Springs move — it pins the and threatens , creating real pressure on the queenside.",next:"White must deal with the pin carefully."},
-    {w:'cxd5',b:'Nxd5',e:51,desc:"White breaks the tension in the center. Black recaptures with the knight.",idea:"centralizes the knight and maintains the pin on . Black's position is active and dangerous.",next:"White needs to untangle carefully."},
-    {w:'Qd2',b:'Bb4',e:51,desc:"White prepares to break the pin. Black adds more pressure!",idea:"pins the to the queen. White is under significant pressure on the queenside.",next:"White must unpin with care."},
-    {w:'Rc1',b:'O-O',e:51,desc:"White activates the rook. Black castles to safety.",idea:"gets the king safe. Black has a very active position with pressure on multiple squares.",next:"The middlegame is rich with tactical ideas."},
+    {w:'Nf3',b:'Qa5',e:51,desc:"White develops. Black unleashes the Cambridge Springs with Qa5!",idea:"This is the Cambridge Springs move — the queen pins the knight on f3 and threatens the bishop on g5, creating real pressure on the queenside.",next:"White must deal with the pin carefully."},
+    {w:'cxd5',b:'Nxd5',e:51,desc:"White breaks the tension in the center. Black recaptures with the knight.",idea:"centralizes the knight and maintains the pin on g5. Black's position is active and dangerous.",next:"White needs to untangle carefully."},
+    {w:'Qd2',b:'Bb4',e:51,desc:"White prepares to break the pin. Black adds more pressure!",idea:"pins the knight to the queen. White is under significant pressure on the queenside.",next:"White must unpin with care."},
+    {w:'Rc1',b:'O-O',e:51,desc:"White activates the rook. Black castles to safety.",idea:"gets the king to safety. Black has a very active position with pressure on multiple squares.",next:"The middlegame is rich with tactical ideas."},
     {w:'Bd3',b:'e5',e:51,desc:"White develops the bishop. Black strikes in the center!",idea:"This is the thematic break — Black opens the position to activate all the pieces.",next:"The position is sharp and complex."},
     {w:'Nxd5',b:'cxd5',e:51,desc:"White trades on d5. Black recaptures with the pawn.",idea:"This move gives Black an open c-file and active pieces. The position is very rich.",next:"Both sides have real winning chances."},
-    {w:'O-O',b:'exd4',e:51,desc:"White castles. Black captures in the center.",idea:"opens the position fully. The game is now completely open and tactical.",next:"The game is entering a critical phase."}
+    {w:'O-O',b:'exd4',e:51,desc:"White castles. Black captures in the center.",idea:"opens the center fully. The game is now completely open and tactical.",next:"The game is entering a critical phase."}
   ]},
   {id:'qgd-exchange',cx:1,sh:1,pop:'Solid choice',side:'Symmetrical play',name:'Exchange Variation',tag:"3.cxd5 — minority attack",moves:[
-    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"The Queen's Gambit begins. The Exchange Variation leads to symmetrical pawn structures where the battle is entirely about piece activity and minor piece advantages.",next:"White plays ."},
-    {w:'c4',b:'e6',e:50,desc:"White challenges. Black declines.",idea:"supports solidly.",next:"White plays ."},
-    {w:'Nc3',b:'Nf6',e:50,desc:"Both develop knights.",idea:"Natural development — fight for the center.",next:"White captures on — the Exchange Variation!"},
+    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"The Queen's Gambit begins. The Exchange Variation leads to symmetrical pawn structures where the battle is entirely about piece activity and minor piece advantages.",next:"White plays c4."},
+    {w:'c4',b:'e6',e:50,desc:"White challenges. Black declines.",idea:"supports solidly.",next:"White develops a knight."},
+    {w:'Nc3',b:'Nf6',e:50,desc:"Both develop knights.",idea:"Natural development — fight for the center.",next:"White captures on d5 — the Exchange Variation!"},
     {w:'cxd5',b:'exd5',e:50,desc:"White captures — the Exchange Variation! Black recaptures.",idea:"The position is now completely symmetrical. White will try to exploit the minority attack on the queenside.",next:"White develops the bishop."},
     {w:'Bg5',b:'Be7',e:50,desc:"White pins the knight. Black breaks it calmly.",idea:"This is the solid response — prepare to castle before worrying about the pin.",next:"White plays to solidify."},
     {w:'e3',b:'O-O',e:50,desc:"White solidifies. Black castles immediately.",idea:"King safety first. Black has a solid, symmetrical position.",next:"White completes development."},
     {w:'Bd3',b:'Nbd7',e:50,desc:"White develops the bishop. Black brings out the last knight.",idea:"Nbd7 supports the center and keeps all options open. The Orthodox setup is now fully in place.",next:"Both sides complete development."},
     {w:'Qc2',b:'Re8',e:51,desc:"White centralizes the queen. Black activates the rook.",idea:"adds support to the center and prepares counterplay. Black must be active or White's minority attack will be decisive.",next:"White prepares the minority attack."},
-    {w:'Nge2',b:'Nf8',e:51,desc:"White maneuvers the knight. Black repositions.",idea:"prepares — a strong central outpost that will challenge White's control.",next:"White launches the minority attack."},
-    {w:'O-O',b:'Ne6',e:51,desc:"White castles. Black's knight reaches its ideal square.",idea:"This move is a powerful central piece — it controls key squares and prepares to go to or .",next:"The middlegame battle begins around the minority attack."},
-    {w:'b4',b:'Bd6',e:51,desc:"White launches the minority attack with b4!",idea:"- is White's plan — create a weak pawn on in Black's structure. Black must find active counterplay.",next:"Black develops the bishop to a more active square."},
+    {w:'Nge2',b:'Nf8',e:51,desc:"White maneuvers the knight. Black repositions.",idea:"prepares Ne6 — a strong central outpost that will challenge White's control.",next:"White launches the minority attack."},
+    {w:'O-O',b:'Ne6',e:51,desc:"White castles. Black's knight reaches its ideal square.",idea:"This move is a powerful central piece — it controls key squares and prepares to go to d4 or f4.",next:"The middlegame battle begins around the minority attack."},
+    {w:'b4',b:'Bd6',e:51,desc:"White launches the minority attack with b4!",idea:"b4-b5 is White's plan — create a weak pawn on c6 in Black's structure. Black must find active counterplay.",next:"Black develops the bishop to a more active square."},
     {w:'b5',b:'Ng4',e:51,desc:"White advances. Black's knight leaps forward aggressively!",idea:"threatens and creates complications. Black fights back with sharp play rather than passive defense.",next:"The position is very sharp. Both sides have winning chances."}
   ]},
   {id:'accepted',cx:2,sh:2,pop:'Very popular',side:'Dynamic for both',hist:["One of the oldest openings, first recorded in the 15th century. For a long time it was considered dubious until computers proved it fully sound.", "Kasparov used the QGA to win a brilliant game against Short in 1993. He said capturing the pawn gave him exactly the dynamic play he needed.", "The opening was rehabilitated in the 1990s by Kramnik, who showed that Black's extra pawn gives enough counterplay to equalize against any white system."],name:'Accepted',tag:"2...dxc4 — pawn grab",moves:[
     {w:'d4',b:'d5',e:50,desc:"Both sides plant a pawn in the center.",idea:"White places a pawn in the center. Black answers symmetrically — and on the next move, will take the offered pawn. The Queen's Gambit Accepted is an active defense: take the pawn, give back the center, find counterplay.",next:"White will now offer a pawn."},
     {w:'c4',b:'dxc4',e:50,desc:"White offers the gambit. Black accepts!",idea:"Black takes the pawn, gambling that White can't reclaim it efficiently. White gets central space and fast development in return.",next:"White must develop quickly to make the gambit worthwhile."},
     {w:'Nf3',b:'Nf6',e:50,desc:"White develops. Black develops.",idea:"Both sides race to get their pieces out. Whoever finishes development first gets to attack.",next:"Continue developing. Every tempo matters in an open position."},
-    {w:'e3',b:'e6',e:50,desc:"White prepares to reclaim the pawn. Black solidifies.",idea:"opens the diagonal for the bishop and prepares to win back the pawn with .",next:"White will reclaim the pawn with the bishop."},
-    {w:'Bxc4',b:'c5',e:50,desc:"White reclaims the pawn. Black immediately challenges the center.",idea:"Black's is the key move — it strikes at White's center before White can build an overwhelming position.",next:"The position is now open and tactical. Both sides have real chances."},
-    {w:'O-O',b:'a6',e:50,desc:"White castles. Black prepares queenside expansion.",idea:"King safety first, then attack. prevents and prepares to gain space on the queenside.",next:"Both sides have their plans. The middlegame battle is about to begin."},
-    {w:'Qe2',b:'b5',e:51,desc:"White protects the bishop indirectly. Black pushes the queenside.",idea:"This move is subtle — it prepares to recapture on and overprotects . Black's grabs space but creates weaknesses.",next:"The position is sharp. Both sides must be precise."},
+    {w:'e3',b:'e6',e:50,desc:"White prepares to reclaim the pawn. Black solidifies.",idea:"opens the diagonal for the bishop and prepares to win back the pawn with Bxc4.",next:"White will reclaim the pawn with the bishop."},
+    {w:'Bxc4',b:'c5',e:50,desc:"White reclaims the pawn. Black immediately challenges the center.",idea:"Black's c5 is the key move — it strikes at White's center before White can build an overwhelming position.",next:"The position is now open and tactical. Both sides have real chances."},
+    {w:'O-O',b:'a6',e:50,desc:"White castles. Black prepares queenside expansion.",idea:"King safety first, then attack. a6 prevents Bb5 and prepares b5 to gain space on the queenside.",next:"Both sides have their plans. The middlegame battle is about to begin."},
+    {w:'Qe2',b:'b5',e:51,desc:"White protects the bishop indirectly. Black pushes the queenside.",idea:"This move is subtle — it prepares to recapture on c4 and supports the center. Black grabs space but creates weaknesses.",next:"The position is sharp. Both sides must be precise."},
     {w:'Bb3',b:'Bb7',e:51,desc:"White retreats the bishop safely. Black develops the bishop actively.",idea:"The bishop on is a long-range weapon pointing at the center. Black's pieces are now all active and coordinated.",next:"The strategic battle begins."},
     {w:'Nc3',b:'Nc6',e:51,desc:"Both sides develop their last minor pieces.",idea:"Development is almost complete. Whoever can open the position first will have the advantage.",next:"Keep pieces coordinated. The battle for the center is about to explode."},
-    {w:'d5',b:'Na5',e:51,desc:"White advances the center pawn. Black's knight escapes to the edge.",idea:"This move is a bold central advance that grabs space but gives Black a target. attacks the bishop and prepares .",next:"The position is very sharp. Both players must calculate carefully."},
+    {w:'d5',b:'Na5',e:51,desc:"White advances the center pawn. Black's knight escapes to the edge.",idea:"This move is a bold central advance that grabs space but gives Black a target. Na5 attacks the bishop and prepares c5.",next:"The position is very sharp. Both players must calculate carefully."},
     {w:'Bc2',b:'c4',e:51,desc:"White retreats the bishop. Black grabs more space.",idea:"locks the queenside in Black's favor but Black must act quickly before White reorganizes.",next:"White will try to undermine the pawn. The position requires precise play from both sides."},
     {w:'Nd4',b:'Rc8',e:51,desc:"White centralizes the knight. Black activates the rook.",idea:"Both sides maneuver for the key squares. The player who controls the most important files and diagonals will win.",next:"Every move matters now."}
   ]},
   {id:'qga-classical',cx:2,sh:1,pop:'Club standard',side:'Quiet & solid',name:'Classical',tag:"4.e3 — the quiet way",moves:[
-    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"The Queen's Gambit begins. Black will accept the pawn — an aggressive choice that leads to open, dynamic positions where piece activity compensates for the structural concession.",next:"White challenges with ."},
-    {w:'c4',b:'dxc4',e:50,desc:"White offers the gambit. Black accepts!",idea:"Black takes the pawn and dares White to prove compensation.",next:"White plays — the classical recovery."},
+    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"The Queen's Gambit begins. Black will accept the pawn — an aggressive choice that leads to open, dynamic positions where piece activity compensates for the structural concession.",next:"White challenges with c4."},
+    {w:'c4',b:'dxc4',e:50,desc:"White offers the gambit. Black accepts!",idea:"Black takes the pawn and dares White to prove compensation.",next:"White plays e3 — the classical recovery."},
     {w:'e3',b:'Nf6',e:50,desc:"White plays e3 — calm and solid. Black develops the knight.",idea:"This is the most natural way to recover the pawn — solid and principled. No complications, just good chess.",next:"White develops the bishop."},
     {w:'Bxc4',b:'e6',e:50,desc:"White recovers the pawn. Black solidifies.",idea:"This move is solid and natural — Black closes the diagonal and prepares normal development.",next:"White develops the knight."},
     {w:'Nf3',b:'c5',e:51,desc:"White develops. Black strikes the center!",idea:"attacks immediately. This is the move that makes the QGA interesting — Black fights back at once.",next:"White develops the knight."},
-    {w:'O-O',b:'a6',e:51,desc:"White castles. Black prepares queenside play.",idea:"prevents and prepares . Black is setting up active queenside play.",next:"White develops the knight."},
+    {w:'O-O',b:'a6',e:51,desc:"White castles. Black prepares queenside play.",idea:"prevents Bb5 and prepares b5. Black is setting up active queenside play.",next:"White develops the knight."},
     {w:'Nc3',b:'b5',e:51,desc:"White develops. Black advances!",idea:"gains space and creates counterplay. Black is playing energetically for the initiative.",next:"White retreats the bishop."},
     {w:'Bb3',b:'Bb7',e:51,desc:"White retreats. Black develops the bishop actively.",idea:"This move is excellent — the bishop controls the long diagonal and supports the pawn.",next:"White prepares the center."},
     {w:'d5',b:'exd5',e:51,desc:"White advances the center pawn! Black captures.",idea:"This is the critical advance — White breaks open the center to use the advantage in space.",next:"White recaptures."},
     {w:'Nxd5',b:'Nxd5',e:51,desc:"White recaptures with the knight. Black exchanges.",idea:"centralizes the knight powerfully. The position opens up significantly.",next:"White recaptures again."},
-    {w:'Bxd5',b:'Nc6',e:51,desc:"White recaptures. Black develops the last minor piece.",idea:"develops and challenges the powerful bishop on .",next:"Both sides are in a critical middlegame position."},
+    {w:'Bxd5',b:'Nc6',e:51,desc:"White recaptures. Black develops the last minor piece.",idea:"develops and challenges the powerful bishop on d5.",next:"Both sides are in a critical middlegame position."},
     {w:'Re1',b:'Be7',e:51,desc:"White activates the rook. Black develops the bishop.",idea:"The position is now open and dynamic. Both sides must play accurately.",next:"The game is entering a fascinating tactical phase."}
   ]},
   {id:'qga-central',cx:1,sh:3,pop:'Club weapon',side:'Sharp for White',name:'Central Gambit',tag:"3.e4 — grab center now",moves:[
-    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"White claims central space. In the Central Variation of the QGA, Black will fight back in the center immediately after accepting the gambit pawn.",next:"White challenges with ."},
-    {w:'c4',b:'dxc4',e:50,desc:"White offers the gambit. Black accepts!",idea:"Black grabs the pawn — but White has a surprise.",next:"White plays immediately!"},
-    {w:'e4',b:'Nf6',e:51,desc:"White plays e4 immediately — the Central Gambit! Black develops the knight to attack e4.",idea:"This is the most natural move in the world — 'I have a free pawn in the center, I occupy it immediately.' Very popular at club level. Black must challenge it now or White gets a massive center.",next:"White defends ."},
-    {w:'Nc3',b:'e5',e:51,desc:"White defends the center. Black counterattacks!",idea:"This is the most aggressive response — Black fights fire with fire and attacks . The position becomes very sharp immediately.",next:"White captures in the center."},
+    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"White claims central space. In the Central Variation of the QGA, Black will fight back in the center immediately after accepting the gambit pawn.",next:"White challenges with c4."},
+    {w:'c4',b:'dxc4',e:50,desc:"White offers the gambit. Black accepts!",idea:"Black grabs the pawn — but White has a surprise.",next:"White plays e4 immediately!"},
+    {w:'e4',b:'Nf6',e:51,desc:"White plays e4 immediately — the Central Gambit! Black develops the knight to attack e4.",idea:"This is the most natural move in the world — 'I have a free pawn in the center, I occupy it immediately.' Very popular at club level. Black must challenge it now or White gets a massive center.",next:"White defends the e-pawn."},
+    {w:'Nc3',b:'e5',e:51,desc:"White defends the center. Black counterattacks!",idea:"This is the most aggressive response — Black fights fire with fire and attacks d4. The position becomes very sharp immediately.",next:"White captures in the center."},
     {w:'dxe5',b:'Qxd1',e:51,desc:"White captures. Black exchanges queens!",idea:"simplifies — a common club move. Black gives up the queen to avoid complications but loses the initiative.",next:"White recaptures."},
     {w:'Kxd1',b:'Ng4',e:51,desc:"White recaptures with the king. Black's knight attacks e5!",idea:"immediately attacks the pawn. Black fights to regain the pawn.",next:"White defends the pawn."},
     {w:'Bf4',b:'Nc6',e:51,desc:"White defends with the bishop. Black develops.",idea:"develops and threatens to win the pawn. Black's position is very active.",next:"White defends the pawn chain."},
     {w:'Nf3',b:'Ncxe5',e:51,desc:"White develops. Black wins back the pawn!",idea:"regains the material. Black has active pieces and a playable position.",next:"White activates the bishop."},
     {w:'Nxe5',b:'Ngxe5',e:51,desc:"White trades knights. Black recaptures.",idea:"The position has simplified but Black still has the pawn. The endgame slightly favors White.",next:"White develops the bishop."},
-    {w:'Bxc4',b:'Bb4',e:51,desc:"White reclaims the pawn. Black pins the knight!",idea:"This move is very active — the bishop pins the and creates pressure. Black fights back energetically.",next:"Both sides develop."},
-    {w:'Ke2',b:'O-O',e:51,desc:"White moves the king to safety. Black castles.",idea:"gets the king safe. The position is roughly equal — White has the bishop pair, Black has active pieces.",next:"The endgame is balanced."},
+    {w:'Bxc4',b:'Bb4',e:51,desc:"White reclaims the pawn. Black pins the knight!",idea:"This move is very active — the bishop pins the knight on c3 and creates pressure. Black fights back energetically.",next:"Both sides develop."},
+    {w:'Ke2',b:'O-O',e:51,desc:"White moves the king to safety. Black castles.",idea:"gets the king to safety. The position is roughly equal — White has the bishop pair, Black has active pieces.",next:"The endgame is balanced."},
     {w:'Rhd1',b:'Re8',e:51,desc:"White activates the rook. Black activates the rook.",idea:"Both sides activate their rooks. The endgame requires precise play from both sides.",next:"The game is entering a technical endgame phase."}
   ]},
   {id:'qga-e4',cx:2,sh:3,pop:'Natural choice',side:'White attacks center',name:'5.e4 Variation',tag:"5.e4 — I grab the center",moves:[
-    {w:'d4',b:'d5',e:50,desc:"Both sides occupy the center.",idea:"The QGA battle begins from move one. White's goal: regain the pawn with a tempo and keep a central advantage. Black's goal: use the pawn acceptance to develop freely.",next:"White challenges with ."},
+    {w:'d4',b:'d5',e:50,desc:"Both sides occupy the center.",idea:"The QGA battle begins from move one. White's goal: regain the pawn with a tempo and keep a central advantage. Black's goal: use the pawn acceptance to develop freely.",next:"White challenges with c4."},
     {w:'c4',b:'dxc4',e:50,desc:"White offers the gambit. Black accepts!",idea:"Black grabs the pawn — now White must prove compensation.",next:"White develops the knight."},
-    {w:'Nf3',b:'Nf6',e:50,desc:"Both develop knights.",idea:"Natural development on both sides.",next:"White plays to recover the pawn."},
-    {w:'e3',b:'e6',e:50,desc:"White prepares to recover the pawn. Black solidifies.",idea:"supports the pawn on and prepares the bishop to come out.",next:"White recovers the pawn."},
-    {w:'Bxc4',b:'c5',e:51,desc:"White recovers. Black strikes the center immediately!",idea:"This is the most active response — attack before White consolidates. This is the move club players find naturally.",next:"White pushes — the most natural and aggressive move."},
+    {w:'Nf3',b:'Nf6',e:50,desc:"Both develop knights.",idea:"Natural development on both sides.",next:"White plays e3 to recover the pawn."},
+    {w:'e3',b:'e6',e:50,desc:"White prepares to recover the pawn. Black solidifies.",idea:"supports the pawn on c4 and prepares the bishop to come out.",next:"White recovers the pawn."},
+    {w:'Bxc4',b:'c5',e:51,desc:"White recovers. Black strikes the center immediately!",idea:"This is the most active response — attack before White consolidates. This is the move club players find naturally.",next:"White pushes e4 — the most natural and aggressive move."},
     {w:'e4',b:'cxd4',e:51,desc:"White seizes the center with e4! Black captures.",idea:"This is the move everyone wants to play — grab the center. Black takes immediately to challenge it.",next:"White recaptures and has a huge center."},
-    {w:'Nxd4',b:'Nc6',e:51,desc:"White recaptures, dominating the center. Black develops.",idea:"attacks the strong knight on . Black must challenge White's center or get crushed.",next:"White defends the knight."},
+    {w:'Nxd4',b:'Nc6',e:51,desc:"White recaptures, dominating the center. Black develops.",idea:"attacks the strong knight on d4. Black must challenge White's center or get crushed.",next:"White defends the knight."},
     {w:'Nc3',b:'Bc5',e:51,desc:"White develops. Black develops the bishop actively.",idea:"targets the pawn and puts pressure on White's center. Black is fighting back.",next:"White must defend carefully."},
-    {w:'Be3',b:'O-O',e:51,desc:"White develops the bishop. Black castles.",idea:"gets the king safe. Black will now use the open lines to create counterplay.",next:"White castles queenside for a direct attack."},
-    {w:'O-O',b:'a6',e:51,desc:"White castles. Black prepares queenside expansion.",idea:"prevents and prepares . Black is playing for queenside counterplay.",next:"The position is very sharp with chances for both sides."},
+    {w:'Be3',b:'O-O',e:51,desc:"White develops the bishop. Black castles.",idea:"gets the king to safety. Black will now use the open lines to create counterplay.",next:"White castles queenside for a direct attack."},
+    {w:'O-O',b:'a6',e:51,desc:"White castles. Black prepares queenside expansion.",idea:"prevents Bb5 and prepares b5. Black is playing for queenside counterplay.",next:"The position is very sharp with chances for both sides."},
     {w:'Qe2',b:'b5',e:51,desc:"White centralizes. Black advances on the queenside.",idea:"gains space but creates weaknesses. The position is very double-edged.",next:"The game is extremely sharp."},
     {w:'Bb3',b:'Bb7',e:51,desc:"White retreats the bishop. Black develops actively.",idea:"activates the bishop on the long diagonal. All of Black's pieces are now pointing at the center.",next:"The position is very rich and complex. Both sides have real winning chances."}
   ]},
   {id:'qga-bf4',cx:1,sh:2,pop:'Common at club',side:'Comfortable for White',name:'Bishop Active',tag:"5.Bxc4 — recover and develop",moves:[
-    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"White starts the Queen's Gambit. The Bishop f4 variation is one of the most direct approaches after Black accepts — immediate development, clear plans.",next:"White challenges with ."},
+    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"White starts the Queen's Gambit. The Bishop f4 variation is one of the most direct approaches after Black accepts — immediate development, clear plans.",next:"White challenges with c4."},
     {w:'c4',b:'dxc4',e:50,desc:"White offers the gambit. Black accepts!",idea:"Black takes the pawn. Now White must develop quickly.",next:"White develops the knight."},
-    {w:'Nf3',b:'Nf6',e:50,desc:"Both develop knights.",idea:"Natural development — both sides fight for the center.",next:"White plays ."},
+    {w:'Nf3',b:'Nf6',e:50,desc:"Both develop knights.",idea:"Natural development — both sides fight for the center.",next:"White prepares to recover the pawn."},
     {w:'e3',b:'e6',e:50,desc:"White prepares to reclaim the pawn. Black supports.",idea:"supports and prepares bishop development.",next:"White recovers the pawn."},
     {w:'Bxc4',b:'c5',e:51,desc:"White recovers the pawn. Black attacks d4!",idea:"This is the most principled — attack the center immediately after White recovers the pawn.",next:"White develops the bishop — the most natural move!"},
     {w:'O-O',b:'Nc6',e:51,desc:"White castles, completing development. Black develops the knight.",idea:"This is the natural move here — castle first, then decide how to handle Black's queenside expansion plans.",next:"White prepares the center."},
@@ -1081,25 +1085,25 @@ const OPENINGS = [
     {w:'Ne5',b:'O-O',e:51,desc:"White centralizes the knight powerfully. Black castles.",idea:"gets the king safe despite White's active knight. The position is balanced with chances for both sides.",next:"Development complete — the battle begins."}
   ]},
   {id:'qga-winawer',cx:1,sh:3,pop:'Surprise weapon',side:'Black counter-attacks',name:'Winawer Countergambit',tag:"3...e5 — fight immediately",moves:[
-    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"White opens with the Queen's Gambit. In the Winawer QGA, White will develop quickly and precisely, exploiting Black's slight structural concession from accepting the gambit.",next:"White challenges with ."},
+    {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"White opens with the Queen's Gambit. In the Winawer QGA, White will develop quickly and precisely, exploiting Black's slight structural concession from accepting the gambit.",next:"White challenges with c4."},
     {w:'c4',b:'dxc4',e:50,desc:"White offers the gambit. Black accepts!",idea:"Black grabs the pawn — but has an aggressive plan in mind.",next:"White develops."},
     {w:'Nf3',b:'e5',e:51,desc:"White develops. Black plays the Winawer Countergambit — e5!",idea:"This is the Winawer Countergambit — extremely aggressive! Black immediately attacks and offers a pawn to open lines. Very popular at club level because it feels natural.",next:"White must take or the center collapses."},
     {w:'dxe5',b:'Qxd1',e:51,desc:"White captures. Black exchanges queens!",idea:"forces the exchange. This is the club player's move — 'I take the queen off before getting into complications.'",next:"White recaptures — no choice."},
     {w:'Kxd1',b:'Nc6',e:51,desc:"White recaptures with the king! Black develops the knight.",idea:"After the queen exchange the kings are equal. Black has given back the pawn but has active pieces.",next:"White develops."},
     {w:'Nbd2',b:'Bg4',e:51,desc:"White develops. Black pins the knight!",idea:"pins the knight immediately — Black creates pressure and develops actively.",next:"White plays to support the center."},
     {w:'e3',b:'O-O-O',e:51,desc:"White solidifies. Black castles queenside!",idea:"Queenside castling puts the king safe and connects the rooks. Black's position is surprisingly active.",next:"White recovers the pawn."},
-    {w:'Bxc4',b:'Nge7',e:51,desc:"White recovers the pawn. Black develops the knight.",idea:"Nge7 is solid — the knight will go to or to challenge White's center.",next:"White develops the bishop."},
-    {w:'Bb3',b:'Nf5',e:51,desc:"White retreats. Black's knight reaches a strong outpost.",idea:"This move is very active — the knight attacks and controls key squares.",next:"White must defend."},
+    {w:'Bxc4',b:'Nge7',e:51,desc:"White recovers the pawn. Black develops the knight.",idea:"Nge7 is solid — the knight will go to f5 or g6 to challenge White's center.",next:"White develops the bishop."},
+    {w:'Bb3',b:'Nf5',e:51,desc:"White retreats. Black's knight reaches a strong outpost.",idea:"This move is very active — the knight attacks e3 and controls key squares.",next:"White must defend."},
     {w:'Ke2',b:'Bxf3',e:51,desc:"White moves the king to safety. Black captures the knight!",idea:"eliminates a defender and gives White doubled pawns. Black's position is very active.",next:"White recaptures."},
     {w:'gxf3',b:'Ncxe5',e:51,desc:"White recaptures, creating a pawn weakness. Black's knight grabs back the pawn!",idea:"recovers the pawn sacrificed earlier — Black's pieces are very active and the position is balanced.",next:"White challenges the centralized knight."},
     {w:'f4',b:'Nc6',e:51,desc:"White kicks the knight with tempo. Black retreats.",idea:"keeps the knight safe while maintaining a solid, active position. Material is level and both sides have chances.",next:"The position is balanced — both sides have real winning chances."}
   ]},
   {id:'slav',cx:2,sh:1,pop:'Very popular',side:'Solid for Black',hist:["Became fashionable in the 1920s when Alekhine, Bogoljubow and Vidmar adopted it. Nicknamed the equalizer because it reliably neutralizes White's advantage.", "The Slav was Anand's main weapon as Black in his 2010 World Championship match against Topalov. It helped him win one of the most dramatic championship matches ever.", "What makes the Slav unique is that Black supports d5 with c6 rather than e6, keeping the light-squared bishop free \u2014 solving the main problem of the QGD in one move."],name:'Slav',tag:"2...c6 — solid",moves:[
     {w:'d4',b:'d5',e:50,desc:"Both sides occupy the center.",idea:"White opens with the Queen's Gambit. The Slav Defense will appear on the next move — Black's most solid response, keeping the light-squared bishop free while supporting the center.",next:"White will push to challenge the center."},
-    {w:'c4',b:'c6',e:50,desc:"White challenges the center. Black defends with c6.",idea:"The Slav Defense: Black supports with , keeping the c-pawn free to develop the light-squared bishop. More solid than .",next:"Both sides continue developing their pieces."},
+    {w:'c4',b:'c6',e:50,desc:"White challenges the center. Black defends with c6.",idea:"The Slav Defense: Black supports d5 with c6, keeping the c-pawn free to develop the light-squared bishop. More solid than e6.",next:"Both sides continue developing their pieces."},
     {w:'Nc3',b:'Nf6',e:50,desc:"Both sides develop knights toward the center.",idea:"Knights belong in the center. Both players follow basic development principles.",next:"Continue developing. Get all pieces out."},
     {w:'Nf3',b:'dxc4',e:50,desc:"White completes knight development. Black takes the pawn.",idea:"Now is the right moment to capture — Black has enough support to hold the pawn temporarily.",next:"White must recapture and develop to get full compensation."},
-    {w:'a4',b:'Bf5',e:50,desc:"White prevents b5. Black develops the bishop outside the pawn chain.",idea:"This is the key move of the Slav: the light-squared bishop comes out BEFORE , which is the main advantage over the QGD.",next:"Both sides have solved their development problems. The middlegame begins."},
+    {w:'a4',b:'Bf5',e:50,desc:"White prevents b5. Black develops the bishop outside the pawn chain.",idea:"This is the key move of the Slav: the light-squared bishop comes out BEFORE e6, which is the main advantage over the QGD.",next:"Both sides have solved their development problems. The middlegame begins."},
     {w:'e3',b:'e6',e:50,desc:"White solidifies the center. Black closes the diagonal.",idea:"This move is solid and prepares to reclaim the pawn. The structure is now symmetrical and solid.",next:"White will reclaim the pawn and the position will equalize."},
     {w:'Bxc4',b:'Bb4',e:51,desc:"White reclaims the pawn. Black pins the knight.",idea:"This move is a classical pin — it ties down the knight and keeps pressure on White's center.",next:"White must break the pin or accept a structural concession."},
     {w:'O-O',b:'O-O',e:51,desc:"Both sides castle to safety.",idea:"When in doubt, castle. Both sides get their kings safe and prepare to fight in the middlegame.",next:"Equal position — the real game starts."},
@@ -1113,7 +1117,7 @@ const OPENINGS = [
     {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black immediately challenges it with the knight.",idea:"This move means fighting chess — Black attacks the center on the very first move without committing a pawn.",next:"White will continue building the center."},
     {w:'c4',b:'e6',e:50,desc:"White expands. Black prepares the bishop pin.",idea:"opens the diagonal for the dark-squared bishop and prepares the Nimzo-Indian — one of the most dynamic defenses in chess.",next:"White must develop the queen's knight to provoke the pin."},
     {w:'Nc3',b:'Bb4',e:50,desc:"White develops the knight. Black immediately pins it.",idea:"The Nimzo-Indian: Black pins the knight and threatens to double White's pawns. This is one of the most powerful openings in chess.",next:"White must decide how to deal with the pin."},
-    {w:'e3',b:'O-O',e:50,desc:"White defends solidly. Black castles immediately.",idea:"This is the most solid response — it defends against the doubling and prepares . Black gets the king safe before the real fight begins.",next:"White will develop the bishop and complete development."},
+    {w:'e3',b:'O-O',e:50,desc:"White defends solidly. Black castles immediately.",idea:"This is the most solid response — it defends against the doubling and prepares d5. Black gets the king safe before the real fight begins.",next:"White will develop the bishop and complete development."},
     {w:'Bd3',b:'d5',e:50,desc:"White develops the bishop. Black challenges the center.",idea:"This is the most principled response — Black fights for the center and puts White's bishop under pressure.",next:"The position is balanced. Both sides have good piece play."},
     {w:'Nf3',b:'c5',e:50,desc:"White completes development. Black strikes at the center.",idea:"This is the thematic break — Black attacks the pawn and creates counterplay before White can consolidate.",next:"The position is sharp and dynamic. Both sides must play actively."},
     {w:'O-O',b:'Nc6',e:50,desc:"White castles. Black develops the last minor piece.",idea:"King safety first, then the knight comes to its natural square. Black's position is solid and active.",next:"The strategic battle begins."},
@@ -1121,126 +1125,126 @@ const OPENINGS = [
     {w:'bxc3',b:'dxc4',e:51,desc:"White recaptures. Black takes another pawn.",idea:"Black grabs the pawn, accepting the imbalance. White has the two bishops and an open b-file; Black has solid pawns.",next:"Both sides have their weapons. The player who uses them better will win."},
     {w:'Bxc4',b:'Qc7',e:51,desc:"White reclaims the pawn. Black centralizes the queen.",idea:"This move is a strong move — it protects and prepares to fight for the square.",next:"The position is rich and complex. Both sides have real winning chances."},
     {w:'Bd3',b:'e5',e:51,desc:"White repositions the bishop. Black strikes in the center.",idea:"This is the thematic break — Black opens the position to activate the pieces and fight against White's bishop pair.",next:"The position is now open and dynamic. Accurate play is essential."},
-    {w:'Qc2',b:'Re8',e:51,desc:"White centralizes the queen. Black activates the rook.",idea:"Both sides are maneuvering for the best positions. The rook on supports the pawn and prepares .",next:"Every move matters now."}
+    {w:'Qc2',b:'Re8',e:51,desc:"White centralizes the queen. Black activates the rook.",idea:"Both sides are maneuvering for the best positions. The rook on e8 supports the e5 pawn and prepares further central play.",next:"Every move matters now."}
   ]},
   {id:'tarrasch-qg',cx:2,sh:2,pop:'Underrated',side:'Flexible for White',name:'Tarrasch',tag:"3.Nd2 — flexible",moves:[
     {w:'d4',b:'d5',e:50,desc:"Both sides plant pawns in the center.",idea:"The Queen's Gambit begins. In the Tarrasch Defense, Black will answer with an ambitious setup that accepts an isolated pawn in exchange for active piece play.",next:"White will push to challenge the center."},
     {w:'c4',b:'e6',e:50,desc:"White challenges. Black supports the center with e6.",idea:"This move is solid and prepares the bishop. Black declines the gambit and focuses on sound development.",next:"White develops the knight next."},
-    {w:'Nd2',b:'Nf6',e:50,desc:"White plays the Tarrasch Variation. Black develops the knight.",idea:"This is the Tarrasch: White avoids the Nimzo-Indian pin and prepares . It's a flexible and underrated system.",next:"Black will develop and look for the freeing break."},
+    {w:'Nd2',b:'Nf6',e:50,desc:"White plays the Tarrasch Variation. Black develops the knight.",idea:"This is the Tarrasch: White avoids the Nimzo-Indian pin and prepares e4. It's a flexible and underrated system.",next:"Black will develop and look for the freeing break."},
     {w:'e3',b:'c5',e:50,desc:"White solidifies. Black immediately strikes the center.",idea:"This is the thematic break — Black attacks before White can establish a large center. This is Black's best plan.",next:"White must decide how to handle the central tension."},
     {w:'Ngf3',b:'Nc6',e:50,desc:"White develops. Black brings out the last knight.",idea:"Both sides finish developing their minor pieces. The position is about to open up.",next:"White will create central tension with the next move."},
     {w:'a3',b:'cxd4',e:50,desc:"White prepares expansion. Black releases the tension.",idea:"This is the thematic exchange — Black opens the position and prepares to activate all the pieces.",next:"White recaptures and the IQP position arises."},
     {w:'exd4',b:'Be7',e:51,desc:"White recaptures, creating the IQP structure. Black develops the bishop.",idea:"The IQP (isolated queen's pawn) position is rich with ideas. White has space and attacking chances; Black targets the isolated pawn.",next:"Castle and start the middlegame battle around the isolated pawn."},
     {w:'Bd3',b:'O-O',e:51,desc:"White develops the bishop. Black castles to safety.",idea:"Both sides follow the same principles: develop pieces, get the king safe, prepare for the middlegame.",next:"The opening is nearly over. White will castle and the real fight begins."},
     {w:'O-O',b:'dxc4',e:51,desc:"White castles. Black takes the pawn.",idea:"Now is the right moment to capture — White has committed to castling and can't immediately reclaim the pawn actively.",next:"White reclaims the pawn and the IQP battle intensifies."},
-    {w:'Bxc4',b:'a6',e:51,desc:"White reclaims with the bishop. Black prepares queenside expansion.",idea:"prevents and prepares , giving Black queenside counterplay against White's isolated pawn.",next:"Both sides have their plans. The real battle for the IQP begins now."},
+    {w:'Bxc4',b:'a6',e:51,desc:"White reclaims with the bishop. Black prepares queenside expansion.",idea:"prevents Bb5 and prepares b5, giving Black queenside counterplay against White's isolated pawn.",next:"Both sides have their plans. The real battle for the IQP begins now."},
     {w:'Qe2',b:'b5',e:51,desc:"White prepares the center. Black grabs queenside space.",idea:"gains space but creates weaknesses. White must find the right moment to activate the d-pawn.",next:"The position is very rich. Both sides have real winning chances."},
-    {w:'Bb3',b:'Bb7',e:51,desc:"White retreats the bishop. Black develops actively.",idea:"The bishop on is a powerful piece pointing at the center. Black's position is now fully active.",next:"The real fight is just beginning. Both sides are fully mobilized."}
+    {w:'Bb3',b:'Bb7',e:51,desc:"White retreats the bishop. Black develops actively.",idea:"The bishop on b3 is a powerful piece pointing at the center. Black's position is now fully active.",next:"The real fight is just beginning. Both sides are fully mobilized."}
   ]}
 ]},
-  {id:'caro',theory:2,aggr:2,diff:1,name:'Caro-Kann',tag:'1.e4 c6',flip:true,variants:[
-  {id:'classical',cx:1,sh:1,pop:'Most popular CK',side:'Solid for Black',hist:["Named after Caro and Kann who analyzed it in 1886. Karpov transformed it into a championship weapon using his legendary defensive technique and endgame precision.", "The Classical Caro-Kann suited Karpov perfectly \u2014 he loved positions where small advantages could be nursed for 60+ moves. He won dozens of games from seemingly equal positions.", "Ding Liren, the current World Champion, uses the Classical Caro-Kann as one of his main defenses. He values its solid pawn structure and long-term strategic clarity."],name:'Classical',tag:'3.Nc3 Bf5',moves:[
+  {id:'caro',cx:1,sh:1,pop:'Most popular vs e4',side:'Solid for Black',name:'Caro-Kann',tag:'1.e4 c6',flip:true,variants:[
+  {id:'classical',cx:1,sh:1,pop:'Most popular CK',side:'Solid for Black',hist:["Named after Caro and Kann who analyzed it in 1886. Karpov transformed it into a championship weapon using his legendary defensive technique and endgame precision.", "The Classical Caro-Kann suited Karpov perfectly — he loved positions where small advantages could be nursed for 60+ moves. He won dozens of games from seemingly equal positions.", "Ding Liren, the current World Champion, uses the Classical Caro-Kann as one of his main defenses. He values its solid pawn structure and long-term strategic clarity."],name:'Classical',tag:'3.Nc3 Bf5',moves:[
     {w:'e4',b:'c6',e:50,
      desc:"The Caro-Kann Defense.",
      idea:"Black accepts a slightly cramped position in exchange for a solid, unbreakable structure. The French Defense requires patience — the bishop on c8 is restricted, but everything else is solid.",
-     next:"Don't play immediately — first sets up the support"},
+     next:"Don't play d5 immediately — c6 first sets up the support"},
     {w:'d4',b:'d5',e:52,
-     desc:"Builds the center. contests immediately.",
-     idea:"Challenges while provides the support. This is the Caro-Kann's fundamental idea: contest the center without creating a passive bishop",
-     next:"Don't play instead — that's the French and locks the bishop in"},
+     desc:"Builds the center. d5 contests immediately.",
+     idea:"Challenges d4 while c6 provides the support. This is the Caro-Kann's fundamental idea: contest the center without creating a passive bishop",
+     next:"Don't play e6 instead — that's the French and locks the bishop in"},
     {w:'Nc3',b:'dxe4',e:52,
      desc:"Defends. Black exchanges.",
-     idea:"Frees the position immediately. Black doesn't want a locked center — the exchange opens lines and prepares the key move",
-     next:"Don't keep the tension with delayed — exchange now and play before it's too late"},
+     idea:"Frees the position immediately. Black doesn't want a locked center — the exchange opens lines and prepares the key Bf5 move",
+     next:"Don't keep the tension with delayed dxe4 — exchange now and play Bf5 before it's too late"},
     {w:'Nxe4',b:'Bf5',e:50,
-     desc:"Recaptures. Black plays — the signature Caro-Kann move.",
-     idea:"This move is critical — the diagonal closes forever if delayed. This is exactly why Black played instead. The bishop gets out — the French bishop never does",
-     next:"Don't delay even one move — if you play first, you've just played a bad French"},
+     desc:"Recaptures. Black plays Bf5 — the signature Caro-Kann move.",
+     idea:"This move is critical — the diagonal closes forever if delayed. This is exactly why Black played c6 instead of e6. The bishop gets out — the French bishop never does",
+     next:"Don't delay even one move — if you play e6 first, you've just played a bad French"},
     {w:'Ng3',b:'Bg6',e:50,
      desc:"Chases the bishop. Black retreats.",
-     idea:"This is the correct retreat: the bishop stays active, controls the center. and cannot be traded off without White weakening their structure. Never retreat to or",
+     idea:"This is the correct retreat: the bishop stays active, controls the center, and cannot be traded off without White weakening their structure. Never retreat to d7 or e6",
      next:"Avoid the alternative — you lose a valuable bishop for a knight unnecessarily"},
     {w:'Nf3',b:'Nd7',e:50,
      desc:"White develops. Black makes a key move.",
-     idea:"(not !) is the key: it doesn't block and keeps all options open. The knight can go. or — maximum flexibility",
+     idea:"Nd7 (not Nf6!) is the key: it doesn't block the c-pawn and keeps all options open. The knight can go to b6 or f6 later — maximum flexibility",
      next:"Avoid the alternative — it blocks the c-pawn and limits the knight's future options"},
     {w:'h4',b:'h6',e:53,
      desc:"The Bronstein plan. Black blocks.",
-     idea:"This move is mandatory: if Black ignores , White plays and the bishop is trapped behind Black's own pawns for the rest of the game. This is a permanent positional disaster",
-     next:"Don't skip — the bishop on is one of Black's best pieces. Protect it at all costs"},
+     idea:"This move is mandatory: if Black ignores h4, White plays h5 and the bishop is trapped behind Black's own pawns for the rest of the game. This is a permanent positional disaster",
+     next:"Don't skip h6 — the bishop on g6 is one of Black's best pieces. Protect it at all costs"},
     {w:'Bd3',b:'Bxd3',e:53,
      desc:"Develops toward the kingside. Black exchanges.",
-     idea:"This is the right moment: the queen recaptures on which is far less dangerous than an active bishop pointing at the king. Exchange active pieces when they become threats",
-     next:"Don't let sit — removes it immediately before it causes damage"},
+     idea:"This is the right moment: the queen recaptures on d3 which is far less dangerous than an active bishop pointing at the king. Exchange active pieces when they become threats",
+     next:"Don't let Bd3 sit — Bxd3 removes it immediately before it causes damage"},
     {w:'Qxd3',b:'Ngf6',e:53,
      desc:"Recaptures. Black completes development.",
      idea:"Black has achieved the Caro-Kann dream: solid structure, bishop already out, no weaknesses. White has a slight space edge but it is very hard to exploit",
-     next:"Don't rush counterplay — the position is solid. and then castling complete the setup"},
+     next:"Don't rush counterplay — the position is solid. e6 and then castling complete the setup"},
     {w:'Bd2',b:'e6',e:54,
-     desc:"Completes White's development. Black plays.",
-     idea:"Now prepares castling. Unlike the French, Black played after the bishop came out — so it doesn't imprison anything. This timing difference is the whole point of the Caro-Kann",
+     desc:"Completes White's development. Black plays e6.",
+     idea:"Now prepares castling. Unlike the French, Black played e6 after the bishop came out — so it doesn't imprison anything. This timing difference is the whole point of the Caro-Kann",
      next:"Don't castle queenside — White is going there. Castle kingside to be on opposite flanks"},
     {w:'O-O-O',b:'Qc7',e:55,
      desc:"Queenside castling — White castles queenside! Opposite-side castling begins.",
      idea:"This is the thematic response: prepares kingside castling and counterattacks on the queenside. When your opponent castles long, you must castle short and attack",
      next:"Don't castle queenside too — that would be on White's side where all the action is. Castle kingside"},
     {w:'Ne4',b:'O-O',e:55,
-     desc:"Centralizes from. Black castles kingside.",
-     idea:"The knight on is White's best piece: controls the center. and simultaneously. With opposite-side castling, both players race to attack — don't defend passively, counterattack with or",
-     next:"Don't wait — launch queenside counterplay with or immediately. This is a race"},
+     desc:"Centralizes from g3. Black castles kingside.",
+     idea:"The knight on e4 is White's best piece: it controls the center and eyes d6 simultaneously. With opposite-side castling, both players race to attack — don't defend passively, counterattack with c5 or b5",
+     next:"Don't wait — launch queenside counterplay with c5 or b5 immediately. This is a race"},
   ]},
   {id:'karpov',cx:2,sh:1,pop:'Expert choice',side:'Precise for Black',name:'Karpov',tag:'3.Nd2 solid',moves:[
     {w:'e4',b:'c6',e:50,
      desc:"The Caro-Kann Defense.",
      idea:"The Caro-Kann — Karpov's signature weapon. This move prepares the center fight while keeping the pawn structure flexible. Karpov used it to win the World Championship and dozens of top-level games.",
-     next:"A fight for the center is coming — be ready to contest with"},
+     next:"A fight for the center is coming — be ready to contest with d5"},
     {w:'d4',b:'d5',e:52,
      desc:"White builds a powerful pawn center. Black contests it immediately.",
-     idea:"The - vs - tension defines the Caro-Kann",
-     next:"Karpov's solid alternative to 3"},
+     idea:"The d4-e4 vs c6-d5 tension defines the Caro-Kann",
+     next:"Karpov's solid alternative to 3.Nc3"},
     {w:'Nd2',b:'dxe4',e:52,
      desc:"Defends without creating a pin target. Black exchanges.",
-     idea:"Instead of is Karpov's subtle refinement: there is no pin available, and the knight on is more solid. A small but significant difference",
-     next:"Don't stay in the center with delayed — exchange and play before"},
+     idea:"Nd2 instead of Nc3 is Karpov's subtle refinement: there is no pin available, and the knight on d2 is more solid. A small but significant difference",
+     next:"Don't stay in the center with delayed dxe4 — exchange and play Bf5 before e5"},
     {w:'Nxe4',b:'Bf5',e:52,
-     desc:"Recaptures. Black plays — the thematic move.",
+     desc:"Recaptures. Black plays Bf5 — the thematic move.",
      idea:"Comes out just as in the Classical, but without the pin trick available. Same excellent result for Black",
-     next:"Don't play first — before , always"},
+     next:"Don't play e6 first — Bf5 before e6, always"},
     {w:'Ng3',b:'Bg6',e:52,
      desc:"Chases the bishop. Black retreats.",
-     idea:"This is the right square — active, safe, and hard to attack. Never retreat to where it becomes passive",
+     idea:"This is the right square — active, safe, and hard to attack. Never retreat to d7 where it becomes passive",
      next:"Avoid the alternative — you give up a good bishop for a knight unnecessarily"},
     {w:'Nf3',b:'Nd7',e:52,
-     desc:"Develops. Black plays — flexible.",
-     idea:"This move keeps all options open. Without on the board, White cannot play to trade the flexible knight. Karpov's variation gives Black more freedom",
-     next:"Avoid the alternative — is more flexible. It can go. or"},
+     desc:"Develops. Black plays Nd7 — flexible.",
+     idea:"This move keeps all options open. Without Nc3 on the board, White cannot play Ne4 to trade the flexible knight. Karpov's variation gives Black more freedom",
+     next:"Avoid the alternative — Nd7 is more flexible. It can go to b6 or f6"},
     {w:'h4',b:'h6',e:53,
      desc:"The Bronstein attack on the bishop. Black blocks.",
-     idea:"This move is mandatory. Without it, traps the bishop permanently. This response is not optional",
-     next:"Never skip when facing. The bishop on is invaluable — protect it"},
+     idea:"This move is mandatory. Without it, h5 traps the bishop permanently. This response is not optional",
+     next:"Never skip h6 when facing h4. The bishop on g6 is invaluable — protect it"},
     {w:'Bd3',b:'Bxd3',e:53,
      desc:"Develops toward the kingside. Black exchanges.",
      idea:"At the right moment: the queen recaptures and is far less threatening than an active bishop. Trade active enemy pieces when they become dangers",
      next:"Don't delay — exchange immediately before it gets dangerous"},
     {w:'Qxd3',b:'Ngf6',e:53,
      desc:"Recaptures. Black completes development.",
-     idea:"Black has achieved the Caro-Kann structure perfectly: solid, active bishop already out, no weaknesses. Without , White has less attacking potential than in the Classical",
+     idea:"Black has achieved the Caro-Kann structure perfectly: solid, active bishop already out, no weaknesses. Without Nc3, White has less attacking potential than in the Classical",
      next:"Then castling completes the setup — play it naturally"},
     {w:'Bd2',b:'e6',e:53,
      desc:"Completes White's setup. Black plays.",
-     idea:"NOW is fine because the bishop already exited on move 4. This is the key lesson: timing after — not before",
+     idea:"NOW e6 is fine because the bishop already exited on move 4. This is the key lesson: timing — e6 after Bf5, not before",
      next:"Don't castle the same side as White — after queenside castling from White, castle kingside"},
     {w:'O-O-O',b:'Qc7',e:54,
      desc:"Queenside castling — White goes queenside! Black centralizes the queen.",
      idea:"This is the thematic reply: prepares kingside castling and queenside counterplay. When White castles long, Black must castle short and attack",
-     next:"Castle kingside and launch or immediately — this is a race"},
+     next:"Castle kingside and launch c5 or b5 immediately — this is a race"},
     {w:'Ne4',b:'O-O',e:54,
-     desc:"Centralizes from. Black castles kingside.",
-     idea:"On the perfect outpost: controls key squares. Pure Karpovian domination through structure. Black must counterattack quickly — or to open lines against the White king",
-     next:"Don't defend passively — counterattack immediately with. It's a race"},
+     desc:"Centralizes from g3. Black castles kingside.",
+     idea:"On the perfect outpost: e4 controls key squares. Pure Karpovian domination through structure. Black must counterattack quickly — c5 or b5 to open lines against the White king",
+     next:"Don't defend passively — counterattack immediately with c5 or b5. It's a race"},
   ]},
   {id:'caro-smyslov',cx:1,sh:1,pop:'Solid alternative',side:'Flexible for Black',name:'Smyslov Variation',tag:"...Nd7 — flexible solid",moves:[
-    {w:'e4',b:'c6',e:50,desc:"White seizes the center. Black plays the Caro-Kann.",idea:"The Caro-Kann in its purest form. Black prepares to challenge the center with a pawn supported by another pawn — no weaknesses, no compromises. Smyslov championed this system for its rock-solid reliability.",next:"White plays ."},
+    {w:'e4',b:'c6',e:50,desc:"White seizes the center. Black plays the Caro-Kann.",idea:"The Caro-Kann in its purest form. Black prepares to challenge the center with a pawn supported by another pawn — no weaknesses, no compromises. Smyslov championed this system for its rock-solid reliability.",next:"White plays d4."},
     {w:'d4',b:'d5',e:50,desc:"White builds the center. Black challenges immediately.",idea:"This is the key move — Black fights for the center with solid support.",next:"White develops the knight."},
     {w:'Nc3',b:'dxe4',e:50,desc:"White develops. Black captures in the center.",idea:"This move is correct timing — Black takes the pawn when White has committed the knight.",next:"White recaptures."},
     {w:'Nxe4',b:'Nd7',e:51,desc:"White recaptures. Black plays Nd7 — the Smyslov Variation!",idea:"This move is more solid than — Black develops the knight first and keeps more flexibility. The bishop can come out later.",next:"White develops the bishop."},
@@ -1257,57 +1261,57 @@ const OPENINGS = [
     {w:'e4',b:'c6',e:50,
      desc:"The Caro-Kann Defense.",
      idea:"The Caro-Kann begins. Black prepares to fight for the center without weakening the pawn structure. The bishop stays free — unlike in the French — giving Black active play from the very start.",
-     next:"A fight for the center is coming — be ready to contest with"},
+     next:"A fight for the center is coming — be ready to contest with d5"},
     {w:'d4',b:'d5',e:52,
      desc:"White builds a powerful pawn center. Black contests it immediately.",
-     idea:"Challenges , supported. The central tension is set — White will now advance",
-     next:"After , the key move is — get it out before closes the diagonal"},
+     idea:"Challenges e4, supported by c6. The central tension is set — White will now advance",
+     next:"After e5, the key move is Bf5 — get it out before e6 closes the diagonal"},
     {w:'e5',b:'Bf5',e:53,
      desc:"Advances, claiming space. Black develops immediately.",
-     idea:"Must come NOW, before closes the diagonal permanently. This is the entire lesson of the Advance Caro-Kann: get the bishop out first, then consolidate",
-     next:"Don't play before — you'll imprison your best piece for the whole game"},
+     idea:"Must come NOW, before e6 closes the diagonal permanently. This is the entire lesson of the Advance Caro-Kann: get the bishop out first, then consolidate",
+     next:"Don't play e6 before Bf5 — you'll imprison your best piece for the whole game"},
     {w:'Nf3',b:'e6',e:53,
      desc:"Develops and supports. Black plays.",
-     idea:"Now is the right moment — safe to play: the bishop is already out. Black consolidates and prepares to develop the bishop. Perfect order",
-     next:"Don't play before — first solidifies the structure"},
+     idea:"Now is the right moment — safe to play e6: the bishop is already out. Black consolidates and prepares to develop the dark bishop. Perfect order",
+     next:"Don't play e6 before Bf5 — Bf5 first solidifies the structure"},
     {w:'Be2',b:'Nd7',e:53,
      desc:"Prepares quiet kingside castling. Black develops.",
-     idea:"This is the key piece: it prepares the route to challenge the central pawn. The knight heads to an ideal outpost.",
-     next:"Don't play yet — it gets immediately kicked. first, then , then"},
+     idea:"This is the key piece: it prepares the route to e7-g6 to challenge the central pawn. The knight heads to an ideal outpost.",
+     next:"Don't play c5 yet — it gets immediately kicked. Nd7 first, then Ne7, then Ng6"},
     {w:'O-O',b:'Ne7',e:53,
-     desc:"White castles. Black's knight heads toward.",
-     idea:"This is the relay: the knight heads to to attack. This is Black's standard plan in the Advance — the entire strategy centers on undermining the pawn",
-     next:"Don't stop here — the knight must continue to to make the plan work"},
+     desc:"White castles. Black's knight heads toward g6.",
+     idea:"This is the relay: the knight heads to g6 to attack e5. This is Black's standard plan in the Advance — the entire strategy centers on undermining the e5 pawn",
+     next:"Don't stop here — the knight must continue to g6 to make the plan work"},
     {w:'Nbd2',b:'Ng6',e:52,
-     desc:"Reinforces. Black's knight arrives on, attacking.",
-     idea:"This move puts direct pressure. White has spent two moves defending it. The preparation has paid off — now Black follows with to attack",
-     next:"Don't play prematurely — attack with first to undermine"},
+     desc:"Reinforces. Black's knight arrives on g6, attacking.",
+     idea:"This move puts direct pressure on e5. White has spent two moves defending it. The preparation has paid off — now Black follows with c5 to attack",
+     next:"Don't play c5 prematurely — attack with Ng6 first to undermine e5"},
     {w:'Nb3',b:'c5',e:50,
-     desc:"Defends. Black plays — the thematic counterattack.",
-     idea:"Attacks , the base of White's center. This is the move Black has been building toward: the whole — maneuver was preparation for this central strike",
-     next:"Don't hesitate on — it's the point of the whole variation. Attack the base"},
+     desc:"Defends. Black plays c5 — the thematic counterattack.",
+     idea:"Attacks d4, the base of White's center. This is the move Black has been building toward: the whole Nd7-Ne7-Ng6 maneuver was preparation for this central strike",
+     next:"Don't hesitate on c5 — it's the point of the whole variation. Attack the base"},
     {w:'c3',b:'Qb6',e:50,
-     desc:"Supports. Black's queen attacks and simultaneously.",
+     desc:"Supports. Black's queen attacks b2 and d4 simultaneously.",
      idea:"This move creates two threats at once. White cannot defend both adequately. This is how Black generates counterplay in the Advance: attack the center from the queenside",
-     next:"Don't play instead — is much more forcing and effective"},
+     next:"Don't play cxd4 instead — Qb6 is much more forcing and effective"},
     {w:'Be3',b:'cxd4',e:50,
      desc:"Develops and defends. Black exchanges.",
-     idea:"Opens lines at the right moment. The is developed, White has committed — now is the time to open the position",
+     idea:"Opens lines at the right moment. The bishop is developed, White has committed — now is the time to open the position",
      next:"Don't exchange too early — wait until White's pieces are committed, like now"},
     {w:'cxd4',b:'Ndxe5',e:50,
-     desc:"Recaptures. Black captures on — the reward!",
-     idea:"Recovers the pawn that has been restricting Black's game since move 3. Eight moves of preparation for this one capture. The knight on is magnificent",
-     next:"Don't worry about material — is winning the pawn that was cramping you. Take it"},
+     desc:"Recaptures. Black captures on e5 — the reward!",
+     idea:"Recovers the pawn that has been restricting Black's game since move 3. Eight moves of preparation for this one capture. The knight on e5 is magnificent",
+     next:"Don't worry about material — Ndxe5 is winning the pawn that was cramping you. Take it"},
     {w:'Nxe5',b:'Ngxe5',e:50,
-     desc:"Exchanges on. The position simplifies toward equality.",
+     desc:"Exchanges on e5. The position simplifies toward equality.",
      idea:"Black has fully achieved the Advance Caro-Kann goal: neutralized White's space advantage and recovered the pawn. A complete success",
      next:"Don't overplay — the position is equal. Precise endgame technique is enough"},
   ]},
   {id:'caro-short',cx:2,sh:1,pop:'Strategic choice',side:'Quiet & deep',name:'Short System',tag:"3.e5 Nd2 — strategic",moves:[
-    {w:'e4',b:'c6',e:50,desc:"White seizes the center. Black plays the Caro-Kann.",idea:"The Caro-Kann — one of the most reliable defenses in chess. Black prepares to challenge White's center methodically. Nigel Short called it 'the thinking person's defense' — it rewards patience and precision.",next:"White plays ."},
+    {w:'e4',b:'c6',e:50,desc:"White seizes the center. Black plays the Caro-Kann.",idea:"The Caro-Kann — one of the most reliable defenses in chess. Black prepares to challenge White's center methodically. Nigel Short called it 'the thinking person's defense' — it rewards patience and precision.",next:"White plays d4."},
     {w:'d4',b:'d5',e:50,desc:"White builds the center. Black challenges.",idea:"This is the key Caro-Kann move — fighting for the center.",next:"White plays the Advance Variation."},
     {w:'e5',b:'Bf5',e:50,desc:"White closes the center. Black activates the bishop.",idea:"escapes before being locked in — this is why the Caro-Kann is better than the French.",next:"White plays — the Short System."},
-    {w:'Nd2',b:'e6',e:51,desc:"White plays Nd2 — the Short System! Solid and strategic. Black solidifies.",idea:"This move is more restrained than — White develops quietly and prepares and to support the center.",next:"White plays to support ."},
+    {w:'Nd2',b:'e6',e:51,desc:"White plays Nd2 — the Short System! Solid and strategic. Black solidifies.",idea:"This move is more restrained than Nc3 — White develops quietly and prepares c3 and Bd3 to support the center.",next:"White plays c3 to support the center."},
     {w:'c3',b:'Nd7',e:51,desc:"White solidifies the center. Black develops the knight.",idea:"prepares - or — the knight will find a good square to challenge White's center.",next:"White develops the other knight first."},
     {w:'Ngf3',b:'Ne7',e:51,desc:"White develops the kingside knight. Black repositions too.",idea:"challenges White's pawn chain from a strong central post.",next:"White repositions the other knight."},
     {w:'Nb3',b:'Ng6',e:51,desc:"White's knight steps aside. Black's knight reaches its ideal square.",idea:"clears the way for the queen and prepares to meet Black's plans on the queenside.",next:"White develops the bishop."},
@@ -1318,21 +1322,21 @@ const OPENINGS = [
     {w:'dxc5',b:'Nxc5',e:51,desc:"White captures. Black recaptures, centralizing the knight.",idea:"This move gives Black an active knight in the center. The position is balanced with chances for both sides.",next:"Both sides fight for the initiative."}
   ]},
   {id:'caro-advance-tal',cx:1,sh:3,pop:'Aggressive option',side:'White attacks',name:'Tal Variation',tag:"3.e5 g4 — attack the bishop",moves:[
-    {w:'e4',b:'c6',e:50,desc:"White seizes the center. Black plays the Caro-Kann.",idea:"The Caro-Kann starts here. Even in the sharp Tal Variation, Black's first move is the same principled idea: prepare the center, keep the structure intact, maintain flexibility.",next:"White plays ."},
-    {w:'d4',b:'d5',e:50,desc:"White builds the center. Black challenges.",idea:"fights for the center on move two.",next:"White closes the center with ."},
-    {w:'e5',b:'Bf5',e:50,desc:"White closes the center — the Advance Variation. Black activates the bishop immediately.",idea:"This is the key move — the bishop escapes before the pawn chain closes. This is the defining move of the Advance Caro-Kann.",next:"White plays the Tal Attack with !"},
-    {w:'g4',b:'Bg6',e:51,desc:"White plays g4 — the Tal Attack! Extremely aggressive. Black retreats the bishop.",idea:"attacks the bishop immediately. This is the most aggressive line — White sacrifices kingside pawn structure for the initiative.",next:"White plays to continue the attack."},
+    {w:'e4',b:'c6',e:50,desc:"White seizes the center. Black plays the Caro-Kann.",idea:"The Caro-Kann starts here. Even in the sharp Tal Variation, Black's first move is the same principled idea: prepare the center, keep the structure intact, maintain flexibility.",next:"White plays d4."},
+    {w:'d4',b:'d5',e:50,desc:"White builds the center. Black challenges.",idea:"d5 fights for the center on move two.",next:"White closes the center with e5."},
+    {w:'e5',b:'Bf5',e:50,desc:"White closes the center — the Advance Variation. Black activates the bishop immediately.",idea:"This is the key move — the bishop escapes before the pawn chain closes. This is the defining move of the Advance Caro-Kann.",next:"White plays the Tal Attack with g4!"},
+    {w:'g4',b:'Bg6',e:51,desc:"White plays g4 — the Tal Attack! Extremely aggressive. Black retreats the bishop.",idea:"g4 attacks the bishop immediately. This is the most aggressive line — White sacrifices kingside pawn structure for the initiative.",next:"White plays h4 to continue the attack."},
     {w:'h4',b:'h5',e:51,desc:"White advances h4. Black counters with h5 — challenging the attack!",idea:"This is the best response — Black challenges the pawn advance before White can consolidate the attack.",next:"White must decide how to handle the tension."},
     {w:'g5',b:'e6',e:51,desc:"White advances the pawn. Black solidifies with e6.",idea:"supports and closes lines. Black is content to consolidate and let White overextend.",next:"White develops the knight."},
     {w:'f4',b:'c5',e:51,desc:"White builds a massive pawn chain. Black immediately attacks it!",idea:"attacks — the base of White's pawn chain. Black must undermine the center before White's attack develops.",next:"White must defend the center."},
-    {w:'c3',b:'Nc6',e:51,desc:"White defends the center. Black develops the knight.",idea:"develops a piece and puts pressure on . Black's counterplay is developing well.",next:"White develops the bishop."},
+    {w:'c3',b:'Nc6',e:51,desc:"White defends the center. Black develops the knight.",idea:"develops a piece and puts pressure on d4. Black's counterplay is developing well.",next:"White develops the bishop."},
     {w:'Nf3',b:'Qb6',e:51,desc:"White develops. Black attacks b2!",idea:"This move creates immediate threats and puts White on the defensive. Black's counterplay is very active.",next:"White must defend and keep the attack going."},
     {w:'Nc3',b:'cxd4',e:51,desc:"White develops. Black captures in the center!",idea:"opens lines and creates complications. The position is very sharp and tactical.",next:"The game is extremely complex. Both sides must calculate carefully."},
     {w:'Qxd4',b:'Nxd4',e:51,desc:"White recaptures. Black's knight leaps to d4!",idea:"This move is a powerful centralization — the knight threatens multiple pieces.",next:"White must react immediately or face serious problems."},
     {w:'Nxd4',b:'Qxd4',e:51,desc:"White trades. Black's queen dominates the center!",idea:"This move gives Black a powerful queen in the center with many threats. The position is chaotic and exciting.",next:"The game is extremely sharp. Every move is critical."}
   ]},
   {id:'caro-panov',cx:2,sh:2,pop:'Tactical choice',side:'Open game',name:'Panov Attack',tag:"4.c4 — isolated pawn battle",moves:[
-    {w:'e4',b:'c6',e:50,desc:"White seizes the center. Black plays the Caro-Kann.",idea:"The Caro-Kann foundation. Black's setup is solid from move one. In the Panov Attack, White will try to destroy that solidity with an early pawn storm — Black must be ready.",next:"White plays ."},
+    {w:'e4',b:'c6',e:50,desc:"White seizes the center. Black plays the Caro-Kann.",idea:"The Caro-Kann foundation. Black's setup is solid from move one. In the Panov Attack, White will try to destroy that solidity with an early pawn storm — Black must be ready.",next:"White plays d4."},
     {w:'d4',b:'d5',e:50,desc:"White builds the center. Black challenges.",idea:"fights for the center immediately.",next:"White plays the Panov!"},
     {w:'exd5',b:'cxd5',e:50,desc:"White captures. Black recaptures — the Panov Attack begins!",idea:"The Panov Attack transforms the Caro-Kann into an IQP position similar to the QGD.",next:"White plays — the key Panov move!"},
     {w:'c4',b:'Nf6',e:50,desc:"White attacks the isolated pawn! Black develops.",idea:"immediately attacks — this is the Panov Attack. Black must play accurately to avoid being dominated.",next:"White develops the knight."},
@@ -1368,12 +1372,12 @@ const OPENINGS = [
      next:"Don't rush — develop both knights first"},
     {w:'Nf3',b:'Bg4',e:52,
      desc:"White develops a piece. Black pins it immediately.",
-     idea:"This move creates indirect pressure on : if White ignores it, doubles the pawns. Active play from the very start",
+     idea:"This move creates indirect pressure on f3: if White ignores it, Bxf3 doubles the pawns. Active play from the very start",
      next:"Don't play too quickly — maintain the pin and let it work"},
     {w:'h3',b:'Bh5',e:52,
-     desc:"Challenges the bishop. Black retreats to, maintaining the pin.",
-     idea:"This move keeps the pressure alive. If White plays , it weakens the kingside and the push costs White more than the pin cost Black",
-     next:"Don't exchange on yet — is stronger. Let the pin do its work"},
+     desc:"Challenges the bishop. Black retreats to h5, maintaining the pin.",
+     idea:"This move keeps the pressure alive. If White plays g4, it weakens the kingside and the push costs White more than the pin cost Black",
+     next:"Don't exchange on f3 yet — the pin is stronger. Let the pin do its work"},
     {w:'O-O',b:'e6',e:52,
      desc:"White castles. Black solidifies the center.",
      idea:"Frees the bishop and consolidates. Black has a comfortable, equal position with no weaknesses",
@@ -1402,43 +1406,43 @@ const OPENINGS = [
      next:"White stays flexible without committing yet"},
     {w:'Nc3',b:'d5',e:51,
      desc:"Two Knights. Black plays.",
-     idea:"Before is flexible: White can play. or later. But it also allows , pinning the — Black exploits this immediately",
-     next:"Develop next to set up the pin"},
+     idea:"Before exd5 is flexible: White can play d4 or e5 later. But it also allows Bg4, pinning the knight — Black exploits this immediately",
+     next:"Develop Nf3 next to set up the pin"},
     {w:'Nf3',b:'Bg4',e:51,
      desc:"White develops a piece. Black pins it immediately.",
-     idea:"Exploits the setup: if , White's pawns get doubled. This is the entire point of the Two Knights for Black — use the pin aggressively",
-     next:"Don't rush — wait for to force the issue on YOUR terms"},
+     idea:"Exploits the setup: if h3 Bxf3, White's pawns get doubled. This is the entire point of the Two Knights for Black — use the pin aggressively",
+     next:"Don't rush — wait for h3 to force the issue on YOUR terms"},
     {w:'h3',b:'Bxf3',e:50,
      desc:"Challenges. Black exchanges.",
-     idea:"Now: White played , weakening the kingside slightly. Black doubles the pawns and accepts giving up the dark-squared bishop. The structural damage to White is the compensation",
-     next:"Don't maintain the pin with after — after the bishop is trapped"},
+     idea:"Now: White played h3, weakening the kingside slightly. Black doubles the pawns and accepts giving up the dark-squared bishop. The structural damage to White is the compensation",
+     next:"Don't maintain the pin with Bh5 after h3 — after g4 the bishop is trapped"},
     {w:'Qxf3',b:'e6',e:50,
      desc:"Recaptures with the queen. Black plays.",
-     idea:"Solidifies before counterattacking. The queen on looks active but it's actually a target — Black will challenge it",
-     next:"Don't rush — build the center with and then later"},
+     idea:"Solidifies before counterattacking. The queen on f3 looks active but it's actually a target — Black will challenge it",
+     next:"Don't rush — build the center with d5 and dxe4 later"},
     {w:'d4',b:'dxe4',e:50,
      desc:"Builds the center. Black exchanges.",
      idea:"Forces the queen off. Black gains important tempos — the queen must move again. Every tempo matters when you've given up a bishop",
-     next:"Don't allow White to play - — exchange immediately"},
+     next:"Don't allow White to play e4-e5 — exchange immediately"},
     {w:'Qxe4',b:'Nf6',e:50,
      desc:"Recaptures. Black develops attacking the queen.",
      idea:"Gains another tempo. The queen has now moved three times. Black has caught up completely in development",
-     next:"Avoid the alternative — attacks the queen and gains the tempo you need"},
+     next:"Avoid the alternative — Nf6 attacks the queen and gains the tempo you need"},
     {w:'Qd3',b:'c5',e:50,
      desc:"Retreats. Black counterattacks.",
-     idea:"Attacks and opens the diagonal. Black uses all the tempos gained to strike in the center immediately",
+     idea:"Attacks d4 and opens the diagonal. Black uses all the tempos gained to strike in the center immediately",
      next:"Don't delay — strike while White is still reorganizing"},
     {w:'dxc5',b:'Bxc5',e:50,
      desc:"Exchanges. The bishop develops.",
-     idea:"Activates the bishop: it eyes and can relocate. This is the compensation for giving up the dark-squared bishop earlier",
-     next:"Don't recapture with — the bishop on is much more active"},
+     idea:"Activates the bishop: it eyes f2 and can relocate. This is the compensation for giving up the dark-squared bishop earlier",
+     next:"Don't recapture with Qxc5 — the bishop on c5 is much more active"},
     {w:'Bd2',b:'Nc6',e:50,
      desc:"Both sides continue developing their pieces.",
      idea:"Reinforces the center and prepares castling. Black has fully equalized from the doubled-pawn compensation",
      next:"Castle and complete development — the position is balanced"},
     {w:'O-O-O',b:'Qe7',e:51,
      desc:"Queenside castling — White goes long. Black centralizes the queen.",
-     idea:"Defends and prepares castling. When White castles queenside, Black must castle kingside and counterattack. Don't castle on the same side",
+     idea:"Defends e7 and prepares castling. When White castles queenside, Black must castle kingside and counterattack. Don't castle on the same side",
      next:"Castle kingside immediately and counterattack"},
     {w:'Be2',b:'O-O',e:52,
      desc:"Develops the bishop. Black castles kingside.",
@@ -1505,11 +1509,11 @@ const OPENINGS = [
     {w:'Nf3',b:'Nc6',e:50,
      desc:"Attacks. defends and develops.",
      idea:"Defends and develops a piece. Simple, principled chess — defend what's attacked, develop a piece",
-     next:"— the Italian Game. The bishop targets the square"},
+     next:"Bc4 — the Italian Game. The bishop targets the f7 square"},
     {w:'Bc4',b:'Bc5',e:50,
      desc:"The Italian Game. Black mirrors.",
-     idea:"Targets , Black's weakest square. mirrors the plan — both bishops eye the center. This is the Giuoco Piano: quiet, principled, and deeply strategic",
-     next:"To prepare — the thematic Italian plan"},
+     idea:"Targets f7, Black's weakest square. Bc5 mirrors the plan — both bishops eye the center. This is the Giuoco Piano: quiet, principled, and deeply strategic",
+     next:"To prepare d4 — the thematic Italian plan"},
     {w:'c3',b:'Nf6',e:50,
      desc:"Prepares. Black develops, attacking.",
      idea:"Attacks and develops. Black uses every move to fight for the center. White must defend before pushing",
@@ -1520,7 +1524,7 @@ const OPENINGS = [
      next:"To recapture. Black's bishop on is now under pressure"},
     {w:'cxd4',b:'Bb4',e:51,
      desc:"Recaptures. Black pins.",
-     idea:"This is the active response: pin the and put pressure. Black refuses to retreat passively",
+     idea:"This is the active response: pin the knight and put pressure on the center. Black refuses to retreat passively",
      next:"Don't panic — is fine. White has a strong center and active pieces"},
     {w:'Nc3',b:'Nxe4',e:51,
      desc:"Develops. Black captures on!",
@@ -1532,7 +1536,7 @@ const OPENINGS = [
      next:"To chase the knight and gain central space"},
     {w:'d5',b:'Bf6',e:51,
      desc:"Advances to chase the knight. The bishop retreats.",
-     idea:"Defends the and holds the extra pawn. The position is razor sharp — White has a powerful attack for the material",
+     idea:"Defends the pawn and holds the extra material. The position is razor sharp — White has a powerful attack for the material",
      next:"To attack the knight directly with the rook"},
     {w:'Re1',b:'Ne7',e:52,
      desc:"Attacks the knight. The knight retreats.",
@@ -1541,7 +1545,7 @@ const OPENINGS = [
     {w:'Rxe4',b:'d6',e:52,
      desc:"White recovers the pawn with the active rook. Black plays on.",
      idea:"Consolidates but White's rook on is a monster. White has full compensation and a slight advantage",
-     next:"To pin the and increase the pressure"},
+     next:"To pin the knight and increase the pressure"},
     {w:'Bg5',b:'Bxg5',e:52,
      desc:"Pins. Black exchanges.",
      idea:"Simplifies. White recaptures with keeping the initiative. The Italian Game rewards active, energetic play",
@@ -1701,7 +1705,7 @@ const OPENINGS = [
     {w:'e4',b:'e5',e:50,
      desc:"Open Games.",
      idea:"Both sides begin identically. White will break the symmetry immediately with an early pawn advance, seizing central space before Black can consolidate.",
-     next:"— then , the Scotch-Italian"},
+     next:"Nf3 — then d4, the Scotch-Italian"},
     {w:'Nf3',b:'Nc6',e:50,
      desc:"Attacks. defends.",
      idea:"Natural development. Both sides fight for the center",
@@ -1724,7 +1728,7 @@ const OPENINGS = [
      next:"To recapture the pawn"},
     {w:'Nxd4',b:'Bc5',e:51,
      desc:"Recaptures. Black develops — attacking.",
-     idea:"Develops with tempo: it attacks the and develops. Black is fighting for the initiative",
+     idea:"Develops with tempo: it attacks the knight and develops. Black is fighting for the initiative",
      next:"To simplify the center"},
     {w:'Nxc6',b:'bxc6',e:51,
      desc:"Exchanges. recaptures — Black gets the open b-file.",
@@ -1757,46 +1761,46 @@ const OPENINGS = [
     {w:'Nf3',b:'Nc6',e:50,
      desc:"Attacks. Black defends.",
      idea:"Defends and develops. The most natural move — simple chess",
-     next:"— the Ruy Lopez. The bishop pins indirectly"},
+     next:"Bb5 — the Ruy Lopez. The bishop pins indirectly"},
     {w:'Bb5',b:'a6',e:50,
      desc:"The Ruy Lopez. Black responds — the Morphy Defense.",
-     idea:"Asks the bishop: take on and give me the bishop pair, or retreat? White usually retreats. This little pawn move begins one of the most complex opening systems in chess",
+     idea:"Asks the bishop: take the knight on c6 and give up the bishop pair, or retreat? White usually retreats. This little pawn move begins one of the most complex opening systems in chess",
      next:"Begins the Morphy Defense — one of the most theoretical lines in chess. Know your theory"},
     {w:'Ba4',b:'Nf6',e:50,
      desc:"White maintains the pressure. Black quietly continues developing.",
-     idea:"Attacks — a concrete, immediate threat. Black develops while creating pressure on White's center",
-     next:"Don't play before — attacks and gains time"},
+     idea:"Attacks e4 — a concrete, immediate threat. Black develops while creating pressure on White's center",
+     next:"Don't play Be7 before Nf6 — Nf6 attacks e4 and gains time"},
     {w:'O-O',b:'Be7',e:50,
      desc:"White castles. Black develops.",
-     idea:"Prepares castling. Black follows the same plan: king to safety first, then counterplay. is more solid than the Marshall with",
-     next:"Avoid the alternative — that's the Marshall Attack and requires deep preparation. and castling is safer"},
+     idea:"Prepares castling. Black follows the same plan: king to safety first, then counterplay. Be7 is more solid than the Marshall with Nxe4",
+     next:"Avoid the alternative — that's the Marshall Attack and requires deep preparation. Be7 and castling is safer"},
     {w:'Re1',b:'b5',e:50,
      desc:"Supports. Black pushes chasing the bishop.",
-     idea:"Gains queenside space and chases the bishop. Black takes the initiative on the queenside while White prepares in the center",
-     next:"Don't delay — it's the thematic move that starts Black's counterplay"},
+     idea:"Gains queenside space and chases the bishop. Black takes the initiative on the queenside while White prepares e4-e5 in the center",
+     next:"Don't delay — b5 is the thematic move that starts Black's counterplay"},
     {w:'Bb3',b:'d6',e:50,
      desc:"Retreats safely. Black plays.",
-     idea:"Supports and prepares. Black builds a solid structure — the Closed Ruy Lopez is a slow, complex opening",
-     next:"Don't rush — is solid. or - comes later to challenge"},
+     idea:"Supports e5 and prepares Bg4 or Na5. Black builds a solid structure — the Closed Ruy Lopez is a slow, complex opening",
+     next:"Don't rush — d6 is solid. Na5 or Bg4 comes later to challenge"},
     {w:'c3',b:'O-O',e:50,
      desc:"Prepares. Black castles.",
-     idea:"Castling secures the king. Black now prepares the counterplay: to challenge , or - (the Breyer) for deep rerouting",
-     next:"Don't play immediately — castle first, then. King safety before counterplay"},
+     idea:"Castling secures the king. Black now prepares the counterplay: Na5 to challenge Bb3, or Nb8-d7 (the Breyer) for deep rerouting",
+     next:"Don't play Na5 immediately — castle first, then Na5. King safety before counterplay"},
     {w:'h3',b:'Nb8',e:50,
-     desc:"Prevents. Black plays — the Breyer retreat!",
-     idea:"This is the Breyer Defense: the knight retreats ALL the way back to to reroute via to a better square. It looks crazy but it's one of the deepest ideas in chess",
-     next:"Don't be confused by — it's a profound positional idea, not a mistake"},
+     desc:"Prevents. Black plays Nb8 — the Breyer retreat!",
+     idea:"This is the Breyer Defense: the knight retreats ALL the way back to b8 to reroute via d7 to a better square. It looks crazy but it's one of the deepest ideas in chess",
+     next:"Don't be confused by Nb8 — it's a profound positional idea, not a mistake"},
     {w:'d4',b:'Nbd7',e:50,
      desc:"Opens the center. Black redeploys.",
-     idea:"This is the Breyer redeployment: from , the knight goes. then to - or - for a much better position. The journey was worth it",
-     next:"Continue the knight journey — and then or are the target squares"},
+     idea:"This is the Breyer redeployment: from b8, the knight goes to d7, then to b6 or f8 for a much better position. The journey was worth it",
+     next:"Continue the knight journey — b6 and then c4 or d5 are the target squares"},
     {w:'Nbd2',b:'Bb7',e:50,
      desc:"White develops a piece. Black activates the bishop.",
-     idea:"This piece is excellent: it controls the long diagonal and supports from afar. In the Closed Ruy, every piece finds its ideal square over many moves",
-     next:"Continue with — the rook supports and the position is ready for battle"},
+     idea:"This piece is excellent: it controls the long diagonal and supports e4 from afar. In the Closed Ruy, every piece finds its ideal square over many moves",
+     next:"Continue with Re8 — the rook supports e5 and the position is ready for battle"},
     {w:'Nf1',b:'Re8',e:50,
-     desc:"Redeploys toward. Black activates.",
-     idea:"Supports and prepares - or -. The Closed Ruy Lopez is a masterclass in piece coordination over many moves — each piece finds the perfect square",
+     desc:"Redeploys toward g3. Black activates.",
+     idea:"Supports e4 and prepares Ng3-f5 or Bg5. The Closed Ruy Lopez is a masterclass in piece coordination over many moves — each piece finds the perfect square",
      next:"The position is deeply complex. Both sides will maneuver for many more moves"},
   ]},
   {id:'berlin',cx:3,sh:1,pop:'Pro favorite',side:'Solid for Black',hist:["Considered passive for over 100 years until Kramnik used it to neutralize Kasparov in the 2000 World Championship. The chess world was stunned \u2014 Kasparov could not break through in 16 games.", "The Berlin Wall, as it became known, changed chess history. After 2000, endgame technique became as important as opening preparation at the highest level.", "The Berlin leads to a queenless middlegame as early as move 4. This was considered a strategic failure until Kramnik showed the resulting endgames were virtually impregnable."],name:'Berlin',tag:"3...Nf6 — the Wall",moves:[
@@ -1813,13 +1817,13 @@ const OPENINGS = [
      idea:"Attacks instead of defending. A counterattacking move that leads to one of the most solid endgames in chess. Kasparov faced it 6 times against Kramnik in 2000 and never won",
      next:"Avoid the alternative — if you want the Berlin, play and accept the endgame"},
     {w:'O-O',b:'Nxe4',e:50,
-     desc:"White castles. Black captures on!",
-     idea:"This move is legal because after , White attacks , then , and Black must give back the pawn. The Berlin leads to an endgame, not a middlegame",
-     next:"Don't be scared — is the point of the Berlin. Accept the endgame"},
+     desc:"White castles. Black captures on e4!",
+     idea:"This move is legal because after d4, White attacks e5, then Nxe5 d5, and Black must give back the pawn. The Berlin leads to an endgame, not a middlegame",
+     next:"Don't be scared — Nxe4 is the point of the Berlin. Accept the endgame"},
     {w:'d4',b:'Nd6',e:50,
      desc:"Attacks the knight. The knight retreats.",
-     idea:"This is the key Berlin move: a strategic retreat that keeps the knight active. From , it defends and stays relevant",
-     next:"Don't retreat to — is the correct Berlin retreat"},
+     idea:"This is the key Berlin move: a strategic retreat that keeps the knight active. From d6, it defends c4 and stays relevant",
+     next:"Don't retreat to f6 — Nd6 is the correct Berlin retreat"},
     {w:'Bxc6',b:'dxc6',e:51,
      desc:"Doubles Black's pawns. recaptures.",
      idea:"This is the correct recapture: it opens the d-file for the rook and the diagonal for the bishop. The doubled c-pawns are not a weakness — they control key central squares",
@@ -1872,8 +1876,8 @@ const OPENINGS = [
      next:"Requires precise memorization — the forced variations are long and unforgiving"},
     {w:'d4',b:'b5',e:51,
      desc:"Attacks the knight. Black pushes.",
-     idea:"Chases the bishop from before White recovers the pawn. This pawn push is mandatory — if Black doesn't play , White recovers with a clear advantage",
-     next:"Don't delay — it's the most critical move in the Open Lopez"},
+     idea:"Chases the bishop from b3 before White recovers the pawn. This pawn push is mandatory — if Black doesn't play b5, White recovers with a clear advantage",
+     next:"Don't delay — b5 it's the most critical move in the Open Lopez"},
     {w:'Bb3',b:'d5',e:51,
      desc:"Retreats. Black plays — central counterattack!",
      idea:"This is the essential counter: Black opens the center before White can recover the pawn. This is the key move that makes the Open Lopez work",
@@ -1984,7 +1988,7 @@ const OPENINGS = [
      next:"Don't relax after — White has dangerous compensation. Develop quickly"},
     {w:'d5',b:'Bf6',e:51,
      desc:"Advances to chase the knight. The bishop retreats.",
-     idea:"Defends the and keeps the pawn. The position is very dynamic — material is unbalanced",
+     idea:"Defends the bishop and keeps the extra pawn. The position is very dynamic — material is unbalanced",
      next:"Defend precisely — White's initiative is strong but Black's extra material can tell"},
     {w:'Re1',b:'Ne7',e:52,
      desc:"Pins the knight. The knight retreats.",
@@ -2004,27 +2008,27 @@ const OPENINGS = [
   {id:'najdorf',cx:3,sh:3,pop:'Most played Sicilian',side:'Sharp for Black',hist:["Created by Miguel Najdorf partly as a message to his family separated by the Holocaust. He hoped they would see his name in tournament bulletins. Tragically, they never did.", "Fischer played the Najdorf almost exclusively as Black throughout his career. He called it 'best by test' and used it in his legendary 1972 match against Spassky.", "The Najdorf is the most deeply studied opening variation in chess. Theory on some lines extends past move 30, and grandmasters spend months preparing novelties.", "Kasparov used the Najdorf as his main weapon for 20 years. He developed many theoretical novelties that are still played today, sometimes bearing his name."],name:'Najdorf',tag:"5...a6 — most played",moves:[
     {w:'e4',b:'c5',e:50,
      desc:"The Sicilian Defense — the most popular opening in chess.",
-     idea:"Attacks asymmetrically: Black refuses the symmetrical to create an imbalanced position with queenside counterplay. The most popular response to 1",
-     next:"Don't play or immediately — keeps the position flexible and asymmetric"},
+     idea:"Attacks asymmetrically: Black refuses the symmetrical e5 to create an imbalanced position with queenside counterplay. The most popular response to 1.e4",
+     next:"Don't play e6 or c6 immediately — c5 keeps the position flexible and asymmetric"},
     {w:'Nf3',b:'d6',e:50,
      desc:"Develops and prepares. Black plays.",
-     idea:"Prepares and supports a future. The key point: is flexible — it works in many Sicilian structures",
-     next:"Avoid the alternative — that gives White a huge center. is more solid"},
+     idea:"Prepares Nf6 and supports a future e5. The key point: d6 is flexible — it works in many Sicilian structures",
+     next:"Avoid the alternative — Nc6 gives White a huge center. d6 is more solid"},
     {w:'d4',b:'cxd4',e:50,
      desc:"Opens the center. Black exchanges.",
      idea:"This move is correct: Black gives White the center in exchange for the semi-open c-file. This file will be Black's main counterplay channel for the entire game",
-     next:"Don't decline with — always take with to get the c-file"},
+     next:"Don't decline with d6-d5 — always take with cxd4 to get the c-file"},
     {w:'Nxd4',b:'Nf6',e:50,
      desc:"Recaptures. Black develops.",
-     idea:"Attacks and develops. White must defend — this forces White to commit pieces",
-     next:"Don't play yet — attacks immediately which is more forcing"},
+     idea:"Attacks e4 and develops. White must defend e4 — this forces White to commit pieces",
+     next:"Don't play a6 yet — Nf6 attacks e4 immediately which is more forcing"},
     {w:'Nc3',b:'a6',e:50,
-     desc:"Defends. Black plays — Najdorf's move.",
-     idea:"Prevents which would restrict Black's queenside. It also prepares for immediate counterplay. One prophylactic move that opens a whole queenside expansion",
-     next:"Don't play or immediately — first to stop , then follow with or"},
+     desc:"Defends. Black plays a6 — Najdorf's move.",
+     idea:"Prevents Nb5 which would restrict Black's queenside. It also prepares b5 for immediate counterplay. One prophylactic move that opens a whole queenside expansion",
+     next:"Don't play b5 or e5 immediately — a6 first to stop Nb5, then follow with e5 or e6"},
     {w:'Be3',b:'e5',e:51,
      desc:"The English Attack. Black plays gaining central space.",
-     idea:"Chases the and grabs central space. Black refuses to be passive. The Najdorf is not a defensive opening — it fights for the center from move 1",
+     idea:"Chases the knight and grabs central space. Black refuses to be passive. The Najdorf is not a defensive opening — it fights for the center from move 1",
      next:"Avoid the alternative — that's the Scheveningen. is the Najdorf's fighting move"},
     {w:'Nb3',b:'Be7',e:51,
      desc:"Retreats safely. Black develops.",
@@ -2063,14 +2067,14 @@ const OPENINGS = [
     {w:'d4',b:'cxd4',e:50,
      desc:"Opens the center. Black exchanges.",
      idea:"This move gives Black the semi-open c-file for queenside counterplay",
-     next:"Then the Dragon plan begins with"},
+     next:"Then the Dragon plan begins with Nxd4"},
     {w:'Nxd4',b:'Nf6',e:50,
      desc:"Recaptures. Black develops.",
-     idea:"Attacks , develops a piece, and prepares to castle — the most principled reply",
-     next:"To defend. Then — the Dragon"},
+     idea:"Attacks e4, develops a piece, and prepares to castle — the most principled reply",
+     next:"To defend e4. Then g6 — the Dragon"},
     {w:'Nc3',b:'g6',e:50,
-     desc:"Defends. Black plays — the Dragon begins.",
-     idea:"Prepares the fianchetto of. the Dragon bishop: the most powerful fianchettoed bishop in chess. It will control the entire - diagonal",
+     desc:"Defends. Black plays g6 — the Dragon begins.",
+     idea:"Prepares the fianchetto of the Dragon bishop: the most powerful fianchettoed bishop in chess. It will control the entire a1-h8 diagonal",
      next:"Develop immediately — the Dragon only works with the bishop on"},
     {w:'Be3',b:'Bg7',e:50,
      desc:"Develops. Black activates the Dragon bishop.",
@@ -2082,7 +2086,7 @@ const OPENINGS = [
      next:"Don't delay — castle immediately. Every tempo matters in the Dragon"},
     {w:'Qd2',b:'Nc6',e:51,
      desc:"Prepares queenside castling. Black develops.",
-     idea:"Attacks the and prepares. Black is not waiting — the Dragon is an attacking defense, not a passive one",
+     idea:"Attacks the rook and prepares queenside castling. Black is not waiting — the Dragon is an attacking defense, not a passive one",
      next:"Don't play yet — develop and pressure the first"},
     {w:'Bc4',b:'Bd7',e:51,
      desc:"Yugoslav Attack! Points at. Black develops.",
@@ -2136,70 +2140,70 @@ const OPENINGS = [
      next:"Don't play and yet — develop first, then launch queenside counterplay"},
     {w:'Be3',b:'Qc7',e:51,
      desc:"Develops the last bishop. Black centralizes.",
-     idea:"This is the Scheveningen's key multipurpose move: defends , prepares -, and keeps options open. One move, three functions",
-     next:"Don't play before — is more important and sets up everything"},
+     idea:"This is the Scheveningen's key multipurpose move: defends e5, prepares b5-b4, and keeps options open. One move, three functions",
+     next:"Don't play b5 before Qc7 — Qc7 is more important and sets up everything"},
     {w:'Qe1',b:'a6',e:51,
      desc:"Prepares to attack. Black plays.",
-     idea:"Prevents and prepares. Black must generate queenside counterplay before White's - attack becomes decisive",
-     next:"Don't wait — launch on the next move. The race has started"},
+     idea:"Prevents Nb5 and prepares b5. Black must generate queenside counterplay before White's g4-g5 attack becomes decisive",
+     next:"Don't wait — launch b5 on the next move. The race has started"},
     {w:'Qg3',b:'b5',e:52,
-     desc:"Threatens the king. Black launches — the counterattack!",
+     desc:"Threatens the king. Black launches b5 — the counterattack!",
      idea:"This is the counterattack Black has been preparing. Both sides now race: White attacks the Black king, Black attacks the White king. First to mate wins",
-     next:"Don't retreat or defend — attack.. Meet aggression with aggression"},
+     next:"Don't retreat or defend — attack with b4. Meet aggression with aggression"},
     {w:'e5',b:'dxe5',e:52,
      desc:"Advances in the center. Black exchanges.",
      idea:"Opens lines. The position becomes very sharp — both sides have genuine winning chances. The Scheveningen rewards the player who attacks more precisely",
-     next:"Calculate! After , Black has counterplay on the queenside. Don't defend passively"},
+     next:"Calculate! After dxe5, Black has counterplay on the queenside. Don't defend passively"},
   ]},
   {id:'kan',cx:2,sh:2,pop:'Flexible system',side:'Adaptable for Black',name:'Kan / Taimanov',tag:"4...a6 or Nc6",moves:[
     {w:'e4',b:'c5',e:50,
      desc:"The Sicilian Defense — the most popular opening in chess.",
      idea:"The Sicilian begins. Black's asymmetrical response signals fighting chess ahead. The Kan (or Paulsen) gives Black a flexible structure and rich counterplay on the queenside.",
-     next:"Then for the Kan or for the Taimanov"},
+     next:"Then Nf3 for the Kan or Nc3 for the Taimanov"},
     {w:'Nf3',b:'e6',e:50,
-     desc:"Develops. Black plays — the Kan/Taimanov beginning.",
-     idea:"This move is maximally flexible: without , Black can play in one move if White isn't careful. The Kan keeps White guessing longer than any other Sicilian",
-     next:"Avoid the alternative — it commits too early. keeps all options open"},
+     desc:"Develops. Black plays e6 — the Kan/Taimanov beginning.",
+     idea:"This move is maximally flexible: without committing the knight, Black can play a6 or Nc6 in one move if White isn't careful. The Kan keeps White guessing longer than any other Sicilian",
+     next:"Avoid the alternative — Nc6 commits too early. e6 keeps all options open"},
     {w:'d4',b:'cxd4',e:50,
      desc:"White opens the position. Black exchanges immediately.",
      idea:"This move gives Black the c-file. The center temporarily belongs to White",
-     next:"Then for the Taimanov or for the Kan"},
+     next:"Then Nc6 for the Taimanov or a6 for the Kan"},
     {w:'Nxd4',b:'Nc6',e:50,
-     desc:"Recaptures. Black plays — the Taimanov.",
-     idea:"Attacks the immediately. Black forces White to make a decision about the knight before completing development",
-     next:"Don't play here — attacks the knight directly"},
+     desc:"Recaptures. Black plays Nc6 — the Taimanov.",
+     idea:"Attacks the knight on d4 immediately. Black forces White to make a decision about the knight before completing development",
+     next:"Don't play a6 here — Nc6 attacks the knight directly"},
     {w:'Nc3',b:'Qc7',e:50,
      desc:"Defends. Black centralizes.",
-     idea:"This is the Taimanov's signature move: defends , prepares -, and watches everything at once. One of the most versatile queen moves in the Sicilian",
-     next:"Avoid the alternative — it attacks but is easily chased. is better positioned"},
+     idea:"This is the Taimanov's signature move: defends e5, prepares Nf6-d4, and watches everything at once. One of the most versatile queen moves in the Sicilian",
+     next:"Avoid the alternative — Qb6 attacks b2 but is easily chased. Qc7 is better positioned"},
     {w:'Be3',b:'a6',e:51,
      desc:"White develops. Black makes a key move.",
-     idea:"Prevents and prepares for queenside expansion. A small pawn move with big consequences — it changes the entire pawn structure",
-     next:"Don't rush before finishing development — first, then. castling, then"},
+     idea:"Prevents Nb5 and prepares b5 for queenside expansion. A small pawn move with big consequences — it changes the entire pawn structure",
+     next:"Don't rush b5 before finishing development — Be7 first, then castling, then b5"},
     {w:'Bd3',b:'Nf6',e:51,
      desc:"Both sides continue developing their pieces.",
-     idea:"Attacks and forces White to defend. Black's development is advancing quickly",
-     next:"Don't play yet — complete development first. castling"},
+     idea:"Attacks e4 and forces White to defend. Black's development is advancing quickly",
+     next:"Don't play Ne5 yet — complete development first. O-O castling"},
     {w:'O-O',b:'Ne5',e:51,
      desc:"White castles. Black's knight leaps.",
-     idea:"Attacks and stakes out a central outpost. Black is fighting for space actively — the Taimanov is not a passive defense",
-     next:"Don't retreat — is an excellent central post. Make White deal with it"},
+     idea:"Attacks d3 and stakes out a central outpost. Black is fighting for space actively — the Taimanov is not a passive defense",
+     next:"Don't retreat Nc6 — Ne5 is an excellent central post. Make White deal with it"},
     {w:'f4',b:'Nxd3',e:51,
      desc:"Chases the knight. Black exchanges.",
-     idea:"Forces : the queen is. slightly less well-placed. Trading pieces to reduce White's attacking potential is a good practical decision",
+     idea:"Forces Qxd3: the queen is slightly less well-placed. Trading pieces to reduce White's attacking potential is a good practical decision",
      next:"Don't try to keep the knight — exchanging it for the bishop is fine"},
     {w:'Qxd3',b:'d6',e:51,
      desc:"Recaptures. Black plays.",
      idea:"Consolidates and prepares to counterattack. Black has a solid, slightly passive but defensible position",
-     next:"Don't rush immediately — make sure the center is stable first"},
+     next:"Don't rush b5 immediately — make sure the center is stable first"},
     {w:'Nf5',b:'Bf8',e:52,
      desc:"Leaps to an active square. Black retreats the bishop.",
-     idea:"Defends precisely. The retreat looks passive but it covers the key squares is threatening",
-     next:"Don't panic at — is the calm, correct defense. White's knight will be chased away"},
+     idea:"Defends precisely. The retreat looks passive but it covers the key squares Nf5 is threatening",
+     next:"Don't panic at Nf5 — Bf8 is the calm, correct defense. White's knight will be chased away"},
     {w:'Qe2',b:'g6',e:52,
      desc:"Threatens. Black plays to defend.",
-     idea:"Chases the and defends. The structure weakens slightly but the alternative is worse",
-     next:"Avoid the alternative — chases the knight and is more active"},
+     idea:"Chases the knight and defends the center. The structure weakens slightly but the alternative is worse",
+     next:"Avoid the alternative — g6 chases the knight and is more active"},
   ]},
   {id:'closed',cx:1,sh:1,pop:'Club weapon',side:'Quiet for White',name:'Closed',tag:"2.Nc3 — different angle",moves:[
     {w:'e4',b:'c5',e:50,
@@ -2228,12 +2232,12 @@ const OPENINGS = [
      next:"Don't ignore — respond with to prepare and stop"},
     {w:'Nf3',b:'Nge7',e:51,
      desc:"White develops. Black makes a key move.",
-     idea:"This move is more flexible than : it's not exposed to and can head to or from. In the Closed, knight placement is crucial",
-     next:"Avoid the alternative — it gets hit. is the correct knight development"},
+     idea:"This move is more flexible than Nf6: it's not exposed to e5 and can head to d5 or f5 from. In the Closed, knight placement is crucial",
+     next:"Avoid the alternative — Nf6 gets hit by e5. Nge7 is the correct knight development"},
     {w:'O-O',b:'O-O',e:51,
      desc:"Both sides castle kingside. Maneuvering begins.",
-     idea:"After castling, both sides maneuver: White prepares , Black prepares. The position resembles a King's Indian in reverse",
-     next:"Prepare — it's Black's main counter to White's - plan"},
+     idea:"After castling, both sides maneuver: White prepares f5, Black prepares d5. The position resembles a King's Indian in reverse",
+     next:"Prepare d5 — it's Black's main counter to White's f4-f5 plan"},
     {w:'d4',b:'cxd4',e:51,
      desc:"Finally opens the center. Black exchanges.",
      idea:"Transforms the game: White gains space but Black gets active squares. The position becomes sharper",
@@ -2260,12 +2264,12 @@ const OPENINGS = [
      next:"Don't forget about the bishop — freeing it is Black's main strategic task"},
     {w:'d4',b:'d5',e:50,
      desc:"White builds a powerful pawn center. Black contests it immediately.",
-     idea:"The French is defined by this pawn structure: White's - center vs Black's - chain. Everything flows from this tension",
-     next:"To defend — then Black pins with (Winawer) or attacks with (Classical)"},
+     idea:"The French is defined by this pawn structure: White's d4-e4 center vs Black's d5-e6 chain. Everything flows from this tension",
+     next:"To defend e4 — then Black pins with Bb4 (Winawer) or attacks with Nf6 (Classical)"},
     {w:'Nc3',b:'Bb4',e:50,
-     desc:"Defends. Black pins with — the Winawer.",
-     idea:"This is the Winawer's fighting move: pin so that when White plays , the pressure on intensifies. Black is fighting for the initiative from move 3",
-     next:"Don't play or — is the fighting choice. Commit to the Winawer"},
+     desc:"Defends. Black pins with Bb4 — the Winawer.",
+     idea:"This is the Winawer's fighting move: pin the knight so that when White plays e5, the pressure on c3 intensifies. Black is fighting for the initiative from move 3",
+     next:"Don't play Nf6 or dxe4 — Bb4 is the fighting choice. Commit to the Winawer"},
     {w:'e5',b:'c5',e:50,
      desc:"Stakes out space. Black counterattacks.",
      idea:"Attacks immediately — the correct and fighting response. The Winawer is not about defending; it's about creating counterplay from the very first moves",
@@ -2333,16 +2337,16 @@ const OPENINGS = [
      idea:"Castling gets the king to safety before launching. White's looks aggressive but makes the structure rigid — the - pawns can become targets",
      next:"Castle first, then immediately. The counterattack must come quickly"},
     {w:'Nf3',b:'c5',e:51,
-     desc:"Develops. Black plays — the liberating counterattack!",
-     idea:"This is the move the entire French has been building toward: it attacks , the base of White's center. Every French structure leads to this move eventually",
+     desc:"Develops. Black plays c5 — the liberating counterattack!",
+     idea:"This is the move the entire French has been building toward: it attacks d4, the base of White's center. Every French structure leads to this move eventually",
      next:"Don't delay even one more move — every tempo White gets is another pawn down the board"},
     {w:'dxc5',b:'Nc6',e:51,
      desc:"Exchanges. Black develops.",
      idea:"Develops and prepares to recover the pawn immediately. Black is not worried about the pawn — it will be recovered",
-     next:"Don't worry about the pawn — recover it next move with"},
+     next:"Don't worry about the pawn — recover it next move with Nxc5"},
     {w:'Bd3',b:'Nxc5',e:51,
      desc:"Develops. Black recovers the pawn.",
-     idea:"Recovers with an excellent knight on : it attacks and controls key squares. Black has achieved a completely satisfactory position",
+     idea:"Recovers with an excellent knight on c5: it attacks d3 and controls key squares. Black has achieved a completely satisfactory position",
      next:"Don't rush — the position is balanced. Develop naturally and complete castling"},
     {w:'O-O',b:'a5',e:51,
      desc:"White castles. Black plays.",
@@ -2430,7 +2434,7 @@ const OPENINGS = [
      next:"Don't rush — add more pieces to the attack first"},
     {w:'Ne2',b:'cxd4',e:51,
      desc:"White develops. Black makes an important exchange.",
-     idea:"Opens the game when the and are developed. Good timing: open the position when your pieces are ready",
+     idea:"Opens the game once the pieces are developed. Good timing: open the position when your pieces are ready",
      next:"Don't delay — now opens the position at the right moment"},
     {w:'cxd4',b:'f6',e:51,
      desc:"Recaptures. Black attacks directly with!",
@@ -2469,7 +2473,7 @@ const OPENINGS = [
     {w:'Nf3',b:'Nf6',e:52,
      desc:"Both sides continue developing their pieces.",
      idea:"Controls the center. In the Exchange French, Black develops freely — there is no bishop problem because the diagonal was never closed",
-     next:"Don't play again — develop actively. , and castling quickly"},
+     next:"Don't waste time — develop actively with Bd3, Be7, and castling quickly"},
     {w:'Bd3',b:'Bd6',e:52,
      desc:"Both sides continue developing their pieces.",
      idea:"This is the key move: it activates the bishop toward the White kingside. The Exchange French gives Black a free, easy development",
@@ -2506,55 +2510,55 @@ const OPENINGS = [
 ]},
   {id:'kings-indian',cx:3,sh:3,pop:'Pro favorite',side:'Black attacks',hist:["Considered dubious until the 1940s when Soviet grandmasters Bronstein and Geller revealed its potential. It completely changed how players thought about pawn structure.", "Kasparov called the King's Indian his spiritual weapon. He used it to win unforgettable attacking games against the greatest players of his era.", "The King's Indian has produced some of the most spectacular games in chess history. Bronstein vs Keres 1950, Fischer vs Benko 1963, and Kasparov vs Topalov 1999 are legendary.", "Fischer won more games with the King's Indian than any other opening. He called it the most dynamic opening in chess and used it throughout his career."],diff:3,name:"King's Indian",tag:"1.d4 Nf6 2.c4 g6",flip:true,variants:[
   {id:'classical-kid',cx:3,sh:3,pop:'Pro favorite',side:'Black attacks kingside',hist:["Became popular after WWII when Bronstein and Geller used it to defeat the classical school. Their games against Botvinnik and Smyslov are masterpieces of attacking chess.", "Fischer vs Benko, 1963 \u2014 sometimes called the Game of the Century \u2014 featured the King's Indian. Fischer sacrificed material brilliantly to deliver one of the most beautiful checkmates in history.", "Kasparov won dozens of unforgettable games with the King's Indian Classical. His attacking combinations from this opening fill entire anthologies of the best games ever played."],name:'Classical',tag:"5.Be2 — main line",moves:[
-    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black immediately challenges it.",idea:"This move means fighting chess — Black attacks the center on the very first move without committing a pawn.",next:"White will continue expanding with ."},
+    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black immediately challenges it.",idea:"This move means fighting chess — Black attacks the center on the very first move without committing a pawn.",next:"White will continue expanding with c4."},
     {w:'c4',b:'g6',e:50,desc:"White expands. Black begins the fianchetto.",idea:"prepares to put the bishop on the long diagonal — the backbone of the King's Indian. Black will fight back from the kingside.",next:"White builds the center, Black develops the bishop."},
     {w:'Nc3',b:'Bg7',e:50,desc:"White develops the knight. Black activates the King's Indian bishop.",idea:"This bishop is the soul of the opening — it sits quietly but controls the entire board diagonally.",next:"White will continue building a large center."},
-    {w:'e4',b:'d6',e:50,desc:"White seizes the center with two pawns. Black supports and prepares.",idea:"This is the King's Indian backbone: it supports and prepares without allowing .",next:"White will bring out the last knight. Black will play to complete development."},
-    {w:'Nf3',b:'O-O',e:50,desc:"White completes development. Black castles immediately.",idea:"Black castles quickly to get the king safe. The battle is about to explode on both sides of the board.",next:"White plays to complete the setup. Then the real fight begins."},
-    {w:'Be2',b:'e5',e:50,desc:"White completes the classical setup. Black strikes in the center.",idea:"This is the most important move in the King's Indian — Black stakes a claim in the center and begins the fight.",next:"White will close the center with . The two-sided attack begins."},
-    {w:'O-O',b:'Nc6',e:51,desc:"White castles. Black brings out the last knight.",idea:"supports and prepares for the coming kingside attack.",next:"White will close the center and the battle lines are drawn."},
+    {w:'e4',b:'d6',e:50,desc:"White seizes the center with two pawns. Black supports and prepares.",idea:"This is the King's Indian backbone: it supports e5 and prepares it without allowing White to play e5 first.",next:"White will bring out the last knight. Black will play O-O to complete development."},
+    {w:'Nf3',b:'O-O',e:50,desc:"White completes development. Black castles immediately.",idea:"Black castles quickly to get the king safe. The battle is about to explode on both sides of the board.",next:"White plays Be2 to complete the setup. Then the real fight begins."},
+    {w:'Be2',b:'e5',e:50,desc:"White completes the classical setup. Black strikes in the center.",idea:"This is the most important move in the King's Indian — Black stakes a claim in the center and begins the fight.",next:"White will close the center with d5. The two-sided attack begins."},
+    {w:'O-O',b:'Nc6',e:51,desc:"White castles. Black brings out the last knight.",idea:"Nc6 supports e5 and prepares for the coming kingside attack.",next:"White will close the center and the battle lines are drawn."},
     {w:'d5',b:'Ne7',e:51,desc:"White closes the center. Black repositions the knight.",idea:"The knight heads to a better square — a classic maneuver in this opening. Black is quietly preparing a kingside attack.",next:"The position is now a race. White attacks on the queenside, Black on the kingside."},
     {w:'Ne1',b:'Nd7',e:51,desc:"White repositions the knight toward the queenside. Black does the same.",idea:"Both sides reposition their knights for the coming attacks. This is the Petrosian system — quiet but deadly.",next:"The two attacks will develop in parallel. Timing is everything."},
     {w:'Nd3',b:'f5',e:51,desc:"White's knight heads to c5. Black launches the kingside attack.",idea:"This is the start of Black's kingside storm. Black will advance the pawns and use the king's bishop to devastate White.",next:"The race has begun. Who strikes first will win the game."},
-    {w:'f3',b:'f4',e:51,desc:"White reinforces the center. Black advances the attack.",idea:"locks the kingside and sets up the powerful - advance. Black's attack is gaining momentum.",next:"White must act on the queenside before Black's attack arrives."},
+    {w:'f3',b:'f4',e:51,desc:"White reinforces the center. Black advances the attack.",idea:"locks the kingside and sets up the powerful g4 advance. Black's attack is gaining momentum.",next:"White must act on the queenside before Black's attack arrives."},
     {w:'c5',b:'g5',e:51,desc:"White strikes on the queenside. Black continues the kingside attack.",idea:"Both attacks are in full swing. This is the King's Indian at its most exciting — a race between two attacks on opposite sides of the board.",next:"The outcome depends on who moves faster. Every move is critical."}
   ]},
   {id:'samisch-kid',cx:3,sh:3,pop:'Aggressive',side:'Both sides attack',name:'Sämisch',tag:"5.f3 — aggressive",moves:[
-    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black challenges immediately.",idea:"The battle for the center begins. White builds a large pawn center — Black will counterattack it from the flanks. The King's Indian is one of chess's greatest dynamic openings.",next:"White expands with ."},
+    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black challenges immediately.",idea:"The battle for the center begins. White builds a large pawn center — Black will counterattack it from the flanks. The King's Indian is one of chess's greatest dynamic openings.",next:"White expands with c4."},
     {w:'c4',b:'g6',e:50,desc:"White expands. Black begins the fianchetto.",idea:"This is the King's Indian setup — the bishop will control the long diagonal.",next:"White develops the knight."},
-    {w:'Nc3',b:'Bg7',e:50,desc:"White develops. Black activates the King's Indian bishop.",idea:"This bishop is Black's most powerful piece — it will control the entire board.",next:"White seizes the center with ."},
-    {w:'e4',b:'d6',e:50,desc:"White seizes the center. Black supports and prepares.",idea:"This is the backbone of the King's Indian: solid and flexible.",next:"White plays — the Sämisch! An aggressive system."},
-    {w:'f3',b:'O-O',e:50,desc:"White plays f3 — the Sämisch! An aggressive, space-grabbing system. Black castles immediately.",idea:"This move is a bold move — it reinforces the center and prepares a powerful - advance. But it weakens and delays development.",next:"Black will counterattack in the center immediately."},
+    {w:'Nc3',b:'Bg7',e:50,desc:"White develops. Black activates the King's Indian bishop.",idea:"This bishop is Black's most powerful piece — it will control the entire board.",next:"White seizes the center with e4."},
+    {w:'e4',b:'d6',e:50,desc:"White seizes the center. Black supports and prepares.",idea:"This is the backbone of the King's Indian: solid and flexible.",next:"White plays f3 — the Sämisch! An aggressive system."},
+    {w:'f3',b:'O-O',e:50,desc:"White plays f3 — the Sämisch! An aggressive, space-grabbing system. Black castles immediately.",idea:"This move is a bold move — it reinforces the center and prepares a powerful g4 advance. But it weakens the kingside and delays development.",next:"Black will counterattack in the center immediately."},
     {w:'Be3',b:'e5',e:50,desc:"White develops the bishop. Black strikes in the center.",idea:"This move is critical — Black must counterattack immediately before White's center becomes overwhelming.",next:"Both sides have their plans. The battle is fully joined."},
-    {w:'d5',b:'Nh5',e:51,desc:"White closes the center. Black repositions the knight for the kingside attack.",idea:"aims for . Black's attack will focus entirely on the kingside while White attacks on the queenside.",next:"The race between opposite-side attacks is on."},
-    {w:'Qd2',b:'Nf4',e:51,desc:"White prepares queenside attack. Black plants the knight on f4.",idea:"The knight on is a powerful outpost — it's attacking the bishop and controlling key squares.",next:"White must deal with the knight while keeping the queenside attack going."},
+    {w:'d5',b:'Nh5',e:51,desc:"White closes the center. Black repositions the knight for the kingside attack.",idea:"Nh5 aims for f4. Black's attack will focus entirely on the kingside while White attacks on the queenside.",next:"The race between opposite-side attacks is on."},
+    {w:'Qd2',b:'Nf4',e:51,desc:"White prepares queenside attack. Black plants the knight on f4.",idea:"The knight on f4 is a powerful outpost — it's attacking the bishop on e2 and controlling key squares.",next:"White must deal with the knight while keeping the queenside attack going."},
     {w:'O-O-O',b:'c6',e:51,desc:"White castles queenside for a direct attack. Black prepares a counter.",idea:"Queenside castling points both rooks at the center and begins White's direct attack on the Black king. Black must act fast.",next:"The position is extremely sharp. Both kings are exposed. The player who attacks faster wins."},
     {w:'Kb1',b:'a5',e:51,desc:"White makes the king safer. Black launches the queenside counter.",idea:"prepares - to break open the queenside and attack the White king. Both sides attack simultaneously.",next:"The position is one of the most complex in chess. Every tempo counts."},
     {w:'Nge2',b:'Nxe2',e:51,desc:"White develops. Black exchanges the knight.",idea:"Black eliminates White's knight to reduce the attacking force. But White's bishop pair gains in the open position.",next:"The game is entering a critical phase. Accurate calculation is essential."},
     {w:'Nxe2',b:'b5',e:51,desc:"White recaptures. Black advances the queenside pawn break.",idea:"opens lines against the White king. The position is extremely sharp and tactical.",next:"The game will be decided in the next few moves. Calculate everything."}
   ]},
   {id:'four-pawns-kid',cx:2,sh:3,pop:'Aggressive',side:'White attacks center',name:'Four Pawns Attack',tag:"5.f4 — maximum aggression",moves:[
-    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black challenges.",idea:"White seizes maximum central space from the very first move. In the Four Pawns Attack, this aggression will become even more pronounced — Black must counterattack immediately.",next:"White expands with ."},
+    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black challenges.",idea:"White seizes maximum central space from the very first move. In the Four Pawns Attack, this aggression will become even more pronounced — Black must counterattack immediately.",next:"White expands with c4."},
     {w:'c4',b:'g6',e:50,desc:"White expands. Black fianchettos.",idea:"Black prepares the long diagonal for the King's Indian bishop.",next:"White develops the knight."},
     {w:'Nc3',b:'Bg7',e:50,desc:"White develops. Black activates the bishop.",idea:"The King's Indian bishop on is Black's most powerful piece.",next:"White seizes the center."},
     {w:'e4',b:'d6',e:50,desc:"White seizes the center with two pawns. Black supports.",idea:"This is the King's Indian backbone — solid and flexible.",next:"White builds a massive pawn center with !"},
-    {w:'f4',b:'O-O',e:50,desc:"White builds a massive pawn center with f4! Black castles immediately.",idea:"The Four Pawns Attack: White pushes four pawns forward to build the biggest center possible. But it's overextended and Black will attack it.",next:"Black will attack the center immediately with or ."},
+    {w:'f4',b:'O-O',e:50,desc:"White builds a massive pawn center with f4! Black castles immediately.",idea:"The Four Pawns Attack: White pushes four pawns forward to build the biggest center possible. But it's overextended and Black will attack it.",next:"Black will attack the center immediately with c5 or e5."},
     {w:'Nf3',b:'c5',e:50,desc:"White develops. Black immediately attacks the center.",idea:"This is the most principled response — Black attacks before White can advance further.",next:"White will push the center forward. The battle is joined."},
     {w:'d5',b:'e6',e:50,desc:"White advances the center. Black immediately challenges.",idea:"attacks the pawn and opens lines. Black is fighting back against White's massive center.",next:"The position is sharp. White must defend the center while maintaining the attack."},
     {w:'Be2',b:'exd5',e:51,desc:"White develops the bishop. Black captures the center pawn.",idea:"destroys White's center and opens the e-file for the rook. Black's active piece play compensates for the pawn structure.",next:"White recaptures and the position opens up significantly."},
     {w:'cxd5',b:'Re8',e:51,desc:"White recaptures. Black activates the rook.",idea:"increases the pressure on the e-file. Black's position is very active.",next:"White must consolidate while Black maintains the pressure."},
     {w:'O-O',b:'Bg4',e:51,desc:"White castles. Black develops with a pin.",idea:"pins the knight to the queen, increasing the pressure on the center.",next:"White must deal with the pin while keeping the initiative."},
     {w:'h3',b:'Bxf3',e:51,desc:"White breaks the pin. Black eliminates the knight.",idea:"Black trades the bishop for the knight to weaken White's pawn structure.",next:"The position is complex with many imbalances."},
-    {w:'Bxf3',b:'Nbd7',e:51,desc:"White recaptures with the bishop. Black develops the last knight.",idea:"Nbd7 supports the attack on and prepares or .",next:"The game is entering a critical phase. Both sides must play accurately."}
+    {w:'Bxf3',b:'Nbd7',e:51,desc:"White recaptures with the bishop. Black develops the last knight.",idea:"Nbd7 supports the knight and prepares to challenge the center.",next:"The game is entering a critical phase. Both sides must play accurately."}
   ]},
   {id:'averbakh-kid',cx:2,sh:2,pop:'Strategic',side:'White controls center',name:'Averbakh',tag:"5.Be2 Bg5 — prophylaxis",moves:[
-    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black challenges.",idea:"White claims the center. The Averbakh Variation will see White try to dominate with a massive pawn chain — Black must find active counterplay or get squeezed.",next:"White expands with ."},
+    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black challenges.",idea:"White claims the center. The Averbakh Variation will see White try to dominate with a massive pawn chain — Black must find active counterplay or get squeezed.",next:"White expands with c4."},
     {w:'c4',b:'g6',e:50,desc:"White expands. Black begins the fianchetto.",idea:"prepares the long diagonal for the King's Indian bishop.",next:"White develops the knight."},
     {w:'Nc3',b:'Bg7',e:50,desc:"White develops. Black activates the bishop.",idea:"This bishop is the soul of the King's Indian.",next:"White seizes the center."},
-    {w:'e4',b:'d6',e:50,desc:"White seizes the center. Black supports.",idea:"This is the King's Indian backbone.",next:"White plays to develop."},
-    {w:'Be2',b:'O-O',e:50,desc:"White develops the bishop. Black castles immediately.",idea:"Castle early and often. Black gets the king safe before the real fight.",next:"White plays — the Averbakh! Preventing ."},
-    {w:'Bg5',b:'c5',e:50,desc:"White plays the Averbakh! The bishop pins the knight and prevents e5. Black immediately fights back.",idea:"This is the Averbakh system — White prevents Black's main counterplay before it starts. is Black's best response.",next:"White must deal with the central counterplay."},
-    {w:'d5',b:'h6',e:51,desc:"White advances the center pawn. Black chases the bishop.",idea:"forces the bishop to decide — retreat or stay. Black gains a tempo either way.",next:"White retreats the bishop and the position clarifies."},
+    {w:'e4',b:'d6',e:50,desc:"White seizes the center. Black supports.",idea:"This is the King's Indian backbone.",next:"White plays Be2 to develop."},
+    {w:'Be2',b:'O-O',e:50,desc:"White develops the bishop. Black castles immediately.",idea:"Castle early and often. Black gets the king safe before the real fight.",next:"White plays Bg5 — the Averbakh! Preventing e5."},
+    {w:'Bg5',b:'c5',e:50,desc:"White plays the Averbakh! The bishop pins the knight and prevents e5. Black immediately fights back.",idea:"This is the Averbakh system — White prevents Black's main counterplay before it starts. c5 is Black's best response.",next:"White must deal with the central counterplay."},
+    {w:'d5',b:'h6',e:51,desc:"White advances the center pawn. Black chases the bishop.",idea:"h6 forces the bishop to decide — retreat or stay. Black gains a tempo either way.",next:"White retreats the bishop and the position clarifies."},
     {w:'Bh4',b:'g5',e:51,desc:"White retreats the bishop. Black advances the kingside pawns!",idea:"This move is aggressive but effective — Black chases the bishop further and prepares a kingside pawn advance.",next:"The position is sharp. White must act on the queenside before Black's attack develops."},
     {w:'Bg3',b:'Nh5',e:51,desc:"White retreats again. Black's knight heads to f4.",idea:"aims to swap the bishop and take the square. Black's kingside attack is gaining momentum.",next:"White must create counterplay on the queenside immediately."},
     {w:'Nf3',b:'Nxg3',e:51,desc:"White develops the knight. Black eliminates the bishop.",idea:"trades the annoying bishop and opens the h-file for potential attack.",next:"White recaptures and the position becomes complex."},
@@ -2562,16 +2566,16 @@ const OPENINGS = [
     {w:'a4',b:'a6',e:51,desc:"White prevents b5 and prepares queenside expansion. Black reinforces.",idea:"Both sides are setting up their long-term plans. The player with the better plan will win the endgame.",next:"The position requires deep strategic understanding from both sides."}
   ]},
   {id:'fianchetto-kid',cx:2,sh:2,pop:'Solid system',side:'Flexible for both',name:'Fianchetto',tag:"3.g3 — solid",moves:[
-    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black challenges.",idea:"White builds the center. In the Fianchetto Variation, White takes a quieter approach — no massive pawn advances, just solid positional pressure.",next:"White expands with ."},
-    {w:'c4',b:'g6',e:50,desc:"White expands. Black begins the King's Indian fianchetto.",idea:"prepares the long diagonal — Black's main weapon in the King's Indian.",next:"White plays — the Fianchetto! A quieter approach."},
+    {w:'d4',b:'Nf6',e:50,desc:"White builds the center. Black challenges.",idea:"White builds the center. In the Fianchetto Variation, White takes a quieter approach — no massive pawn advances, just solid positional pressure.",next:"White expands with c4."},
+    {w:'c4',b:'g6',e:50,desc:"White expands. Black begins the King's Indian fianchetto.",idea:"prepares the long diagonal — Black's main weapon in the King's Indian.",next:"White plays g3 — the Fianchetto! A quieter approach."},
     {w:'g3',b:'Bg7',e:50,desc:"White plays g3 — the Fianchetto Variation! A solid, strategic approach. Black activates the bishop.",idea:"prepares to fianchetto White's own bishop. White wants a solid position without tactical complications.",next:"Both sides will fianchetto their bishops. A strategic battle is coming."},
     {w:'Bg2',b:'O-O',e:50,desc:"White activates the bishop on the long diagonal. Black castles.",idea:"White's bishop on is a powerful piece. Black castles early to get the king safe.",next:"White develops the knight. The position is becoming very solid."},
     {w:'Nf3',b:'d6',e:50,desc:"White develops the knight. Black plays the King's Indian backbone.",idea:"This move is essential — it supports and keeps the position solid.",next:"White develops the last knight and the opening structure is set."},
     {w:'Nc3',b:'Nbd7',e:50,desc:"White completes development. Black brings out the last knight.",idea:"Nbd7 is the best square — it supports and prepares without blocking the bishop.",next:"Both sides have fully developed. The strategic battle begins."},
     {w:'O-O',b:'e5',e:51,desc:"White castles. Black finally strikes in the center.",idea:"This is the move Black has been preparing — it stakes a claim in the center and activates all the pieces.",next:"White will advance to close the center and the classic King's Indian battle begins."},
     {w:'d5',b:'Nc5',e:51,desc:"White closes the center. Black's knight develops actively.",idea:"This move is a strong square — the knight attacks the square and prepares queenside play.",next:"The position is strategic and complex. Both sides have long-term plans."},
-    {w:'Nd2',b:'a5',e:51,desc:"White repositions the knight. Black prepares queenside expansion.",idea:"prepares , gaining space and preventing . Black develops naturally on the queenside.",next:"White will play to seize more central space."},
-    {w:'Qc2',b:'h5',e:51,desc:"White centralizes the queen. Black begins the kingside expansion.",idea:"prepares and , launching the kingside attack. The position is becoming very sharp.",next:"Both sides have their plans. The race is on."},
+    {w:'Nd2',b:'a5',e:51,desc:"White repositions the knight. Black prepares queenside expansion.",idea:"a5 prepares a4, gaining space and preventing b4. Black develops naturally on the queenside.",next:"White will play a3 to seize more central space."},
+    {w:'Qc2',b:'h5',e:51,desc:"White centralizes the queen. Black begins the kingside expansion.",idea:"h5 prepares h4 and g4, launching the kingside attack. The position is becoming very sharp.",next:"Both sides have their plans. The race is on."},
     {w:'b3',b:'h4',e:51,desc:"White expands on the queenside. Black advances the kingside attack.",idea:"This move is bold — Black advances the kingside pawn before White can stop it.",next:"The position is critical. Both sides must calculate very carefully."},
     {w:'Bb2',b:'Nh5',e:51,desc:"White develops the bishop actively. Black's knight heads to f4.",idea:"Both sides are activating all their pieces. The game is entering its most critical phase.",next:"The outcome of the game will be decided in the next few moves."}
   ]}
@@ -2784,16 +2788,26 @@ function renderAnalysis(){
   const ideaEl = document.getElementById('aidea');
   const nextEl = document.getElementById('anext');
 
+  let spokenText = '';
+  let shouldSpeak = true;
   if(!isB && mv.wdesc){
     if(ideaEl) ideaEl.innerHTML = mv.widea || mv.idea || '';
     if(nextEl)  nextEl.innerHTML = isOpponent ? (mv.wnext || mv.next || '') : '';
+    spokenText = mv.widea || mv.idea || '';
   } else if(isB && mv.bdesc){
     if(ideaEl) ideaEl.innerHTML = mv.bidea || mv.idea || '';
     if(nextEl)  nextEl.innerHTML = isOpponent ? (mv.bnext || mv.next || '') : '';
+    spokenText = mv.bidea || mv.idea || '';
   } else {
     if(ideaEl) ideaEl.innerHTML = mv.idea || '';
     if(nextEl)  nextEl.innerHTML = isOpponent ? (mv.next || '') : '';
+    spokenText = mv.idea || '';
+    // This move has no side-specific text (mv.wdesc/mv.bdesc) — idea is shared across
+    // both halves of the pair. Speak it only once, on White's half-move, and stay silent
+    // on Black's half-move to avoid reading the identical sentence twice in a row.
+    if(isB) shouldSpeak = false;
   }
+  if(shouldSpeak) speakIdea(spokenText);
 
   if(b){
     const nextText = nextEl ? nextEl.textContent : '';
@@ -2881,6 +2895,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 /* ════════════════ TAB SWITCHER ════════════════ */
 function switchTab(tab){
+  stopSpeaking();
   document.getElementById('learn-view').classList.toggle('hidden', tab==='quiz');
   document.getElementById('quiz-view').classList.toggle('active', tab==='quiz');
   document.getElementById('tab-learn').classList.toggle('active', tab==='learn');
@@ -3022,10 +3037,9 @@ function renderVarFilter(){
   const _caroSeps = {"advance": "Advance", "caro-panov": "Panov & Others"};
   const _pracSepBefore = pracOp.id === 'queens-gambit' ? _qgSeps : pracOp.id === 'caro' ? _caroSeps : {};
   const outerBar = document.getElementById('prac-var-bar');
-  const bar = document.getElementById('prac-var-filter');
-  if(!bar) return;
+  if(!outerBar) return;
   const variants = getFilteredVariants(pracOp, pracFamily);
-  if(outerBar) outerBar.innerHTML = '<span class="filter-label">Variation</span><div class="vlist" id="prac-var-filter"></div>';
+  outerBar.innerHTML = '<span class="filter-label">Variation</span><div class="vlist" id="prac-var-filter"></div>';
   const bar2 = document.getElementById('prac-var-filter');
   if(!bar2) return;
   variants.forEach(v => {
@@ -3142,6 +3156,7 @@ function pracSaveHistory(){
 
 function pracGoBack(){
   if(pracHistory.length === 0) return;
+  stopSpeaking();
   pracFuture.push({board: cloneB(pracBoard), step: pracStep, prevBoard: pracPrevBoard ? cloneB(pracPrevBoard) : null});
   const prev = pracHistory.pop();
   pracBoard = prev.board;
@@ -3166,6 +3181,7 @@ function pracGoBack(){
 
 function pracGoForward(){
   if(pracFuture.length === 0) return;
+  stopSpeaking();
   pracHistory.push({board: cloneB(pracBoard), step: pracStep, prevBoard: pracPrevBoard ? cloneB(pracPrevBoard) : null});
   const next = pracFuture.pop();
   pracBoard = next.board;
@@ -3420,6 +3436,14 @@ function showPracCard(type, header, idea){
   h.textContent = header;
   i.innerHTML = idea;
   {const _s=card;if(_s)_s.style.display='';}
+  if(type === 'hint'){
+    // Hint used — the player needs the explanation, so read it in full.
+    speakIdea(idea);
+  } else if(type === 'correct'){
+    // Found the move unaided — a short acknowledgement is enough, no need to re-explain.
+    speakIdea('Correct!');
+  }
+  // type === 'opp' (opponent's automatic reply) — stay silent, no narration needed here.
 }
 
 function showPracDone(){
@@ -3434,6 +3458,7 @@ function showPracDone(){
 }
 
 function startPractice(){
+  stopSpeaking();
   pracBoard = initBoard();
   pracStep = 0;
   pracMaxSteps = pracVar.moves.length * 2;
@@ -3810,7 +3835,10 @@ if(localStorage.getItem('co_settings_v') !== '7'){
   localStorage.removeItem('co_theme');
   localStorage.setItem('co_settings_v','7');
 }
-let boardTheme = 'light';
+let boardTheme = (function(){
+  try{ return localStorage.getItem('co_theme') === 'dark' ? 'dark' : 'light'; }
+  catch(e){ return 'light'; }
+})();
 function applyTheme(){
   document.body.classList.toggle('dark', boardTheme==='dark');
   const bg = boardTheme==='dark' ? '#070500' : '#f5f0e8';
@@ -3831,6 +3859,90 @@ function toggleTheme(){
   applyTheme();
 }
 applyTheme();
+
+/* ════════════════ VOICE NARRATION (idea text) ════════════════ */
+let voiceEnabled = (function(){
+  try{
+    const stored = localStorage.getItem('co_voice');
+    if(stored === null) return true; // default to on for first-time users
+    return stored === '1';
+  }
+  catch(e){ return true; }
+})();
+let _voiceUtter = null;
+let _bestEnglishVoice = null;
+let _voicesLoaded = false;
+
+function stripHtmlForSpeech(html){
+  if(!html) return '';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return (tmp.textContent || tmp.innerText || '').trim();
+}
+
+function pickBestEnglishVoice(){
+  if(typeof window.speechSynthesis === 'undefined') return null;
+  const voices = window.speechSynthesis.getVoices() || [];
+  if(voices.length === 0) return null;
+  const englishVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+  if(englishVoices.length === 0) return null;
+  // Prefer higher-quality voices when the platform exposes them (iOS "Enhanced"/"Premium", Android "Neural"/"Wavenet")
+  const qualityKeywords = ['enhanced','premium','neural','wavenet','natural'];
+  const enhanced = englishVoices.find(v => qualityKeywords.some(k => v.name.toLowerCase().includes(k)));
+  if(enhanced) return enhanced;
+  // Prefer US/UK English over other English locales as a sane default
+  const usOrUk = englishVoices.find(v => /en-(us|gb)/i.test(v.lang));
+  if(usOrUk) return usOrUk;
+  return englishVoices[0];
+}
+
+function refreshVoiceList(){
+  _bestEnglishVoice = pickBestEnglishVoice();
+  _voicesLoaded = true;
+}
+
+if(typeof window.speechSynthesis !== 'undefined'){
+  refreshVoiceList();
+  window.speechSynthesis.onvoiceschanged = refreshVoiceList;
+}
+
+function speakIdea(text){
+  if(!voiceEnabled) return;
+  if(typeof window.speechSynthesis === 'undefined') return;
+  const clean = stripHtmlForSpeech(text);
+  if(!clean) return;
+  try{
+    if(!_voicesLoaded) refreshVoiceList();
+    window.speechSynthesis.cancel();
+    _voiceUtter = new SpeechSynthesisUtterance(clean);
+    _voiceUtter.lang = 'en-US';
+    if(_bestEnglishVoice) _voiceUtter.voice = _bestEnglishVoice;
+    _voiceUtter.rate = 1;
+    _voiceUtter.pitch = 1;
+    window.speechSynthesis.speak(_voiceUtter);
+  }catch(e){}
+}
+
+function stopSpeaking(){
+  try{ if(typeof window.speechSynthesis !== 'undefined') window.speechSynthesis.cancel(); }catch(e){}
+}
+
+function updateVoiceBtn(){
+  const btn = document.getElementById('voice-toggle-btn');
+  if(!btn) return;
+  btn.classList.toggle('active', voiceEnabled);
+  btn.textContent = voiceEnabled ? '🔊' : '🔈';
+  btn.setAttribute('aria-label', voiceEnabled ? 'Voice narration on' : 'Voice narration off');
+  btn.title = voiceEnabled ? 'Voice narration: on' : 'Voice narration: off';
+}
+
+function toggleVoice(){
+  voiceEnabled = !voiceEnabled;
+  try{ localStorage.setItem('co_voice', voiceEnabled ? '1' : '0'); }catch(e){}
+  if(!voiceEnabled) stopSpeaking();
+  updateVoiceBtn();
+}
+updateVoiceBtn();
 
 /* ════════════════ SETTINGS DRAWER ════════════════ */
 function toggleSettings(){
