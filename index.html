@@ -3156,7 +3156,7 @@ function pracGoBack(){
   setFeedback('','');
   showPracBadge('none');
   const hb = document.getElementById('prac-hint-btn');
-  if(hb){ hb.textContent='Hint ?'; hb.style.display=''; }
+  if(hb){ hb.textContent='💡 Hint ?'; hb.classList.remove('hint-stage2'); }
   renderPracBoard();
   renderDots();
   updateStatus();
@@ -3173,11 +3173,14 @@ function pracGoForward(){
   pracPrevBoard = next.prevBoard ? cloneB(next.prevBoard) : null;
   pracSelected = null;
   pracLocked = false;
+  pracHintUsed = false;
   const card = document.getElementById('prac-card');
   if(card) card.style.display = 'none';
   hideContinueBtn();
   setFeedback('','');
   showPracBadge('none');
+  const hb2 = document.getElementById('prac-hint-btn');
+  if(hb2){ hb2.textContent='💡 Hint ?'; hb2.classList.remove('hint-stage2'); }
   renderPracBoard();
   renderDots();
   updateStatus();
@@ -3348,10 +3351,11 @@ function showHint(){
   renderPracBoard();
   renderDots();
 
+  pracLocked = true;
+  if(hintBtn){ hintBtn.style.opacity='0'; hintBtn.style.pointerEvents='none'; }
+
   const idea = isB ? (mv.bidea||mv.idea) : (mv.widea||mv.idea);
   showPracCard('hint', '👁 Move revealed', idea || mv.desc || '');
-
-  if(hintBtn) hintBtn.style.display = 'none';
 
   if(pracStep >= pracMaxSteps){
     showContinueBtn(() => { hideContinueBtn(); showPracDone(); });
@@ -3376,9 +3380,6 @@ function showHint(){
           updateStatus();
           const turnEl2 = document.getElementById('prac-turn');
           if(turnEl2) turnEl2.style.display = '';
-          // Restore hint button
-          const hw2 = document.getElementById('prac-hint-btn');
-          if(hw2) hw2.style.display = '';
           if(pracStep >= pracMaxSteps) setTimeout(() => showPracDone(), 2500);
         }, 900);
       }, '');
@@ -3390,8 +3391,6 @@ function showHint(){
         updateStatus();
         const turnEl = document.getElementById('prac-turn');
         if(turnEl) turnEl.style.display = '';
-        const hw2 = document.getElementById('prac-hint-btn');
-        if(hw2) hw2.style.display = '';
       });
     }
   }
@@ -4275,12 +4274,48 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 function toggleReverseMode(){
+  // Don't allow switching mid-action (hint shown, feedback pending, opponent thinking, tap-to-continue pending)
+  if(pracLocked || window._pracThinking || pracHintUsed || window._pracContinueCb){
+    return;
+  }
+
   reverseMode = !reverseMode;
   const btn = document.getElementById('prac-reverse-btn');
   const txt = document.getElementById('reverse-toggle-text');
   if(btn) btn.classList.toggle('active', reverseMode);
   if(txt) txt.textContent = reverseMode ? 'Defending against this' : 'Practice as defender';
-  startPractice();
+
+  // Flip control in place — keep current board position and step
+  pracFlip = reverseMode ? !(pracOp.flip || false) : (pracOp.flip || false);
+
+  // Clear navigation history — going back across a perspective switch isn't meaningful
+  pracHistory = [];
+  pracFuture = [];
+  updatePracNav();
+
+  // Clean up any leftover visual state from the previous perspective
+  pracSelected = null;
+  setFeedback('', '');
+  showPracBadge('none');
+  const card = document.getElementById('prac-card');
+  if(card) card.style.display = 'none';
+
+  renderPracBoard();
+  updateStatus();
+
+  // If it's now the "opponent's" turn under the new perspective, play it immediately
+  if(!isPlayerTurn() && pracStep < pracMaxSteps){
+    pracLocked = true;
+    updateStatus();
+    if(window.pracBubble) window.pracBubble.showThinking();
+    setTimeout(() => {
+      autoPlayOpponent();
+      pracLocked = false;
+      updateStatus();
+    }, 700);
+  } else if(window.pracBubble && pracStep < pracMaxSteps){
+    window.pracBubble.showTurn();
+  }
 }
 
 </script>
