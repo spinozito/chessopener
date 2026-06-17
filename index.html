@@ -2809,6 +2809,19 @@ function renderAnalysis(){
   }
   if(shouldSpeak) speakIdea(spokenText);
 
+  // Autoplay: after showing White's half of a pair, automatically advance to Black's
+  // half-move after a short fixed delay — unless the user navigates manually first.
+  clearTimeout(window._learnAutoplayTimer);
+  if(!isB && curH < maxH()){
+    window._learnAutoplayTimer = setTimeout(() => {
+      // Guard: only fire if we're still on the exact step that scheduled it
+      if(curH % 2 === 0 && curH < maxH()){
+        curH++;
+        update();
+      }
+    }, 2000);
+  }
+
   if(b){
     const nextText = nextEl ? nextEl.textContent : '';
     b.style.display = (isOpponent && nextText) ? '' : 'none';
@@ -2827,7 +2840,7 @@ function renderOpenings(){
     const btn=document.createElement('button');
     btn.className='op-btn'+(op.id===curOp.id?' active':'');
     btn.innerHTML=`<span class="on">${op.name}</span>`;
-    btn.onclick=()=>{curOp=op;curFamily=null;curV=op.variants[0];curH=-1;renderFamilyBar(op,'family-bar',true);update();updateLegend(op.cx||1,op.sh||1,op.pop||'',op.side||'',op.name,true);};
+    btn.onclick=()=>{clearTimeout(window._learnAutoplayTimer);curOp=op;curFamily=null;curV=op.variants[0];curH=-1;renderFamilyBar(op,'family-bar',true);update();updateLegend(op.cx||1,op.sh||1,op.pop||'',op.side||'',op.name,true);};
     bar.appendChild(btn);
   });
   renderFamilyBar(curOp,'family-bar',true);
@@ -2868,7 +2881,7 @@ function renderVariants(){
     const done=false;
     btn.className='vbtn'+(v.id===curV.id?' active':'')+(done?' done':'');
     btn.innerHTML=`<span class="vn">${v.name}${done?' ✓':''}</span>`;
-    btn.onclick=()=>{curV=v;curH=-1;update();updateLegend(v.cx||1,v.sh||1,v.pop||'',v.side||'',v.name,true);};
+    btn.onclick=()=>{clearTimeout(window._learnAutoplayTimer);curV=v;curH=-1;update();updateLegend(v.cx||1,v.sh||1,v.pop||'',v.side||'',v.name,true);};
     list.appendChild(btn);
   });
 }
@@ -2896,6 +2909,7 @@ document.addEventListener('DOMContentLoaded', function(){
 /* ════════════════ TAB SWITCHER ════════════════ */
 function switchTab(tab){
   stopSpeaking();
+  clearTimeout(window._learnAutoplayTimer);
   document.getElementById('learn-view').classList.toggle('hidden', tab==='quiz');
   document.getElementById('quiz-view').classList.toggle('active', tab==='quiz');
   document.getElementById('tab-learn').classList.toggle('active', tab==='learn');
@@ -3440,8 +3454,8 @@ function showPracCard(type, header, idea){
     // Hint used — the player needs the explanation, so read it in full.
     speakIdea(idea);
   } else if(type === 'correct'){
-    // Found the move unaided — a short acknowledgement is enough, no need to re-explain.
-    speakIdea('Correct!');
+    // Found the move unaided — a short chime is enough, no need to speak a word.
+    if(voiceEnabled) playSuccessChime();
   }
   // type === 'opp' (opponent's automatic reply) — stay silent, no narration needed here.
 }
@@ -3702,6 +3716,7 @@ function handlePracClick(r, c){
 
   if(!matchedMove){
     // Illegal move
+    if(voiceEnabled) playErrorChime();
     setFeedback('That piece can\'t go there.', 'wrong');
     renderPracBoard();
     return;
@@ -3764,6 +3779,7 @@ function handlePracClick(r, c){
     }
   } else {
     // Wrong move
+    if(voiceEnabled) playErrorChime();
     showPracBadge('wrong');
     setFeedback('Not the right move for this opening. Try again.', 'wrong');
     fadeOutWrong();
@@ -3886,9 +3902,27 @@ function pickBestEnglishVoice(){
   if(voices.length === 0) return null;
   const englishVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
   if(englishVoices.length === 0) return null;
-  // Prefer higher-quality voices when the platform exposes them (iOS "Enhanced"/"Premium", Android "Neural"/"Wavenet")
+
+  // Known female voice names across the major platforms (iOS/Safari, Android/Chrome, desktop browsers).
+  // Speech Synthesis doesn't expose a reliable gender attribute, so we match on known names instead.
+  const femaleNames = ['samantha','karen','moira','tessa','victoria','susan','allison','ava','samantha (enhanced)',
+    'kate','serena','fiona','zoe','female','siri female','google us english female','aria','jenny','emma','libby',
+    'olivia','salli','joanna','kimberly','kendra','ivy','amy','nicole','natasha','catherine','flo','sandy','shelley'];
+  const isFemale = (v) => femaleNames.some(n => v.name.toLowerCase().includes(n));
+
   const qualityKeywords = ['enhanced','premium','neural','wavenet','natural'];
-  const enhanced = englishVoices.find(v => qualityKeywords.some(k => v.name.toLowerCase().includes(k)));
+  const isQuality = (v) => qualityKeywords.some(k => v.name.toLowerCase().includes(k));
+
+  // 1. Best of both: a female voice that's also flagged as high-quality
+  const femaleQuality = englishVoices.find(v => isFemale(v) && isQuality(v));
+  if(femaleQuality) return femaleQuality;
+
+  // 2. Any identifiable female voice, even without a quality keyword
+  const female = englishVoices.find(isFemale);
+  if(female) return female;
+
+  // 3. No identifiable female voice — fall back to the best quality voice available
+  const enhanced = englishVoices.find(isQuality);
   if(enhanced) return enhanced;
   // Prefer US/UK English over other English locales as a sane default
   const usOrUk = englishVoices.find(v => /en-(us|gb)/i.test(v.lang));
@@ -3904,6 +3938,55 @@ function refreshVoiceList(){
 if(typeof window.speechSynthesis !== 'undefined'){
   refreshVoiceList();
   window.speechSynthesis.onvoiceschanged = refreshVoiceList;
+}
+
+let _audioCtx = null;
+function playSuccessChime(){
+  try{
+    if(!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = _audioCtx;
+    if(ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    // Two-note rising chime, short and pleasant rather than a spoken word.
+    const notes = [{freq:880, start:0, dur:0.11}, {freq:1320, start:0.09, dur:0.16}];
+    notes.forEach(n=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = n.freq;
+      gain.gain.setValueAtTime(0, now + n.start);
+      gain.gain.linearRampToValueAtTime(0.18, now + n.start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + n.start);
+      osc.stop(now + n.start + n.dur + 0.02);
+    });
+  }catch(e){}
+}
+
+function playErrorChime(){
+  try{
+    if(!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = _audioCtx;
+    if(ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    // Two-note descending tone, short and clearly distinct from the success chime.
+    const notes = [{freq:330, start:0, dur:0.13}, {freq:220, start:0.1, dur:0.18}];
+    notes.forEach(n=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = n.freq;
+      gain.gain.setValueAtTime(0, now + n.start);
+      gain.gain.linearRampToValueAtTime(0.16, now + n.start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + n.start);
+      osc.stop(now + n.start + n.dur + 0.02);
+    });
+  }catch(e){}
 }
 
 function speakIdea(text){
@@ -3962,12 +4045,13 @@ const pieceStyle = 'classic';
 
 
 /* ════════════════ EVENTS ════════════════ */
-document.getElementById('bp2').onclick=()=>{if(curH>-1){curH--;update();}};
+document.getElementById('bp2').onclick=()=>{if(curH>-1){clearTimeout(window._learnAutoplayTimer);curH--;update();}};
 document.getElementById('bn').onclick=()=>{
+  clearTimeout(window._learnAutoplayTimer);
   if(curH<maxH()){curH++;update();showMoveCommentary();}
 };
-const _bs=document.getElementById('bs'); if(_bs) _bs.onclick=()=>{curH=-1;update();};
-const _be=document.getElementById('be'); if(_be) _be.onclick=()=>{curH=maxH();update();};
+const _bs=document.getElementById('bs'); if(_bs) _bs.onclick=()=>{clearTimeout(window._learnAutoplayTimer);curH=-1;update();};
+const _be=document.getElementById('be'); if(_be) _be.onclick=()=>{clearTimeout(window._learnAutoplayTimer);curH=maxH();update();};
 // Track horizontal touch swipes to avoid triggering nav on scroll
 let _touchStartX = 0, _touchStartY = 0, _isScrolling = false;
 document.addEventListener('touchstart', e => {
@@ -3995,9 +4079,10 @@ document.addEventListener('keydown',e=>{
       cb(); return;
     }
     // Learn mode: next move
+    clearTimeout(window._learnAutoplayTimer);
     if(curH<maxH()){curH++;update();}
   }
-  if(e.key==='ArrowLeft'&&curH>-1){curH--;update();}
+  if(e.key==='ArrowLeft'&&curH>-1){clearTimeout(window._learnAutoplayTimer);curH--;update();}
 
 });
 
@@ -4010,6 +4095,7 @@ document.addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-_touchStartX;
   const dy=Math.abs(e.changedTouches[0].clientY-_touchStartY);
   if(Math.abs(dx)>50 && dy<40){
+    clearTimeout(window._learnAutoplayTimer);
     if(dx<0&&curH<maxH()){curH++;update();}
     else if(dx>0&&curH>-1){curH--;update();}
   }
