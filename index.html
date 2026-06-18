@@ -2669,33 +2669,51 @@ function renderBoard(){
   const boardEl=document.getElementById('board');
   boardEl.innerHTML='';
   const cur=curH<0?initBoard():boardAt(curV,curH);
-  // On Black's half-move (curH odd), compare against the state BEFORE White's half of the
-  // same pair, so both halves of the pair stay highlighted together. On White's half-move
-  // (curH even), compare against the immediately preceding state as before.
-  const isOnBlackHalf = curH>=0 && curH%2===1;
-  const prev = curH<0 ? null
-    : isOnBlackHalf ? (curH>=2 ? boardAt(curV,curH-2) : initBoard())
-    : (curH>0 ? boardAt(curV,curH-1) : initBoard());
   const flip=curOp.flip;
+
+  // Build a map of square -> highlight suffix ('hf'/'ht' + optional '-opp'), computing each
+  // half-move's diff independently rather than collapsing two half-moves into one comparison.
+  // This avoids ambiguous colors when White's and Black's moves in the same pair touch the
+  // same square (e.g. White moves to a square, Black immediately captures there).
+  const highlights = {}; // key: "r,c" -> classname suffix string, e.g. "hf" or "ht-opp"
+
+  function applyHalfMoveDiff(beforeBoard, afterBoard, isWhiteMove){
+    const isPlayerMove = flip ? !isWhiteMove : isWhiteMove;
+    const suffix = isPlayerMove ? '' : '-opp';
+    for(let r=0;r<8;r++){
+      for(let c=0;c<8;c++){
+        const was=beforeBoard[r][c], is=afterBoard[r][c];
+        if(was!==is){
+          const key = r+','+c;
+          if(was&&!is) highlights[key] = 'hf'+suffix;
+          else if(is) highlights[key] = 'ht'+suffix;
+        }
+      }
+    }
+  }
+
+  if(curH>=0){
+    const isOnBlackHalf = curH%2===1;
+    if(isOnBlackHalf){
+      // Show both halves of the pair: White's half-move diff, then Black's half-move diff
+      const beforeWhite = curH>=2 ? boardAt(curV,curH-2) : initBoard();
+      const afterWhite = boardAt(curV,curH-1);
+      applyHalfMoveDiff(beforeWhite, afterWhite, true);
+      applyHalfMoveDiff(afterWhite, cur, false);
+    } else {
+      const beforeWhite = curH>0 ? boardAt(curV,curH-1) : initBoard();
+      applyHalfMoveDiff(beforeWhite, cur, true);
+    }
+  }
+
   for(let dispRow=0;dispRow<8;dispRow++){
     const r=flip?(7-dispRow):dispRow;
     for(let dispCol=0;dispCol<8;dispCol++){
       const co=flip?(7-dispCol):dispCol;
       const sq=document.createElement('div');
       sq.className='sq '+((r+co)%2===0?'l':'d');
-      if(prev){const was=prev[r][co],is=cur[r][co];
-        if(was!==is){
-          // Determine which side made this particular change: White's half of the pair
-          // is the "player" color when curOp.flip is false (you play White), and the
-          // "opponent" color when curOp.flip is true (you play Black) — and vice versa
-          // for Black's half. This mirrors the player/opponent distinction in Practice.
-          const movedPieceColor = was ? (was===was.toUpperCase() ? 'w' : 'b') : (is===is.toUpperCase() ? 'w' : 'b');
-          const isPlayerMove = flip ? movedPieceColor==='b' : movedPieceColor==='w';
-          const suffix = isPlayerMove ? '' : '-opp';
-          if(was&&!is) sq.classList.add('hf'+suffix);
-          else if(is) sq.classList.add('ht'+suffix);
-        }
-      }
+      const hl = highlights[r+','+co];
+      if(hl) sq.classList.add(hl);
       const piece=cur[r][co];
       if(piece)sq.innerHTML=pieceSVG(piece);
       boardEl.appendChild(sq);
