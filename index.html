@@ -24,7 +24,9 @@ html{touch-action:manipulation;-webkit-text-size-adjust:100%}
   --vbtn-active:rgba(26,18,0,.58);
 }
 html,body{background:#f5f0e8}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-height:100dvh;display:flex;flex-direction:column}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-height:100dvh;display:flex;flex-direction:column;position:relative}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(26,18,0,.012) 3px,rgba(26,18,0,.012) 4px),repeating-linear-gradient(90deg,transparent,transparent 5px,rgba(26,18,0,.008) 5px,rgba(26,18,0,.008) 6px)}
+body.dark::before{background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.018) 3px,rgba(255,255,255,.018) 4px),repeating-linear-gradient(90deg,transparent,transparent 5px,rgba(255,255,255,.012) 5px,rgba(255,255,255,.012) 6px)}
 
 /* ── HEADER ── */
 header{position:sticky;top:0;z-index:20;flex-shrink:0;display:flex;align-items:center;padding:.4rem .75rem;background:rgba(245,240,232,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(138,104,32,.12);box-shadow:0 2px 8px rgba(0,0,0,.04)}
@@ -182,6 +184,8 @@ body.light .ablock.b .ablabel{color:#b5621e}
   .acard{flex:1;min-height:0;display:flex;flex-direction:column}
   .abody{flex:1;min-height:0;overflow-y:auto}
   .adesc{font-size:16px}.abtext{font-size:15px}
+  .quiz-view.active{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;max-height:calc(100vh - 46px)}
+  body{overflow:hidden !important}
 }
 @media(min-width:900px){.board-wrap{--sq:56px}}
 
@@ -665,20 +669,11 @@ body.light
   min-height:1.85rem;padding:0 1rem;
   overflow:hidden;
 }
-@media(min-width:720px){
-  #prac-hint-bubble{
-    position:fixed !important;
-    top:auto !important;
-    bottom:2rem !important;
-    left:50% !important;
-    transform:translateX(-50%) !important;
-  }
-}
-
+/* Bubble is fixed in HTML inline style — no CSS positioning needed */
 
 @keyframes pracBubbleFloat{
-  0%,100%{transform:translate(-50%,-50%) translateY(0)}
-  50%{transform:translate(-50%,-50%) translateY(-5px)}
+  0%,100%{transform:translateX(-50%) translateY(0)}
+  50%{transform:translateX(-50%) translateY(-5px)}
 }
 #prac-hint-bubble.state-turn{
   animation:pracBubbleFloat 2.5s ease-in-out infinite;
@@ -707,8 +702,11 @@ body.light .prac-hint-btn.hint-stage2{color:#0a5040;border-color:rgba(15,110,86,
 
 
 @keyframes pracBubblePulse{
-  0%,100%{opacity:.8;transform:translate(-50%,-50%) scale(1)}
-  50%{opacity:1;transform:translate(-50%,-50%) scale(1.02)}
+  0%,100%{opacity:.8;transform:translateX(-50%) scale(1)}
+  50%{opacity:1;transform:translateX(-50%) scale(1.02)}
+}
+#prac-hint-bubble.state-continue{
+  animation:pracBubblePulse 3s ease-in-out infinite;
 }
 #prac-hint-bubble.state-continue{
   animation:pracBubblePulse 3s ease-in-out infinite;
@@ -874,7 +872,7 @@ function splashIconFallback(img){
   </button>
 </div>
 <div class="gamif-legend" id="prac-gamif-legend" style="position:relative">
-  <div id="prac-hint-bubble" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;border-radius:22px;padding:7px 16px;font-family:'Inter',sans-serif;white-space:nowrap;pointer-events:none;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:background .4s,color .4s,box-shadow .4s"><span id="prac-hint-icon" style="font-size:12px">♟</span><span id="prac-hint-text" style="font-size:11px;font-weight:700;color:#fff;letter-spacing:.01em">Your turn to play</span></div>
+  <div id="prac-hint-bubble" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;border-radius:22px;padding:7px 16px;font-family:'Inter',sans-serif;white-space:nowrap;pointer-events:none;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:background .4s,color .4s,box-shadow .4s"><span id="prac-hint-icon" style="font-size:12px">♟</span><span id="prac-hint-text" style="font-size:11px;font-weight:700;color:#fff;letter-spacing:.01em">Your turn to play</span></div>
   <span class="gamif-legend-placeholder" id="prac-gamif-legend-placeholder" style="display:none">Select an opening to see its profile</span>
   <span class="rating-name" id="prac-gamif-legend-name" style="display:none"></span>
   <div class="rating-bars" id="prac-gamif-legend-bars" style="display:none">
